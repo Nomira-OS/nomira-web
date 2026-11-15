@@ -1,0 +1,18 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-header">
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  {{- /* Native disclosure elements: they work with the keyboard and
+         without JavaScript, and the browser's page search opens them. */}}
+  <div class="faq">
+    {{- range .Params.questions }}
+    <details id="{{ .q | anchorize }}">
+      <summary><h2>{{ .q }}</h2></summary>
+      <div class="prose">{{ .a | $.RenderString (dict "display" "block") }}</div>
+    </details>
+    {{- end }}
+  </div>
+</article>
+{{ end }}
