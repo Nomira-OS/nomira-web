@@ -1,7 +1,7 @@
 ---
 title: Installation
 lead: How nomira gets onto a machine. Please try it in a VM first.
-weight: 20
+weight: 30
 untested: true
 ---
 
@@ -35,5 +35,5 @@ commands will be here.
 ## Afterwards
 
 The installed system is the base image: deliberately small. You describe
-your own system in a [recipe](../recipes/) and switch to it with
+your own system in a [recipe](../../recipes/writing/) and switch to it with
 `sudo nomira switch`.

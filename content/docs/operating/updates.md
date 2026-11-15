@@ -1,7 +1,7 @@
 ---
 title: Updates and the way back
 lead: An update is a new image. The previous state stays bootable.
-weight: 50
+weight: 10
 untested: true
 ---
 

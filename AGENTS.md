@@ -5,7 +5,8 @@ Guidance for coding agents (and humans) working in this repository.
 ## What this is
 
 The nomira website: a Hugo site with its own small theme. Landing page,
-comparisons with NixOS and BlueBuild, FAQ and documentation.
+a landing page for the frontend, comparisons (NixOS, BlueBuild, Arkane
+Linux), FAQ and documentation.
 
 Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
 `nomira-image` (base image), `ci` (shared workflows).
@@ -18,6 +19,9 @@ Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
 - **Do not call nomira declarative.** A recipe is a list of imperative
   steps; say "built from a recipe". Verified-parallel building is a
   property of the frontend, not of the resulting system.
+- **Docs grow by sections.** A new topic is a page in the fitting
+  section under `content/docs/`, or a new directory with `_index.md`.
+  Never hand-write navigation; it is generated from the tree.
 - **Mark what is untested.** A documentation page whose steps nobody has
   run carries `untested: true`. Remove it only after running the steps.
 - **Little text on the landing page.** Long explanations go to the docs.

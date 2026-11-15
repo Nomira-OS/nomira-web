@@ -1,0 +1,21 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-header">
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+  </header>
+  {{ partial "axes.html" . }}
+  <div class="prose wide">
+    {{ .Content }}
+  </div>
+  <h2 class="children-title">One by one</h2>
+  <ul class="card-list">
+    {{- range .Pages.ByWeight }}
+    <li class="card">
+      <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+      {{- with .Params.lead }}<p>{{ . }}</p>{{ end }}
+    </li>
+    {{- end }}
+  </ul>
+</article>
+{{ end }}

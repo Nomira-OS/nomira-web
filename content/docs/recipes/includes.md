@@ -1,7 +1,7 @@
 ---
 title: Splitting recipes
 lead: With include a recipe spreads over several files and directories.
-weight: 40
+weight: 20
 ---
 
 A recipe has one entry file. Everything else can be moved out:

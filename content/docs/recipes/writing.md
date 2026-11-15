@@ -1,7 +1,7 @@
 ---
 title: Writing recipes
 lead: A recipe builds your system in phases and groups.
-weight: 30
+weight: 10
 ---
 
 ## A small example
@@ -66,7 +66,8 @@ and `/var` is not part of the image. Put the content of the system into
 `/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
 
 After changing the kernel or adding firmware that is needed early,
-`/usr/libexec/nomira-initramfs` regenerates the initramfs.
+`/usr/libexec/nomira-initramfs` regenerates the initramfs. More in
+[Building on the base image](../../base-image/building-on-it/).
 
 ## Build and check
 
@@ -76,5 +77,4 @@ nomira build     # build the image
 nomira graph     # print the pipeline as a diagram
 ```
 
-The full description of the schema is in the
-[README of the frontend](https://github.com/Nomira-OS/nomira).
+All fields and flags are in the [recipe schema](../../frontend/schema/).

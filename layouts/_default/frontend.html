@@ -1,0 +1,128 @@
+{{ define "main" }}
+<section class="wrap hero" aria-labelledby="hero-title">
+  <h1 id="hero-title">Build in parallel. Verified.</h1>
+  <p class="lead">A BuildKit frontend for container images. You say which steps are independent; every build checks that they are, runs them at the same time and caches them one by one.</p>
+  <ul class="chips" aria-label="Properties">
+    <li>any base image</li>
+    <li>plain BuildKit</li>
+    <li>three commands</li>
+    <li>works without the rest of nomira</li>
+  </ul>
+  <div class="actions">
+    <a class="button primary" href="{{ "docs/frontend/" | relURL }}">Frontend docs</a>
+    <a class="button secondary" href="{{ site.Params.github }}/nomira" rel="noopener">Source on GitHub</a>
+  </div>
+  <p class="early">Early stage of development (alpha): the recipe schema may still change.</p>
+</section>
+
+<section class="section band" aria-labelledby="contrast-title">
+  <div class="wrap">
+    <h2 id="contrast-title">What changes when one step changes</h2>
+    <p class="section-lead">The same build twice. In both, the step <code>config b</code> was edited.</p>
+    <div class="contrast">
+      <div class="card">
+        <h3>Containerfile: a chain</h3>
+        <p>Every step builds on the one before. Everything after the change runs again.</p>
+        <ol class="steps">
+          <li>packages <span class="state">from cache</span></li>
+          <li>config a <span class="state">from cache</span></li>
+          <li class="changed">config b <span class="state">changed, rebuilt</span></li>
+          <li class="rebuilt">config c <span class="state">rebuilt</span></li>
+          <li class="rebuilt">finish <span class="state">rebuilt</span></li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>nomira: phases and groups</h3>
+        <p>Groups of a phase start from the same state. Siblings of the changed group stay cached.</p>
+        <ol class="steps">
+          <li>phase packages <span class="state">from cache</span></li>
+          <li class="fan"><span>phase configs: three groups, in parallel</span>
+            <ul>
+              <li>group a <span class="state">from cache</span></li>
+              <li class="changed">group b <span class="state">changed, rebuilt</span></li>
+              <li>group c <span class="state">from cache</span></li>
+            </ul>
+          </li>
+          <li class="rebuilt">check and merge <span class="state">runs again, cheap</span></li>
+          <li class="rebuilt">phase finish <span class="state">rebuilt</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <div class="wrap">
+    <h2 id="how-title">How it works</h2>
+    <ul class="grid">
+      <li class="card">
+        <h3>Phases</h3>
+        <p>Run one after another, in the order you write them.</p>
+      </li>
+      <li class="card">
+        <h3>Groups</h3>
+        <p>Independent parts of a phase. They run at the same time, and each has its own cache entry.</p>
+      </li>
+      <li class="card">
+        <h3>Check</h3>
+        <p>Every build records which files each group wrote or deleted. If two groups overlap, the build aborts before anything is merged.</p>
+      </li>
+      <li class="card">
+        <h3>Merge</h3>
+        <p>The results of the groups become layers of the image. The next phase starts from their sum.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section band" aria-labelledby="example-title">
+  <div class="wrap">
+    <h2 id="example-title">A recipe, and a conflict</h2>
+    <p class="section-lead">One line at the top selects the frontend. Any BuildKit can then build the file.</p>
+    <div class="codepair">
+      <div>
+        <p id="ex-recipe">recipe.yml</p>
+        <pre tabindex="0" aria-labelledby="ex-recipe"><code># syntax=ghcr.io/nomira-os/nomira:1-alpha
+settings:
+  base: docker.io/library/alpine:3.22
+phases:
+  - name: content
+    groups:
+      a: ["run echo a > /etc/a"]
+      b: ["run echo b > /etc/b"]</code></pre>
+      </div>
+      <div>
+        <p id="ex-error">If both groups write /etc/a</p>
+        <pre tabindex="0" aria-labelledby="ex-error"><code>phase "content": declared-independent
+groups are not disjoint (policy: strict):
+  groups "a" and "b": /etc/a (both write)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="fit-title">
+  <div class="wrap">
+    <h2 id="fit-title">Where it fits, and where it does not</h2>
+    <ul class="grid">
+      <li class="card">
+        <h3>Good fit</h3>
+        <p>Builds with many parts that have nothing to do with each other, such as the configuration of a whole operating system.</p>
+      </li>
+      <li class="card">
+        <h3>Little gain</h3>
+        <p>Short builds, or builds where every step needs the one before. A Containerfile does that just as well.</p>
+      </li>
+      <li class="card">
+        <h3>Not declarative</h3>
+        <p>A recipe lists commands that run in order. The frontend adds structure and the check, not a new language.</p>
+      </li>
+      <li class="card">
+        <h3>Tried so far</h3>
+        <p>With <code>buildctl</code>, on Alpine and Arch images. Other BuildKit clients such as <code>docker buildx</code> should work but are untested.</p>
+      </li>
+    </ul>
+    <p class="section-lead" style="margin-top:1.5rem">Continue with <a href="{{ "docs/frontend/standalone/" | relURL }}">using the frontend on its own</a> or the <a href="{{ "docs/frontend/schema/" | relURL }}">recipe schema</a>.</p>
+  </div>
+</section>
+{{ end }}

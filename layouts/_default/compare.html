@@ -5,24 +5,7 @@
     <h1>{{ .Title }}</h1>
     {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
   </header>
-
-  {{- /* Axes come from the front matter. Each one carries a sentence that
-         says what the track shows; that sentence is the accessible form. */}}
-  {{- $other := .Params.other }}
-  {{- with .Params.axes }}
-  <figure class="axes">
-    <figcaption>Where the two projects stand. The position of the marks is a rough placement, not a measurement.</figcaption>
-    {{- range . }}
-    <div class="axis">
-      <p class="axis-title">{{ .title }}</p>
-      <div class="axis-ends"><span>{{ .left }}</span><span>{{ .right }}</span></div>
-      <div class="track" aria-hidden="true"><span class="mark other" style="left: {{ .other }}%">{{ $other }}</span><span class="mark nom" style="left: {{ .nomira }}%">nomira</span></div>
-      <p class="axis-text">{{ .text }}</p>
-    </div>
-    {{- end }}
-  </figure>
-  {{- end }}
-
+  {{ partial "axes.html" . }}
   <div class="prose">
     {{ .Content }}
   </div>

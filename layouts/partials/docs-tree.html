@@ -1,0 +1,12 @@
+{{- /* Recursive navigation tree. Context: dict "section" <page> "current" <page>. */ -}}
+{{- $cur := .current -}}
+<ul>
+  {{- range .section.Pages.ByWeight }}
+  <li>
+    <a href="{{ .RelPermalink }}"{{ if eq $cur . }} aria-current="page"{{ end }}{{ if .IsSection }} class="is-section"{{ end }}>{{ .LinkTitle }}</a>
+    {{- if and .IsSection .Pages }}
+    {{ partial "docs-tree.html" (dict "section" . "current" $cur) }}
+    {{- end }}
+  </li>
+  {{- end }}
+</ul>

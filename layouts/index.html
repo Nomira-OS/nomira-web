@@ -11,7 +11,7 @@
   </ul>
   <div class="actions">
     <a class="button primary" href="{{ "docs/" | relURL }}">Read the docs</a>
-    <a class="button secondary" href="{{ "compare/" | relURL }}">Compare with NixOS and BlueBuild</a>
+    <a class="button secondary" href="{{ "compare/" | relURL }}">See how it compares</a>
   </div>
   <p class="early">Early stage of development (alpha): for trying out, not yet for systems you depend on.</p>
 </section>
@@ -72,15 +72,17 @@
       <li class="card">
         <h3>Frontend</h3>
         <p>Translates the recipe for BuildKit: groups build in parallel, and each build verifies that they are independent. It stands on its own and builds any container image.</p>
-        <p><a class="more" href="{{ "frontend/" | relURL }}">Use the frontend on its own</a></p>
+        <p><a class="more" href="{{ "frontend/" | relURL }}">About the frontend</a></p>
       </li>
       <li class="card">
         <h3>CLI</h3>
         <p>One command builds, checks and switches the system: <code>nomira switch</code>.</p>
+        <p><a class="more" href="{{ "docs/cli/" | relURL }}">CLI docs</a></p>
       </li>
       <li class="card">
         <h3>Base image</h3>
         <p>The smallest Arch Linux that bootc can boot, with AppArmor. Your recipe chooses everything else.</p>
+        <p><a class="more" href="{{ "docs/base-image/" | relURL }}">Base image docs</a></p>
       </li>
     </ul>
   </div>

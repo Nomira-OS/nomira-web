@@ -1,0 +1,17 @@
+{{- /* Overview graphic: projects placed on a few axes. Each axis carries a
+       sentence that says what the track shows; that is the accessible form. */ -}}
+{{- with .Params.axes }}
+<figure class="axes">
+  <figcaption>Where the projects stand. The position of the marks is a rough placement, not a measurement.</figcaption>
+  {{- range . }}
+  <div class="axis">
+    <p class="axis-title">{{ .title }}</p>
+    <div class="axis-ends"><span>{{ .left }}</span><span>{{ .right }}</span></div>
+    <div class="track" aria-hidden="true">
+      {{- range .marks }}<span class="mark {{ if eq .name "nomira" }}nom{{ else }}other{{ end }}" style="left: {{ .at }}%">{{ .name }}</span>{{ end -}}
+    </div>
+    <p class="axis-text">{{ .text }}</p>
+  </div>
+  {{- end }}
+</figure>
+{{- end }}

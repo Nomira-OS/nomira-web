@@ -1,6 +1,6 @@
 ---
 title: Quick start
-weight: 5
+weight: 10
 lead: Build a first recipe, on any Linux and without changing anything on your own system.
 ---
 
@@ -59,4 +59,4 @@ phase "content": declared-independent groups are not disjoint (policy: strict):
   groups "a" and "b": /etc/a (both write)
 ```
 
-Continue with [Writing recipes](../recipes/).
+Continue with [Writing recipes](../../recipes/writing/) or read what the [CLI](../../cli/) does.

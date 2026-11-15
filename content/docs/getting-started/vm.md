@@ -1,7 +1,7 @@
 ---
 title: Starting in a VM
 lead: The safe way to get to know nomira. Nothing changes on your own system.
-weight: 10
+weight: 20
 untested: true
 ---
 
@@ -40,7 +40,7 @@ listed under
 
 The base image does not set locale, keymap, time zone or root password.
 On the first boot it asks for them on the console. After that you log in
-as `root`.
+as `root`. See [First boot](../../base-image/first-boot/).
 
 If the VM should start without questions, in a test for instance, pass
 the kernel argument:

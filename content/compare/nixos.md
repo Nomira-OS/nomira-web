@@ -3,25 +3,27 @@ title: nomira and NixOS
 lead: nomira is not better than NixOS. It has different goals.
 layout: compare
 weight: 10
-other: NixOS
 axes:
   - title: How is the system described?
     left: Declaratively, in a language of its own
     right: As ordinary commands and files
-    other: 8
-    nomira: 84
+    marks:
+      - {name: NixOS, at: 8}
+      - {name: nomira, at: 84}
     text: NixOS describes the system declaratively in its own language. nomira runs ordinary commands and copies files.
   - title: How exactly can a state be repeated?
     left: Every input pinned
     right: Package set pinned by a date
-    other: 8
-    nomira: 70
+    marks:
+      - {name: NixOS, at: 8}
+      - {name: nomira, at: 70}
     text: NixOS pins every input. nomira pins the package set through a date.
   - title: How mature is the project?
     left: Proven over many years
     right: Early stage of development
-    other: 6
-    nomira: 92
+    marks:
+      - {name: NixOS, at: 6}
+      - {name: nomira, at: 92}
     text: NixOS has been proven over many years. nomira is at an early stage of development.
 ---
 

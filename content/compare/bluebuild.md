@@ -3,25 +3,27 @@ title: nomira and BlueBuild
 lead: Both build a bootable system image from a YAML recipe. BlueBuild is the more mature project and offers far more out of the box.
 layout: compare
 weight: 20
-other: BlueBuild
 axes:
   - title: What is a recipe made of?
     left: Ready-made modules
     right: Plain commands
-    other: 14
-    nomira: 88
+    marks:
+      - {name: BlueBuild, at: 14}
+      - {name: nomira, at: 88}
     text: BlueBuild recipes are made of ready-made modules. nomira recipes are made of plain commands.
   - title: How does the build run?
     left: One step after another
     right: Phases with parallel, verified groups
-    other: 10
-    nomira: 80
+    marks:
+      - {name: BlueBuild, at: 10}
+      - {name: nomira, at: 80}
     text: A BlueBuild recipe runs one step after another. A nomira recipe runs in phases whose groups build in parallel and are verified to be independent.
   - title: How mature is the project?
     left: Established
     right: Early stage of development
-    other: 14
-    nomira: 92
+    marks:
+      - {name: BlueBuild, at: 14}
+      - {name: nomira, at: 92}
     text: BlueBuild is established. nomira is at an early stage of development.
 ---
 

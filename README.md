@@ -1,7 +1,7 @@
 # nomira-web
 
-> **Alpha.** The nomira website: overview, comparisons with NixOS and
-> BlueBuild, FAQ and documentation. Much of it is a draft; pages whose
+> **Alpha.** The nomira website: overview, comparisons with other
+> projects, FAQ and documentation. Much of it is a draft; pages whose
 > steps nobody has run yet are marked as such.
 
 ## Viewing it locally
@@ -17,8 +17,14 @@ hugo server
 
 - `content/`: the texts as Markdown. `untested: true` in the front
   matter of a page shows the notice "Draft, not tried yet".
-- `content/compare/`: comparison pages. The axes of the overview graphic
-  are in the front matter.
+- `content/docs/`: the documentation. Every directory with an
+  `_index.md` is a section and may contain pages and further sections,
+  to any depth. Navigation tree, breadcrumb and previous/next links are
+  generated; `weight` in the front matter sets the order.
+- `content/compare/`: the overview and one page per project. The axes of
+  the graphics are in the front matter.
+- `content/frontend.md`: the landing page of the frontend; its text is
+  in `layouts/_default/frontend.html`.
 - `layouts/`, `assets/`: a small theme of our own without external
   dependencies. The colours for the dark and the light theme are at the
   top of `assets/css/main.css`.

@@ -1,0 +1,10 @@
+{{- /* All pages below a section in reading order, sections before their children. */ -}}
+{{- $out := slice -}}
+{{- range .Pages.ByWeight -}}
+  {{- $out = $out | append . -}}
+  {{- if .IsSection -}}
+    {{- $sub := partial "docs-flat.html" . -}}
+    {{- if $sub }}{{ $out = $out | append $sub }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

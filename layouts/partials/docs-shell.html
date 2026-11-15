@@ -1,0 +1,55 @@
+{{- /* Shared frame of all documentation pages: tree navigation, breadcrumb,
+       content, child pages, previous/next. Sections may nest to any depth. */ -}}
+{{- $root := site.GetPage "/docs" -}}
+<div class="wrap docs">
+  <p class="docs-jump"><a href="#docs-nav">Docs menu</a></p>
+  <article class="docs-main">
+    <header class="page-header">
+      {{- if ne . $root }}
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          {{- range .Ancestors.Reverse }}{{ if not .IsHome }}
+          <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+          {{- end }}{{ end }}
+        </ol>
+      </nav>
+      {{- end }}
+      <h1>{{ .Title }}</h1>
+      {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+      {{- if .Params.untested }}
+      <p class="notice" role="note"><strong>Draft, not tried yet.</strong> This page describes the intended way. Nobody has run the commands from start to finish so far.</p>
+      {{- end }}
+    </header>
+    <div class="prose">{{ .Content }}</div>
+    {{- if and .IsSection .Pages }}
+    <h2 class="children-title">{{ if eq . $root }}Sections{{ else }}In this section{{ end }}</h2>
+    <ul class="card-list">
+      {{- range .Pages.ByWeight }}
+      <li class="card">
+        <h3><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h3>
+        {{- with .Params.lead }}<p>{{ . }}</p>{{ end }}
+        {{- if .Params.untested }}<p class="tag">Draft, not tried yet</p>{{ end }}
+      </li>
+      {{- end }}
+    </ul>
+    {{- end }}
+    {{- $flat := partial "docs-flat.html" $root }}
+    {{- $prev := false }}{{ $next := false }}{{ $found := false }}{{ $self := . }}
+    {{- range $flat }}
+      {{- if $found }}{{ if not $next }}{{ $next = . }}{{ end }}
+      {{- else if eq . $self }}{{ $found = true }}
+      {{- else }}{{ $prev = . }}{{ end }}
+    {{- end }}
+    {{- if eq . $root }}{{ $prev = false }}{{ with index $flat 0 }}{{ $next = . }}{{ end }}{{ end }}
+    {{- if or $prev $next }}
+    <nav class="pager" aria-label="Previous and next page">
+      {{- with $prev }}<a class="prev" href="{{ .RelPermalink }}"><span>Previous</span>{{ .LinkTitle }}</a>{{ end }}
+      {{- with $next }}<a class="next" href="{{ .RelPermalink }}"><span>Next</span>{{ .LinkTitle }}</a>{{ end }}
+    </nav>
+    {{- end }}
+  </article>
+  <nav class="docs-nav" id="docs-nav" aria-label="Docs" tabindex="-1">
+    <p class="docs-nav-title"><a href="{{ $root.RelPermalink }}"{{ if eq . $root }} aria-current="page"{{ end }}>Docs</a></p>
+    {{ partial "docs-tree.html" (dict "section" $root "current" .) }}
+  </nav>
+</div>

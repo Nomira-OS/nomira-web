@@ -1,5 +1,5 @@
 {{- /* Wide tables scroll inside their own focusable region instead of the page. */ -}}
-<div class="table-scroll" role="region" aria-label="Table, scrolls sideways if needed" tabindex="0">
+<div class="table-scroll" role="region" aria-label="Table {{ add .Ordinal 1 }}, scrolls sideways if needed" tabindex="0">
 <table>
   <thead>
     {{- range .THead }}

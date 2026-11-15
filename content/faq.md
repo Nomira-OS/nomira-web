@@ -27,10 +27,19 @@ is the more mature project. nomira has three plain commands, is made for
 Arch Linux and builds independent parts in parallel. See the
 [comparison with BlueBuild](../compare/bluebuild/).
 
+## How does nomira differ from Arkane Linux?
+
+Both are immutable systems built from Arch packages. Arkane Linux is a
+complete desktop distribution with its own deployment tool on btrfs.
+nomira is a set of building blocks: you assemble the system yourself, as
+a container image that bootc boots. See the
+[comparison with Arkane Linux](../compare/arkane/).
+
 ## Can I use the frontend without the rest?
 
 Yes. The frontend builds any container image and needs neither the CLI
-nor the base image. See [The frontend](../frontend/).
+nor the base image. See [the frontend](../frontend/) and
+[using it on its own](../docs/frontend/standalone/).
 
 ## Does nomira only run with Arch Linux?
 
