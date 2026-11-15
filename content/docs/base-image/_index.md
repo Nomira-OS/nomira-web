@@ -1,7 +1,7 @@
 ---
 title: Base image
 lead: The smallest Arch Linux that bootc can boot, plus the tools to build and switch on the machine itself.
-weight: 50
+weight: 40
 ---
 
 Recipes for a nomira system start from this image:

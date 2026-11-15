@@ -1,90 +1,89 @@
 {{ define "main" }}
-<section class="wrap hero" aria-labelledby="hero-title">
-  {{ partial "logo.html" (dict "width" 132 "height" 113) }}
-  <h1 id="hero-title">Your system as a recipe.</h1>
-  <p class="lead">nomira builds an immutable Linux from a recipe: Arch packages, ordinary configuration files and atomic updates.</p>
-  <ul class="chips" aria-label="Properties">
-    <li>built from a recipe</li>
-    <li>immutable</li>
-    <li>freely configurable</li>
-    <li>plain Arch packages</li>
-  </ul>
-  <div class="actions">
-    <a class="button primary" href="{{ "docs/" | relURL }}">Read the docs</a>
-    <a class="button secondary" href="{{ "compare/" | relURL }}">See how it compares</a>
+<section class="wrap hero hero-split" aria-labelledby="hero-title">
+  <div class="hero-text">
+    <h1 id="hero-title">Your system as a recipe.</h1>
+    <p class="lead">An immutable Arch Linux, built from a recipe and switched atomically.</p>
+    <div class="actions">
+      <a class="button primary" href="{{ "docs/getting-started/quickstart/" | relURL }}">Get started</a>
+      <a class="button secondary" href="{{ "compare/" | relURL }}">See how it compares</a>
+    </div>
+    <p class="early">Alpha: for trying out, not yet for systems you depend on.</p>
   </div>
-  <p class="early">Early stage of development (alpha): for trying out, not yet for systems you depend on.</p>
+  {{ partial "fanout.html" (dict "label" "A recipe fans out into three groups that are built in parallel, terminal, network and boot, and merge into one image." "from" "recipe" "to" "image" "lanes" (slice "terminal" "network" "boot")) }}
+</section>
+
+<section class="section" aria-labelledby="why-title">
+  <div class="wrap">
+    <h2 id="why-title" class="visually-hidden">What you get</h2>
+    <ul class="features">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span>
+        <h3>Built from a recipe</h3>
+        <p>Ordinary commands in one file. Every build starts fresh, so nothing lingers.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+        <h3>Immutable</h3>
+        <p>The running system is read-only. Updates arrive whole, with a way back.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></span>
+        <h3>Freely configurable</h3>
+        <p>Any command, normal files in <code>/etc</code>. No new language to learn.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg></span>
+        <h3>Plain Arch packages</h3>
+        <p>Unchanged, in the usual paths. The Arch Wiki mostly still applies.</p>
+      </li>
+    </ul>
+  </div>
 </section>
 
 <section class="section band" aria-labelledby="flow-title">
   <div class="wrap">
     <h2 id="flow-title">From recipe to running system</h2>
-    <p class="section-lead">Phases run one after another. The groups of a phase run at the same time, and the build checks that they do not get in each other's way.</p>
-    <ol class="flow">
-      <li><span class="step">1</span><strong>Recipe</strong><span class="what">A YAML file lists the steps that build the system.</span></li>
-      <li><span class="step">2</span><strong>Phases</strong><span class="what">Step by step, in a fixed order.</span></li>
-      <li class="parallel"><span class="step">3</span><strong>Groups</strong><span class="what">Independent, at the same time, cached one by one.</span>
-        <ul class="lanes" aria-label="Example groups">
-          <li>terminal</li>
-          <li>network</li>
-          <li>boot</li>
-        </ul>
-      </li>
-      <li><span class="step">4</span><strong>Check</strong><span class="what">If two groups write the same file, the build aborts.</span></li>
-      <li><span class="step">5</span><strong>Image</strong><span class="what">A finished, immutable system image.</span></li>
-      <li><span class="step">6</span><strong>Switch</strong><span class="what">bootc switches atomically. The old state stays as a way back.</span></li>
+    <ol class="path">
+      <li><h3>Write</h3><p>A YAML file lists the steps, in phases.</p></li>
+      <li><h3>Build</h3><p>Independent groups of a phase build at the same time.</p></li>
+      <li><h3>Check</h3><p>Two groups touching the same file stop the build.</p></li>
+      <li><h3>Switch</h3><p>bootc changes over atomically. The old state stays bootable.</p></li>
     </ol>
   </div>
 </section>
 
-<section class="section" aria-labelledby="why-title">
+<section class="section" aria-labelledby="parts-title">
   <div class="wrap">
-    <h2 id="why-title">What you get</h2>
-    <ul class="grid">
-      <li class="card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
-        <h3>Built from a recipe</h3>
-        <p>A recipe is a list of ordinary commands, not a declarative language. But every build starts over from the base image, so nothing lingers from earlier.</p>
+    <h2 id="parts-title">Three tools, one system</h2>
+    <p class="section-lead">Each one is useful on its own. Together they take a recipe to a running machine.</p>
+    <ul class="tools">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4M17 12h4M7 12c3 0 2-6 5-6s2 6 5 6M7 12c3 0 2 6 5 6s2-6 5-6M7 12h10"/></svg></span>
+        <h3><a href="{{ "frontend/" | relURL }}">Frontend</a></h3>
+        <p>Builds the recipe with BuildKit, in parallel where it is safe. Works for any container image.</p>
       </li>
-      <li class="card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-        <h3>Immutable</h3>
-        <p>The running system is read-only. Updates arrive completely or not at all, with a way back.</p>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></span>
+        <h3><a href="{{ "docs/cli/" | relURL }}">CLI</a></h3>
+        <p>One command builds, checks and switches: <code>nomira switch</code>.</p>
       </li>
-      <li class="card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-        <h3>Freely configurable</h3>
-        <p>Any command and normal files in <code>/etc</code>. No language of its own that has to know every option.</p>
-      </li>
-      <li class="card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>
-        <h3>Plain Arch packages</h3>
-        <p>Packages come unchanged from Arch Linux, in the usual paths. Most of what the Arch Wiki says still applies.</p>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg></span>
+        <h3><a href="{{ "docs/base-image/" | relURL }}">Base image</a></h3>
+        <p>The smallest Arch Linux that bootc can boot, with AppArmor. Your recipe adds the rest.</p>
       </li>
     </ul>
   </div>
 </section>
 
-<section class="section band" aria-labelledby="parts-title">
+<section class="section band closing" aria-labelledby="closing-title">
   <div class="wrap">
-    <h2 id="parts-title">Three parts</h2>
-    <ul class="grid">
-      <li class="card">
-        <h3>Frontend</h3>
-        <p>Translates the recipe for BuildKit: groups build in parallel, and each build verifies that they are independent. It stands on its own and builds any container image.</p>
-        <p><a class="more" href="{{ "frontend/" | relURL }}">About the frontend</a></p>
-      </li>
-      <li class="card">
-        <h3>CLI</h3>
-        <p>One command builds, checks and switches the system: <code>nomira switch</code>.</p>
-        <p><a class="more" href="{{ "docs/cli/" | relURL }}">CLI docs</a></p>
-      </li>
-      <li class="card">
-        <h3>Base image</h3>
-        <p>The smallest Arch Linux that bootc can boot, with AppArmor. Your recipe chooses everything else.</p>
-        <p><a class="more" href="{{ "docs/base-image/" | relURL }}">Base image docs</a></p>
-      </li>
-    </ul>
+    <h2 id="closing-title">Try it without touching your system</h2>
+    <p class="section-lead">Build an image and boot it in a virtual machine.</p>
+    <div class="actions">
+      <a class="button primary" href="{{ "docs/getting-started/" | relURL }}">Getting started</a>
+      <a class="button secondary" href="{{ "faq/" | relURL }}">Read the FAQ</a>
+    </div>
   </div>
 </section>
 {{ end }}

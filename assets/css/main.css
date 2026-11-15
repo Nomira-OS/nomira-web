@@ -76,9 +76,9 @@ code, pre { font-family: var(--mono); font-size: 0.92em; }
 .hero .logo-mark { width: clamp(84px, 14vw, 132px); height: auto; }
 .hero p.lead { font-size: clamp(1.1rem, 2.2vw, 1.35rem); color: var(--muted); max-width: 38rem; margin: 0; }
 .hero .early { font-size: 0.95rem; color: var(--muted); margin: 0; }
-.section { padding-block: 2.5rem; }
+.section { padding-block: clamp(3.5rem, 7vw, 5.5rem); }
 .section > .wrap > h2 { margin-bottom: 0.3em; }
-.section-lead { color: var(--muted); max-width: 44rem; }
+.section-lead { color: var(--muted); max-width: 40rem; font-size: 1.15rem; }
 
 .flow { list-style: none; margin: 1.5rem 0 0; padding: 0; display: flex; align-items: stretch; gap: 2.25rem; }
 .flow > li { position: relative; flex: 1 1 0; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: 0.35rem; }
@@ -133,7 +133,7 @@ tbody th { font-weight: 600; }
 tbody tr:last-child > * { border-bottom: 0; }
 
 /* Footer */
-.site-footer { border-top: 1px solid var(--border); margin-top: 2rem; color: var(--muted); font-size: 0.95rem; }
+.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.95rem; }
 .footer-inner { padding-block: 2rem; display: grid; gap: 0.75rem; }
 .footer-inner p { margin: 0; max-width: 46rem; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; list-style: none; margin: 0; padding: 0; }
@@ -218,3 +218,49 @@ tbody tr:last-child > * { border-bottom: 0; }
 .faq summary h2 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
 .faq .prose { padding: 0 1rem 0.4rem 2.3rem; }
 @media (prefers-reduced-motion: reduce) { .faq summary::before { transition: none; } }
+
+/* Landing pages: room around few words. Features stand free, without
+   boxes; boxes are kept for things that are objects (code, diagrams). */
+.hero-split { grid-template-columns: minmax(0, 1fr); align-items: center; gap: 2.5rem 4rem; padding-block: clamp(3.5rem, 9vw, 7rem); }
+.hero-text { display: grid; gap: 1.6rem; }
+.hero-text h1 { margin: 0; font-size: clamp(2.6rem, 6vw, 4.4rem); }
+.hero-text p.lead { max-width: 30rem; }
+.fanout { width: 100%; max-width: 34rem; height: auto; justify-self: center; }
+.fanout .lane { fill: none; stroke-width: 9; stroke-linecap: round; }
+.fanout .l1 { stroke: var(--accent); }
+.fanout .l2 { stroke: var(--text); }
+.fanout .l3 { stroke: var(--accent-2); }
+.fanout .node { fill: var(--text); }
+.fanout .lane-labels rect { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; }
+.fanout text { font-family: var(--mono); font-size: 15px; fill: var(--text); }
+.fanout .end-labels text { fill: var(--muted); }
+@media (min-width: 58rem) { .hero-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+.features, .tools { list-style: none; margin: 0; padding: 0; display: grid; gap: 3rem 2.5rem; }
+.features { grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr)); }
+.tools { grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin-top: 3rem; }
+.features h3, .tools h3 { font-size: 1.25rem; margin: 1.1rem 0 0.4rem; }
+.features p, .tools p { margin: 0; color: var(--muted); max-width: 24rem; }
+.tools h3 a { color: var(--text); text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
+.tools h3 a:hover { color: var(--accent); }
+.icon-tile { display: inline-flex; align-items: center; justify-content: center; width: 3.25rem; height: 3.25rem; border-radius: 14px; background: var(--surface-2); color: var(--accent); }
+.band .icon-tile { background: var(--bg); }
+.icon-tile svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The four steps as one line with stops, like the lanes of the mark. */
+.path { overflow-x: clip; list-style: none; margin: 3rem 0 0; padding: 0; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); counter-reset: stop; }
+.path li { position: relative; padding-top: 2.4rem; counter-increment: stop; }
+.path li::before { content: ""; position: absolute; top: 0.55rem; left: 0; right: -2rem; height: 3px; background: var(--border); }
+.path li:last-child::before { right: 0; }
+.path li::after { content: counter(stop); position: absolute; top: 0; left: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 0.8rem; font-weight: 700; display: grid; place-items: center; }
+.path h3 { font-size: 1.25rem; margin: 0 0 0.3rem; }
+.path p { margin: 0; color: var(--muted); }
+.closing { text-align: center; }
+.closing .section-lead { margin-inline: auto; }
+.closing .actions { justify-content: center; margin-top: 1.75rem; }
+.contrast { gap: 2rem; margin-top: 2.5rem; }
+.panel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+.panel h3 { font-size: 1.25rem; margin: 0 0 0.3rem; }
+.panel > p { color: var(--muted); margin: 0 0 1.25rem; }
+.codepair { gap: 2rem; margin-top: 2.5rem; }
+.codepair pre { background: var(--surface); }

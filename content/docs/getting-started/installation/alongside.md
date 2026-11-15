@@ -29,7 +29,7 @@ restoring it.
 ## 1. Load the image
 
 On the running Linux, install Podman and skopeo, then load your image as
-described in [Build an image you can use](../image/). On Arch:
+described in [Prepare the image](../image/). On Arch:
 
 ```sh
 sudo pacman -S --needed podman skopeo

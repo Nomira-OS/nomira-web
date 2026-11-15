@@ -16,7 +16,7 @@ pacman -Sy --noconfirm podman skopeo
 ```
 
 Then load your image as described in
-[Build an image you can use](../image/).
+[Prepare the image](../image/).
 
 ## 2. Find the disk
 

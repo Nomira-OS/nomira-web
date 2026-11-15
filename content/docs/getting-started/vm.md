@@ -1,7 +1,7 @@
 ---
 title: Starting in a VM
 lead: The safe way to get to know nomira. Nothing changes on your own system.
-weight: 20
+weight: 30
 untested: true
 ---
 

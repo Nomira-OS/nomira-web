@@ -1,5 +1,5 @@
 ---
 title: Getting started
-lead: Build a first recipe, boot the base image in a VM, install.
+lead: Install the CLI, build a first system image, boot it in a VM, install it.
 weight: 10
 ---

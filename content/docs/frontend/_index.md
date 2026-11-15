@@ -1,5 +1,5 @@
 ---
-weight: 30
+weight: 50
 title: Frontend
 lead: "How the BuildKit frontend works: phases, groups and the check that groups are independent."
 ---

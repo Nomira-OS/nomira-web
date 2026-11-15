@@ -1,7 +1,7 @@
 ---
 title: Installation
 lead: How nomira gets onto a machine. Please try it in a VM first.
-weight: 30
+weight: 40
 untested: true
 ---
 
@@ -19,7 +19,7 @@ Podman and root.
 
 ## The steps
 
-1. **[Build an image you can use](image/).** The bare base image has no
+1. **[Prepare the image](image/).** The bare base image has no
    network management, no firmware and no SSH. A machine installed from
    it boots, but cannot go online. Build a small recipe on top first.
 2. **Install**, in one of two ways:

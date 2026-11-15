@@ -1,0 +1,18 @@
+{{- /* The mark, drawn large as a diagram: one state fans out into lanes
+       that merge again. Context: dict "label" <text> "from" "to" "lanes" (slice of 3). */ -}}
+<svg class="fanout" viewBox="0 0 560 320" role="img" aria-label="{{ .label }}">
+  <path class="lane l1" d="M70 160 C 170 160, 150 56, 280 56 C 410 56, 390 160, 490 160"/>
+  <path class="lane l2" d="M70 160 L 490 160"/>
+  <path class="lane l3" d="M70 160 C 170 160, 150 264, 280 264 C 410 264, 390 160, 490 160"/>
+  <circle class="node" cx="70" cy="160" r="13"/>
+  <circle class="node" cx="490" cy="160" r="13"/>
+  <g class="lane-labels" text-anchor="middle">
+    <rect x="216" y="38" width="128" height="36" rx="18"/><text x="280" y="62">{{ index .lanes 0 }}</text>
+    <rect x="216" y="142" width="128" height="36" rx="18"/><text x="280" y="166">{{ index .lanes 1 }}</text>
+    <rect x="216" y="246" width="128" height="36" rx="18"/><text x="280" y="270">{{ index .lanes 2 }}</text>
+  </g>
+  <g class="end-labels" text-anchor="middle">
+    <text x="70" y="206">{{ .from }}</text>
+    <text x="490" y="206">{{ .to }}</text>
+  </g>
+</svg>

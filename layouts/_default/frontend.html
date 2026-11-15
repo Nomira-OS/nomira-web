@@ -1,28 +1,53 @@
 {{ define "main" }}
-<section class="wrap hero" aria-labelledby="hero-title">
-  <h1 id="hero-title">Build in parallel. Verified.</h1>
-  <p class="lead">A BuildKit frontend for container images. You say which steps are independent; every build checks that they are, runs them at the same time and caches them one by one.</p>
-  <ul class="chips" aria-label="Properties">
-    <li>any base image</li>
-    <li>plain BuildKit</li>
-    <li>three commands</li>
-    <li>works without the rest of nomira</li>
-  </ul>
-  <div class="actions">
-    <a class="button primary" href="{{ "docs/frontend/" | relURL }}">Frontend docs</a>
-    <a class="button secondary" href="{{ site.Params.github }}/nomira" rel="noopener">Source on GitHub</a>
+<section class="wrap hero hero-split" aria-labelledby="hero-title">
+  <div class="hero-text">
+    <h1 id="hero-title">Build in parallel. Verified.</h1>
+    <p class="lead">A BuildKit frontend for container images. You declare which steps are independent; every build proves it.</p>
+    <div class="actions">
+      <a class="button primary" href="{{ "docs/frontend/" | relURL }}">Frontend docs</a>
+      <a class="button secondary" href="{{ site.Params.github }}/nomira" rel="noopener">Source on GitHub</a>
+    </div>
+    <p class="early">Alpha: the recipe schema may still change.</p>
   </div>
-  <p class="early">Early stage of development (alpha): the recipe schema may still change.</p>
+  {{ partial "fanout.html" (dict "label" "One state fans out into three groups, a, b and c, that are built in parallel and merge into the next state." "from" "state" "to" "merged" "lanes" (slice "group a" "group b" "group c")) }}
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <div class="wrap">
+    <h2 id="how-title" class="visually-hidden">How it works</h2>
+    <ul class="features">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M17 3l3 3-3 3"/></svg></span>
+        <h3>Phases</h3>
+        <p>Run one after another, in the order you write them.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4M17 12h4M7 12c3 0 2-6 5-6s2 6 5 6M7 12c3 0 2 6 5 6s2-6 5-6M7 12h10"/></svg></span>
+        <h3>Groups</h3>
+        <p>Independent parts of a phase. Built at the same time, cached one by one.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.500-3.400 8-8 9-4.600-1-8-4.500-8-9V6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg></span>
+        <h3>Check</h3>
+        <p>If two groups touch the same file, the build stops before the merge.</p>
+      </li>
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg></span>
+        <h3>Merge</h3>
+        <p>Each group becomes a layer. The next phase starts from their sum.</p>
+      </li>
+    </ul>
+  </div>
 </section>
 
 <section class="section band" aria-labelledby="contrast-title">
   <div class="wrap">
-    <h2 id="contrast-title">What changes when one step changes</h2>
-    <p class="section-lead">The same build twice. In both, the step <code>config b</code> was edited.</p>
+    <h2 id="contrast-title">What one change costs</h2>
+    <p class="section-lead">The same build twice. In both, <code>config b</code> was edited.</p>
     <div class="contrast">
-      <div class="card">
-        <h3>Containerfile: a chain</h3>
-        <p>Every step builds on the one before. Everything after the change runs again.</p>
+      <div class="panel">
+        <h3>Containerfile</h3>
+        <p>A chain. Everything after the change runs again.</p>
         <ol class="steps">
           <li>packages <span class="state">from cache</span></li>
           <li>config a <span class="state">from cache</span></li>
@@ -31,9 +56,9 @@
           <li class="rebuilt">finish <span class="state">rebuilt</span></li>
         </ol>
       </div>
-      <div class="card">
-        <h3>nomira: phases and groups</h3>
-        <p>Groups of a phase start from the same state. Siblings of the changed group stay cached.</p>
+      <div class="panel">
+        <h3>nomira</h3>
+        <p>Phases and groups. Siblings of the change stay cached.</p>
         <ol class="steps">
           <li>phase packages <span class="state">from cache</span></li>
           <li class="fan"><span>phase configs: three groups, in parallel</span>
@@ -51,34 +76,10 @@
   </div>
 </section>
 
-<section class="section" aria-labelledby="how-title">
-  <div class="wrap">
-    <h2 id="how-title">How it works</h2>
-    <ul class="grid">
-      <li class="card">
-        <h3>Phases</h3>
-        <p>Run one after another, in the order you write them.</p>
-      </li>
-      <li class="card">
-        <h3>Groups</h3>
-        <p>Independent parts of a phase. They run at the same time, and each has its own cache entry.</p>
-      </li>
-      <li class="card">
-        <h3>Check</h3>
-        <p>Every build records which files each group wrote or deleted. If two groups overlap, the build aborts before anything is merged.</p>
-      </li>
-      <li class="card">
-        <h3>Merge</h3>
-        <p>The results of the groups become layers of the image. The next phase starts from their sum.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="section band" aria-labelledby="example-title">
+<section class="section" aria-labelledby="example-title">
   <div class="wrap">
     <h2 id="example-title">A recipe, and a conflict</h2>
-    <p class="section-lead">One line at the top selects the frontend. Any BuildKit can then build the file.</p>
+    <p class="section-lead">One line selects the frontend. Any BuildKit can then build the file.</p>
     <div class="codepair">
       <div>
         <p id="ex-recipe">recipe.yml</p>
@@ -101,28 +102,30 @@ groups are not disjoint (policy: strict):
   </div>
 </section>
 
-<section class="section" aria-labelledby="fit-title">
+<section class="section band" aria-labelledby="fit-title">
   <div class="wrap">
     <h2 id="fit-title">Where it fits, and where it does not</h2>
-    <ul class="grid">
-      <li class="card">
+    <ul class="tools">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.500l2.800 2.800L16 9.500"/></svg></span>
         <h3>Good fit</h3>
         <p>Builds with many parts that have nothing to do with each other, such as the configuration of a whole operating system.</p>
       </li>
-      <li class="card">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span>
         <h3>Little gain</h3>
         <p>Short builds, or builds where every step needs the one before. A Containerfile does that just as well.</p>
       </li>
-      <li class="card">
+      <li>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6M14 4l-4 16"/></svg></span>
         <h3>Not declarative</h3>
         <p>A recipe lists commands that run in order. The frontend adds structure and the check, not a new language.</p>
       </li>
-      <li class="card">
-        <h3>Tried so far</h3>
-        <p>With <code>buildctl</code>, on Alpine and Arch images. Other BuildKit clients such as <code>docker buildx</code> should work but are untested.</p>
-      </li>
     </ul>
-    <p class="section-lead" style="margin-top:1.5rem">Continue with <a href="{{ "docs/frontend/standalone/" | relURL }}">using the frontend on its own</a> or the <a href="{{ "docs/frontend/schema/" | relURL }}">recipe schema</a>.</p>
+    <div class="actions" style="margin-top: 2.5rem">
+      <a class="button primary" href="{{ "docs/frontend/standalone/" | relURL }}">Use it on its own</a>
+      <a class="button secondary" href="{{ "docs/frontend/schema/" | relURL }}">Recipe schema</a>
+    </div>
   </div>
 </section>
 {{ end }}
