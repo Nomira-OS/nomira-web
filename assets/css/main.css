@@ -150,7 +150,7 @@ tbody tr:last-child > * { border-bottom: 0; }
 .axis-ends span:last-child { text-align: right; }
 .track { position: relative; height: 2.6rem; margin-top: 0.5rem; border-radius: 999px; background: linear-gradient(var(--border), var(--border)) center / 100% 2px no-repeat; }
 .mark { position: absolute; top: 50%; transform: translate(-50%, -50%); padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
-.mark.nix { background: var(--surface-2); color: var(--text); border: 2px solid var(--text); }
+.mark.other { background: var(--surface-2); color: var(--text); border: 2px solid var(--text); }
 .mark.nom { background: var(--accent); color: var(--on-accent); border: 2px solid var(--accent); }
 /* The sentence repeats what the track shows; it is the accessible form
    and stays visible on small screens, where the track is hidden. */

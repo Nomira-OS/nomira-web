@@ -1,38 +1,37 @@
 ---
-title: Das Frontend
-lead: Der Kern von nomira ist ein BuildKit-Frontend. Es wird in diesem Projekt entwickelt, steht aber für sich und baut jedes Container-Image.
+title: The frontend
+lead: The core of nomira is a BuildKit frontend. It is developed in this project, but it stands on its own and builds any container image.
 ---
 
-## Was es tut
+## What it does
 
-Ein Containerfile ist eine Kette: Ändert sich ein Schritt, laufen alle
-folgenden neu. Das nomira-Frontend beschreibt einen Build stattdessen in
-**Phasen** und **Gruppen**.
+A Containerfile is a chain: change one step, and all that follow run
+again. The nomira frontend describes a build in **phases** and
+**groups** instead.
 
-- **Phasen** laufen nacheinander.
-- **Gruppen** einer Phase sind voneinander unabhängig. Sie starten alle
-  vom selben Stand, laufen gleichzeitig und liegen einzeln im Cache.
-- Am Ende der Phase werden ihre Ergebnisse zusammengeführt.
+- **Phases** run one after another.
+- **Groups** of a phase are independent of each other. They all start
+  from the same state, run at the same time and are cached one by one.
+- At the end of the phase their results are merged.
 
-Ändert sich eine Gruppe, wird nur sie neu gebaut, nicht ihre
-Geschwister.
+When a group changes, only that group is rebuilt, not its siblings.
 
-## Unabhängigkeit wird nachgewiesen
+## Independence is verified
 
-Dass Gruppen unabhängig sind, behauptet das Recipe nur. Das Frontend
-prüft es bei jedem Build: Es ermittelt, welche Dateien jede Gruppe
-geschrieben oder gelöscht hat. Überschneiden sich zwei Gruppen, bricht
-der Build ab und nennt die Gruppen und den Pfad.
+The recipe only claims that groups are independent. The frontend checks
+it on every build: it determines which files each group has written or
+deleted. If two groups overlap, the build aborts and names the groups
+and the path.
 
-```
+```text
 phase "configs": declared-independent groups are not disjoint (policy: strict):
   groups "a" and "b": /etc/a (both write)
 ```
 
-## Ohne den Rest von nomira nutzen
+## Using it without the rest of nomira
 
-Das Frontend braucht weder die nomira-CLI noch das Basis-Image und auch
-kein bootc. Es genügt eine Zeile am Anfang der Datei:
+The frontend needs neither the nomira CLI nor the base image, and no
+bootc either. One line at the top of the file is enough:
 
 ```yaml
 # syntax=ghcr.io/nomira-os/nomira:1-alpha
@@ -44,10 +43,10 @@ phases:
       config:
         - copy files/app.conf /etc/app.conf
       assets:
-        - run mkdir -p /srv/www && echo hallo > /srv/www/index.html
+        - run mkdir -p /srv/www && echo hello > /srv/www/index.html
 ```
 
-Gebaut wird mit BuildKit selbst:
+BuildKit itself does the build:
 
 ```sh
 buildctl build --frontend gateway.v0 \
@@ -56,18 +55,20 @@ buildctl build --frontend gateway.v0 \
   --output type=oci,dest=image.tar
 ```
 
-Dieser Weg ist erprobt. Werkzeuge, die BuildKit verwenden und die
-`# syntax=`-Zeile auswerten, etwa `docker buildx`, sollten das Recipe
-ebenfalls bauen; das haben wir noch nicht ausprobiert.
+This way has been tried. Tools that use BuildKit and honour the
+`# syntax=` line, such as `docker buildx`, should build the recipe as
+well; we have not tried that yet.
 
-## Was es bewusst nicht ist
+## What it deliberately is not
 
-- **Keine Modulsammlung.** Es gibt drei Befehle: `run`, `copy` und
-  `env`. Alles Weitere ist Shell.
-- **Kein Ersatz für ein Containerfile in jedem Fall.** Der Gewinn
-  entsteht dort, wo ein Build viele unabhängige Teile hat.
-- **Noch nicht stabil.** Das Schema kann sich ändern, deshalb der Tag
-  `1-alpha`.
+- **Not a collection of modules.** There are three commands: `run`,
+  `copy` and `env`. Everything else is shell.
+- **Not declarative.** A recipe lists commands that run in order. What
+  the frontend adds is structure: which steps are independent, and the
+  proof that they are.
+- **Not a replacement for a Containerfile in every case.** It pays off
+  where a build has many independent parts.
+- **Not stable yet.** The schema may change, hence the tag `1-alpha`.
 
-Quelltext und vollständige Beschreibung des Schemas:
+Source and the full description of the schema:
 [github.com/Nomira-OS/nomira](https://github.com/Nomira-OS/nomira)

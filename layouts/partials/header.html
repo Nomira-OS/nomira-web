@@ -3,19 +3,19 @@
     <a class="brand" href="{{ site.Home.RelPermalink }}"{{ if .IsHome }} aria-current="page"{{ end }}>
       {{ partial "logo.html" (dict "width" 36 "height" 31) }}
       <span class="brand-name">nomira</span>
-      <span class="status" title="Früher Entwicklungsstand">{{ site.Params.status }}<span class="visually-hidden">: früher Entwicklungsstand</span></span>
+      <span class="status" title="Early stage of development">{{ site.Params.status }}<span class="visually-hidden">: early stage of development</span></span>
     </a>
-    <nav aria-label="Hauptnavigation">
+    <nav aria-label="Main">
       <ul class="nav-list">
         {{- $current := . }}
         {{- range site.Menus.main }}
         <li><a href="{{ .URL | relURL }}"{{ if or ($current.IsMenuCurrent "main" .) ($current.HasMenuCurrent "main" .) (and $current.Section (eq (printf "/%s/" $current.Section) .URL)) }} aria-current="page"{{ end }}>{{ .Name }}</a></li>
         {{- end }}
-        <li><a href="{{ site.Params.github }}" rel="noopener">GitHub<span class="visually-hidden"> (externer Link)</span></a></li>
+        <li><a href="{{ site.Params.github }}" rel="noopener">GitHub<span class="visually-hidden"> (external link)</span></a></li>
       </ul>
     </nav>
     <button type="button" class="theme-toggle" id="theme-toggle" hidden>
-      <span id="theme-toggle-label">Helles Design</span>
+      <span id="theme-toggle-label">Light theme</span>
     </button>
   </div>
 </header>

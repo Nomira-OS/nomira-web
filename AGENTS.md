@@ -5,7 +5,7 @@ Guidance for coding agents (and humans) working in this repository.
 ## What this is
 
 The nomira website: a Hugo site with its own small theme. Landing page,
-comparison with NixOS, FAQ and documentation.
+comparisons with NixOS and BlueBuild, FAQ and documentation.
 
 Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
 `nomira-image` (base image), `ci` (shared workflows).
@@ -15,6 +15,9 @@ Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
 - **Be honest about the project.** nomira is alpha and is not presented
   as better than NixOS or BlueBuild; it serves different goals. Claims
   about other projects need a source and a hedge.
+- **Do not call nomira declarative.** A recipe is a list of imperative
+  steps; say "built from a recipe". Verified-parallel building is a
+  property of the frontend, not of the resulting system.
 - **Mark what is untested.** A documentation page whose steps nobody has
   run carries `untested: true`. Remove it only after running the steps.
 - **Little text on the landing page.** Long explanations go to the docs.
@@ -29,5 +32,5 @@ Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
 - **Conventional Commits** for every commit.
 - **Licence:** EUPL-1.2 via `REUSE.toml`, fonts OFL-1.1; `reuse lint`
   must pass.
-- **Languages:** website and README are German. Code, comments, commit
-  messages and this file are English.
+- **Language:** everything is English: README, docs, code, comments and
+  commit messages.

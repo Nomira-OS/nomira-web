@@ -1,4 +1,4 @@
 ---
 title: nomira
-tagline: Dein System als Recipe
+tagline: Your system as a recipe
 ---

@@ -5,7 +5,7 @@
     <h1>{{ .Title }}</h1>
     {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
     {{- if .Params.untested }}
-    <p class="notice" role="note"><strong>Entwurf, noch nicht erprobt.</strong> Diese Anleitung beschreibt den vorgesehenen Weg. Die Befehle sind bisher nicht von Anfang bis Ende ausgeführt worden.</p>
+    <p class="notice" role="note"><strong>Draft, not tried yet.</strong> This guide describes the intended way. Nobody has run the commands from start to finish so far.</p>
     {{- end }}
   </header>
   <div class="prose">

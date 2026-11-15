@@ -1,48 +1,50 @@
 # nomira-web
 
-> **Alpha.** Die Website von nomira: Überblick, Vergleich mit NixOS, FAQ
-> und Dokumentation. Vieles ist Entwurf; Seiten, deren Schritte noch
-> niemand ausgeführt hat, sind als solche gekennzeichnet.
+> **Alpha.** The nomira website: overview, comparisons with NixOS and
+> BlueBuild, FAQ and documentation. Much of it is a draft; pages whose
+> steps nobody has run yet are marked as such.
 
-## Lokal ansehen
+## Viewing it locally
 
-Gebraucht wird [Hugo](https://gohugo.io/) in der erweiterten Fassung; die
-Version steht in `.github/workflows/site.yml`.
+You need the extended edition of [Hugo](https://gohugo.io/); the version
+is in `.github/workflows/site.yml`.
 
 ```sh
 hugo server
 ```
 
-## Aufbau
+## Layout
 
-- `content/`: die Texte als Markdown. `untested: true` im Kopf einer
-  Seite blendet den Hinweis „Entwurf, noch nicht erprobt“ ein.
-- `layouts/`, `assets/`: eigenes, kleines Theme ohne fremde Abhängigkeiten.
-  Farben für dunkles und helles Design stehen oben in `assets/css/main.css`.
-- `static/fonts/`: Inter und IBM Plex Mono, selbst ausgeliefert. Die Seite
-  lädt nichts von fremden Servern.
+- `content/`: the texts as Markdown. `untested: true` in the front
+  matter of a page shows the notice "Draft, not tried yet".
+- `content/compare/`: comparison pages. The axes of the overview graphic
+  are in the front matter.
+- `layouts/`, `assets/`: a small theme of our own without external
+  dependencies. The colours for the dark and the light theme are at the
+  top of `assets/css/main.css`.
+- `static/fonts/`: Inter and IBM Plex Mono, served by the site itself.
+  The site loads nothing from other servers.
 
-## Veröffentlichen
+## Publishing
 
-`hugo --minify` erzeugt in `public/` reine statische Dateien. Die CI
-veröffentlicht sie über GitHub Pages; ebenso gut kann sie jeder Webserver
-ausliefern, etwa ein nginx-Container in einem Kubernetes-Cluster. Alle
-internen Verweise sind relativ zur Basis-URL, die beim Bau mit `--baseURL`
-gesetzt wird.
+`hugo --minify` writes plain static files to `public/`. CI publishes
+them through GitHub Pages; any web server can serve them just as well,
+an nginx container in a Kubernetes cluster for instance. All internal
+links are relative to the base URL, which is set at build time with
+`--baseURL`.
 
-## Barrierefreiheit
+## Accessibility
 
-Ziel ist WCAG 2.1 AA: ausreichende Kontraste in beiden Designs, sichtbarer
-Tastaturfokus, Sprungmarke zum Inhalt, Tabellen und Codeblöcke per
-Tastatur scrollbar, Grafiken mit Textentsprechung. Fehler bitte als Issue
-melden.
+The goal is WCAG 2.1 AA: sufficient contrast in both themes, a visible
+keyboard focus, a skip link, tables and code blocks that can be scrolled
+with the keyboard, graphics with a text equivalent. Please report
+problems as an issue.
 
-Verwandte Repos: [nomira](https://github.com/Nomira-OS/nomira) (das
-Build-Frontend), [nomira-cli](https://github.com/Nomira-OS/nomira-cli),
-[nomira-image](https://github.com/Nomira-OS/nomira-image) (das
-Basis-Image), [ci](https://github.com/Nomira-OS/ci) (gemeinsame CI).
+Related repositories: [nomira](https://github.com/Nomira-OS/nomira) (the
+build frontend), [nomira-cli](https://github.com/Nomira-OS/nomira-cli),
+[nomira-image](https://github.com/Nomira-OS/nomira-image) (the base
+image), [ci](https://github.com/Nomira-OS/ci) (shared CI).
 
-## Lizenz
+## Licence
 
-EUPL-1.2; die Schriften stehen unter OFL-1.1. Siehe `LICENSES/` und
-`REUSE.toml`.
+EUPL-1.2; the fonts are under OFL-1.1. See `LICENSES/` and `REUSE.toml`.

@@ -13,7 +13,7 @@
   }
   function render() {
     // The label names what a click switches to.
-    label.textContent = current() === "dark" ? "Helles Design" : "Dunkles Design";
+    label.textContent = current() === "dark" ? "Light theme" : "Dark theme";
   }
   button.hidden = false;
   render();

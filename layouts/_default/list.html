@@ -10,7 +10,7 @@
     <li class="card">
       <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
       {{- with .Params.lead }}<p>{{ . }}</p>{{ end }}
-      {{- if .Params.untested }}<p class="tag">Entwurf, noch nicht erprobt</p>{{ end }}
+      {{- if .Params.untested }}<p class="tag">Draft, not tried yet</p>{{ end }}
     </li>
     {{- end }}
   </ul>

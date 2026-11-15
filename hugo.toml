@@ -1,14 +1,14 @@
 # baseURL is set by the deployment (HUGO_BASEURL or --baseURL). All links in
 # the templates are relative to it, so the site runs under any host or path.
 baseURL = "/"
-locale = "de"
-defaultContentLanguage = "de"
+locale = "en"
+defaultContentLanguage = "en"
 title = "nomira"
 enableRobotsTXT = true
 disableKinds = ["taxonomy", "term", "rss"]
 
 [params]
-  description = "nomira baut unveränderliche Linux-Systeme aus einem deklarativen Recipe: Arch-Pakete, gewöhnliche Konfigurationsdateien, atomare Updates mit bootc."
+  description = "nomira builds an immutable Linux system from a recipe: Arch packages, ordinary configuration files, atomic updates with bootc."
   status = "alpha"
   github = "https://github.com/Nomira-OS"
 
@@ -26,14 +26,14 @@ disableKinds = ["taxonomy", "term", "rss"]
     pageRef = "/frontend"
     weight = 10
   [[menus.main]]
-    name = "Vergleich"
-    pageRef = "/vergleich"
+    name = "Compare"
+    pageRef = "/compare"
     weight = 20
   [[menus.main]]
     name = "FAQ"
     pageRef = "/faq"
     weight = 30
   [[menus.main]]
-    name = "Doku"
-    pageRef = "/doku"
+    name = "Docs"
+    pageRef = "/docs"
     weight = 40
