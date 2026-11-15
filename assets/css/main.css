@@ -59,7 +59,7 @@ code, pre { font-family: var(--mono); font-size: 0.92em; }
 .nav-list a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.8rem; border-radius: 8px; color: var(--text); text-decoration: none; font-weight: 500; }
 .nav-list a:hover { background: var(--surface-2); }
 .nav-list a[aria-current="page"] { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 8px 8px 0 0; }
-.theme-toggle { min-height: 44px; padding: 0 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.9rem; cursor: pointer; }
+.theme-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 0.9rem; cursor: pointer; }
 .theme-toggle:hover { background: var(--surface-2); }
 
 /* Buttons and chips */
@@ -221,7 +221,7 @@ tbody tr:last-child > * { border-bottom: 0; }
 
 /* Landing pages: room around few words. Features stand free, without
    boxes; boxes are kept for things that are objects (code, diagrams). */
-.hero-split { grid-template-columns: minmax(0, 1fr); align-items: center; gap: 2.5rem 4rem; padding-block: clamp(3.5rem, 9vw, 7rem); }
+.hero-split { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 2.5rem 4rem; padding-block: clamp(3.5rem, 9vw, 7rem); }
 .hero-text { display: grid; gap: 1.6rem; }
 .hero-text h1 { margin: 0; font-size: clamp(2.6rem, 6vw, 4.4rem); }
 .hero-text p.lead { max-width: 30rem; }
@@ -264,3 +264,40 @@ tbody tr:last-child > * { border-bottom: 0; }
 .panel > p { color: var(--muted); margin: 0 0 1.25rem; }
 .codepair { gap: 2rem; margin-top: 2.5rem; }
 .codepair pre { background: var(--surface); }
+
+.theme-toggle[hidden] { display: none; }
+.theme-toggle svg { width: 1.3rem; height: 1.3rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle[data-next="light"] .moon, .theme-toggle[data-next="dark"] .sun { display: none; }
+
+/* The two landing pages differ at a glance. The system page shows the
+   bare mark and keeps violet; the tool page shows an editor window and
+   takes the second colour as its key. */
+.tool { --accent: var(--accent-2); }
+.mark-hero { width: 100%; max-width: 30rem; height: auto; justify-self: center; filter: drop-shadow(0 0 3.5rem color-mix(in srgb, var(--accent) 35%, transparent)); }
+.window { justify-self: stretch; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1.5rem 4rem -2rem color-mix(in srgb, var(--accent) 45%, transparent); }
+.window-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.85rem; color: var(--muted); }
+.window-bar i { display: flex; gap: 0.35rem; }
+.window-bar i::before, .window-bar i::after, .window-bar i b { content: ""; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--border); display: block; }
+.window pre { margin: 0; padding: 1.25rem 1.25rem 1.5rem; overflow-x: auto; line-height: 1.65; font-size: 0.9rem; }
+.window .k { color: var(--muted); }
+.window .g { color: var(--accent); font-weight: 500; }
+.hero-cmd { font-family: var(--mono); font-size: 0.9rem; color: var(--muted); margin: 0; }
+.hero-cmd code { color: var(--text); }
+
+/* Compare */
+.page-hero { padding-block: clamp(3rem, 8vw, 5.5rem) 1rem; }
+.page-hero h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); margin: 0 0 1.25rem; }
+.page-hero .lead { max-width: 38rem; margin: 0; }
+.axes.open { background: none; border: 0; padding: 0; max-width: none; gap: 2.75rem; margin: 0; }
+.axes.open .axis-title { font-size: 1.25rem; letter-spacing: -0.02em; }
+.axes.open .track { height: 3.2rem; }
+.projects { list-style: none; margin: 0; padding: 0; display: grid; gap: 3rem 2.5rem; grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr)); }
+.projects h3 { font-size: 1.25rem; margin: 1.1rem 0 0.4rem; }
+.projects p { margin: 0 0 0.75rem; color: var(--muted); }
+.projects .pick { color: var(--text); }
+.projects .ours .icon-tile { background: var(--accent); color: var(--on-accent); }
+.projects a.more { font-weight: 600; }
+.wide-table { margin-top: 2.5rem; }
+.wide-table .table-scroll { margin: 0; background: var(--bg); }
+.wide-table tbody td:first-of-type, .wide-table thead th:nth-child(2) { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.fineprint { color: var(--muted); font-size: 0.95rem; max-width: 46rem; margin: 1.5rem 0 0; }

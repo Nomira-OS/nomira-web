@@ -1,7 +1,7 @@
 ---
 title: nomira and NixOS
 lead: nomira is not better than NixOS. It has different goals.
-layout: compare
+layout: comparison
 weight: 10
 axes:
   - title: How is the system described?

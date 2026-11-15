@@ -1,7 +1,7 @@
 ---
 title: nomira and BlueBuild
 lead: Both build a bootable system image from a YAML recipe. BlueBuild is the more mature project and offers far more out of the box.
-layout: compare
+layout: comparison
 weight: 20
 axes:
   - title: What is a recipe made of?

@@ -9,7 +9,13 @@
     </div>
     <p class="early">Alpha: for trying out, not yet for systems you depend on.</p>
   </div>
-  {{ partial "fanout.html" (dict "label" "A recipe fans out into three groups that are built in parallel, terminal, network and boot, and merge into one image." "from" "recipe" "to" "image" "lanes" (slice "terminal" "network" "boot")) }}
+  <svg class="mark-hero" viewBox="0 0 112 96" role="img" aria-label="The nomira mark: one point fans out into three lines that merge again.">
+    <path d="M14 48 C 34 48, 30 16, 56 16 C 82 16, 78 48, 98 48" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M14 48 L 98 48" fill="none" stroke="var(--text)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M14 48 C 34 48, 30 80, 56 80 C 82 80, 78 48, 98 48" fill="none" stroke="var(--accent-2)" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="14" cy="48" r="6" fill="var(--text)"/>
+    <circle cx="98" cy="48" r="6" fill="var(--text)"/>
+  </svg>
 </section>
 
 <section class="section" aria-labelledby="why-title">

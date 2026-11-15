@@ -1,0 +1,17 @@
+{{ define "main" }}
+<section class="wrap page-hero" aria-labelledby="page-title">
+  {{- if .Parent }}{{ if not .Parent.IsHome }}<p class="crumb"><a href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }}</a></p>{{ end }}{{ end }}
+  <h1 id="page-title">{{ .Title }}</h1>
+  {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+</section>
+<section class="section band" style="margin-top: 3rem" aria-label="Where the two projects stand">
+  <div class="wrap">{{ partial "axes.html" (dict "page" . "open" true) }}
+    <p class="fineprint">A rough placement, not a measurement.</p>
+  </div>
+</section>
+<article class="wrap page">
+  <div class="prose">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

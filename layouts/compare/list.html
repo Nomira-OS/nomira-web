@@ -1,21 +1,39 @@
 {{ define "main" }}
-<article class="wrap page">
-  <header class="page-header">
-    <h1>{{ .Title }}</h1>
-    {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
-  </header>
-  {{ partial "axes.html" . }}
-  <div class="prose wide">
-    {{ .Content }}
+<section class="wrap page-hero" aria-labelledby="page-title">
+  <h1 id="page-title">{{ .Title }}</h1>
+  {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+</section>
+
+<section class="section" aria-labelledby="projects-title">
+  <div class="wrap">
+    <h2 id="projects-title" class="visually-hidden">The four projects</h2>
+    <ul class="projects">
+      {{- range .Params.projects }}
+      <li{{ if not .page }} class="ours"{{ end }}>
+        <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true">{{ .icon | safeHTML }}</svg></span>
+        <h3>{{ .name }}</h3>
+        <p>{{ .text }}</p>
+        <p class="pick">{{ .pick }}</p>
+        {{- with .page }}{{ with site.GetPage . }}<p><a class="more" href="{{ .RelPermalink }}">{{ .Title }}</a></p>{{ end }}{{ end }}
+      </li>
+      {{- end }}
+    </ul>
   </div>
-  <h2 class="children-title">One by one</h2>
-  <ul class="card-list">
-    {{- range .Pages.ByWeight }}
-    <li class="card">
-      <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
-      {{- with .Params.lead }}<p>{{ . }}</p>{{ end }}
-    </li>
-    {{- end }}
-  </ul>
-</article>
+</section>
+
+<section class="section band" aria-labelledby="axes-title">
+  <div class="wrap">
+    <h2 id="axes-title">Where each one stands</h2>
+    <p class="section-lead">A rough placement, not a measurement.</p>
+    <div style="margin-top: 3rem">{{ partial "axes.html" (dict "page" . "open" true) }}</div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="table-title">
+  <div class="wrap">
+    <h2 id="table-title">Side by side</h2>
+    <div class="wide-table">{{ .Content }}</div>
+    <p class="fineprint">The statements about the other projects reflect what we know and may be out of date. Their own documentation is authoritative; the individual pages name our sources.</p>
+  </div>
+</section>
 {{ end }}

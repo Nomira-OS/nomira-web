@@ -1,6 +1,26 @@
 ---
 title: Compare
-lead: Where nomira stands next to NixOS, BlueBuild and Arkane Linux. It is not better than any of them; it has different goals and is far younger.
+lead: nomira next to NixOS, BlueBuild and Arkane Linux. It is not better than any of them. It has different goals, and it is far younger.
+projects:
+  - name: nomira
+    icon: '<path d="M3 12h4M17 12h4M7 12c3 0 2-6 5-6s2 6 5 6M7 12c3 0 2 6 5 6s2-6 5-6M7 12h10"/>'
+    text: An immutable Arch from a recipe of plain commands, built as a container image.
+    pick: Pick it to assemble an Arch system yourself, if you can live with alpha software.
+  - name: NixOS
+    page: /compare/nixos
+    icon: '<path d="M12 3l8 4.500v9L12 21l-8-4.500v-9z"/><path d="M12 12l8-4.500M12 12v9M12 12L4 7.500"/>'
+    text: The whole system in a declarative language, checked before anything is built.
+    pick: Pick it for the strongest guarantees, if you accept a language of its own.
+  - name: BlueBuild
+    page: /compare/bluebuild
+    icon: '<rect x="3" y="3" width="7" height="7" rx="1.500"/><rect x="14" y="3" width="7" height="7" rx="1.500"/><rect x="3" y="14" width="7" height="7" rx="1.500"/><rect x="14" y="14" width="7" height="7" rx="1.500"/>'
+    text: A system image from ready-made modules, mainly on top of atomic Fedora.
+    pick: Pick it for a Fedora-based desktop image with little effort.
+  - name: Arkane Linux
+    page: /compare/arkane
+    icon: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'
+    text: An immutable Arch desktop, built from package lists with its own deployment tool.
+    pick: Pick it for an immutable Arch desktop you can install today.
 axes:
   - title: What do you write?
     left: The result you want
@@ -31,19 +51,6 @@ axes:
     text: "From proven to early: NixOS, BlueBuild, Arkane Linux, nomira."
 ---
 
-## In one sentence each
-
-- **NixOS** describes the whole system in a declarative language and
-  checks a great deal before it builds anything.
-- **BlueBuild** assembles a system image from ready-made modules, mainly
-  on top of atomic Fedora.
-- **Arkane Linux** is an immutable Arch desktop, built from package
-  lists with its own deployment tool.
-- **nomira** builds an immutable Arch from a recipe of plain commands,
-  as a container image, and builds independent parts in parallel.
-
-## Side by side
-
 | Topic | nomira | NixOS | BlueBuild | Arkane Linux |
 |---|---|---|---|---|
 | Packages from | Arch Linux | nixpkgs | Mainly Fedora | Arch Linux |
@@ -56,17 +63,3 @@ axes:
 | Independent parts built in parallel | Yes, verified on every build | Yes, by design | No | No |
 | Ready-made desktop | No | Yes | Yes | Yes |
 | Maturity | Alpha | Proven | Established | In active development |
-
-The statements about the other projects reflect what we know and may be
-out of date. Their own documentation is authoritative; the pages below
-name our sources.
-
-## Which one, roughly
-
-- You want the strongest guarantees and accept a language of its own:
-  **NixOS**.
-- You want a Fedora-based desktop image with little effort:
-  **BlueBuild**.
-- You want an immutable Arch desktop to install today: **Arkane Linux**.
-- You want an immutable Arch that you assemble yourself from plain
-  commands, and you can live with alpha software: **nomira**.

@@ -1,8 +1,11 @@
 {{- /* Overview graphic: projects placed on a few axes. Each axis carries a
-       sentence that says what the track shows; that is the accessible form. */ -}}
-{{- with .Params.axes }}
-<figure class="axes">
-  <figcaption>Where the projects stand. The position of the marks is a rough placement, not a measurement.</figcaption>
+       sentence that says what the track shows; that is the accessible form.
+       Context: a page, or dict "page" <page> "open" true for the unboxed form. */ -}}
+{{- $page := . }}{{ $open := false }}
+{{- if reflect.IsMap . }}{{ $page = .page }}{{ $open = .open }}{{ end }}
+{{- with $page.Params.axes }}
+<figure class="axes{{ if $open }} open{{ end }}">
+  {{- if not $open }}<figcaption>Where the projects stand. The position of the marks is a rough placement, not a measurement.</figcaption>{{ end }}
   {{- range . }}
   <div class="axis">
     <p class="axis-title">{{ .title }}</p>

@@ -1,7 +1,7 @@
 ---
 title: nomira and Arkane Linux
 lead: Both are immutable systems built from Arch packages. Arkane Linux is a complete distribution you can install today; nomira is a set of building blocks.
-layout: compare
+layout: comparison
 weight: 30
 axes:
   - title: What do you get?

@@ -3,8 +3,7 @@
 (function () {
   var root = document.documentElement;
   var button = document.getElementById("theme-toggle");
-  var label = document.getElementById("theme-toggle-label");
-  if (!button || !label) return;
+  if (!button) return;
 
   function current() {
     var set = root.getAttribute("data-theme");
@@ -12,8 +11,11 @@
     return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   }
   function render() {
-    // The label names what a click switches to.
-    label.textContent = current() === "dark" ? "Light theme" : "Dark theme";
+    // Icon and name say what a click switches to.
+    var next = current() === "dark" ? "light" : "dark";
+    button.setAttribute("data-next", next);
+    button.setAttribute("aria-label", "Switch to " + next + " theme");
+    button.setAttribute("title", "Switch to " + next + " theme");
   }
   button.hidden = false;
   render();
