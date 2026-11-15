@@ -1,0 +1,4 @@
+<div class="notice {{ .Get "art" | default "warn" }}" role="note">
+<strong>{{ .Get "titel" | default "Hinweis" }}</strong>
+{{ .Inner | markdownify }}
+</div>

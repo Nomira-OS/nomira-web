@@ -1,4 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>Nomira-OS/ci"]
+  "extends": ["local>Nomira-OS/ci"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Hugo version used to build the website",
+      "managerFilePatterns": ["/^\\.github/workflows/site\\.yml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+HUGO_VERSION: (?<currentValue>\\S+)"
+      ]
+    }
+  ]
 }

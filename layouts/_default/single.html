@@ -1,0 +1,15 @@
+{{ define "main" }}
+<article class="wrap page">
+  <header class="page-header">
+    {{- if .Parent }}{{ if not .Parent.IsHome }}<p class="crumb"><a href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }}</a></p>{{ end }}{{ end }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+    {{- if .Params.untested }}
+    <p class="notice" role="note"><strong>Entwurf, noch nicht erprobt.</strong> Diese Anleitung beschreibt den vorgesehenen Weg. Die Befehle sind bisher nicht von Anfang bis Ende ausgeführt worden.</p>
+    {{- end }}
+  </header>
+  <div class="prose">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

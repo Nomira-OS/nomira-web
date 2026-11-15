@@ -1,0 +1,106 @@
+{{ define "main" }}
+<section class="wrap hero" aria-labelledby="hero-title">
+  {{ partial "logo.html" (dict "width" 132 "height" 113) }}
+  <h1 id="hero-title">Dein System als Recipe.</h1>
+  <p class="lead">nomira baut ein unveränderliches Linux aus einer deklarativen Beschreibung: mit Arch-Paketen, gewöhnlichen Konfigurationsdateien und atomaren Updates.</p>
+  <ul class="chips" aria-label="Eigenschaften">
+    <li>deklarativ</li>
+    <li>unveränderlich</li>
+    <li>frei konfigurierbar</li>
+    <li>geprüft parallel gebaut</li>
+  </ul>
+  <div class="actions">
+    <a class="button primary" href="{{ "doku/" | relURL }}">Zur Doku</a>
+    <a class="button secondary" href="{{ "vergleich/" | relURL }}">Vergleich mit NixOS</a>
+  </div>
+  <p class="early">Früher Entwicklungsstand (alpha): zum Ausprobieren, noch nicht für Systeme, auf die du angewiesen bist.</p>
+</section>
+
+<section class="section band" aria-labelledby="flow-title">
+  <div class="wrap">
+    <h2 id="flow-title">Vom Recipe zum laufenden System</h2>
+    <p class="section-lead">Phasen laufen nacheinander. Die Gruppen einer Phase laufen gleichzeitig, und der Build prüft, dass sie sich nicht in die Quere kommen.</p>
+    <ol class="flow">
+      <li><span class="step">1</span><strong>Recipe</strong><span class="what">Eine YAML-Datei beschreibt das System.</span></li>
+      <li><span class="step">2</span><strong>Phasen</strong><span class="what">Schritt für Schritt, in fester Reihenfolge.</span></li>
+      <li class="parallel"><span class="step">3</span><strong>Gruppen</strong><span class="what">Unabhängig, gleichzeitig, einzeln im Cache.</span>
+        <ul class="lanes" aria-label="Beispielgruppen">
+          <li>terminal</li>
+          <li>netzwerk</li>
+          <li>boot</li>
+        </ul>
+      </li>
+      <li><span class="step">4</span><strong>Prüfung</strong><span class="what">Schreiben zwei Gruppen dieselbe Datei, bricht der Build ab.</span></li>
+      <li><span class="step">5</span><strong>Image</strong><span class="what">Ein fertiges, unveränderliches System-Image.</span></li>
+      <li><span class="step">6</span><strong>Umstellen</strong><span class="what">bootc wechselt atomar. Der alte Stand bleibt als Rückweg.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="why-title">
+  <div class="wrap">
+    <h2 id="why-title">Wofür nomira gedacht ist</h2>
+    <ul class="grid">
+      <li class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
+        <h3>Deklarativ</h3>
+        <p>Das Recipe ist das System. Was nicht drinsteht, ist nicht drauf.</p>
+      </li>
+      <li class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <h3>Unveränderlich</h3>
+        <p>Das laufende System ist schreibgeschützt. Updates kommen ganz oder gar nicht, mit Rückweg.</p>
+      </li>
+      <li class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        <h3>Frei konfigurierbar</h3>
+        <p>Beliebige Befehle und normale Dateien in <code>/etc</code>. Keine eigene Sprache, die jede Option kennen muss.</p>
+      </li>
+      <li class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4M17 12h4M7 12c3 0 2-6 5-6s2 6 5 6M7 12c3 0 2 6 5 6s2-6 5-6M7 12h10"/></svg>
+        <h3>Geprüft parallel</h3>
+        <p>Eine geänderte Gruppe baut nur sich selbst neu. Dass Gruppen unabhängig sind, wird bei jedem Build nachgewiesen.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section band" aria-labelledby="parts-title">
+  <div class="wrap">
+    <h2 id="parts-title">Drei Bausteine</h2>
+    <ul class="grid">
+      <li class="card">
+        <h3>Frontend</h3>
+        <p>Übersetzt das Recipe für BuildKit. Es steht für sich und baut jedes Container-Image, nicht nur Betriebssysteme.</p>
+        <p><a class="more" href="{{ "frontend/" | relURL }}">Das Frontend einzeln nutzen</a></p>
+      </li>
+      <li class="card">
+        <h3>CLI</h3>
+        <p>Ein Befehl baut, prüft und stellt das System um: <code>nomira switch</code>.</p>
+      </li>
+      <li class="card">
+        <h3>Basis-Image</h3>
+        <p>Das kleinste Arch Linux, das bootc starten kann, mit AppArmor. Alles Weitere wählt dein Recipe.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="scope-title">
+  <div class="wrap">
+    <h2 id="scope-title">Ehrlich gesagt</h2>
+    <div class="duo">
+      <div class="card">
+        <h3>Welche Systeme?</h3>
+        <p>Das Frontend ist nicht an eine Distribution gebunden. Als Basis kommt grundsätzlich jedes System infrage, das bootc unterstützt.</p>
+        <p>Unterstützt und erprobt wird derzeit nur Arch Linux.</p>
+      </div>
+      <div class="card">
+        <h3>Kein Ersatz für NixOS</h3>
+        <p>NixOS prüft mehr, reproduziert genauer und ist viel reifer. nomira verfolgt andere Ziele: vertraute Pakete und Dateien statt einer eigenen Sprache.</p>
+        <p><a class="more" href="{{ "vergleich/" | relURL }}">Zum Vergleich</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
