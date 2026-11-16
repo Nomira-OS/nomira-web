@@ -2,8 +2,11 @@
 title: What gets rebuilt
 lead: Which parts of a recipe run again after a change, and how to keep that small.
 weight: 14
-untested: true
 ---
+
+> These rules are checked by end-to-end tests with a real BuildKit on
+> small test images. A whole system on the nomira base image has not
+> been built this way yet.
 
 ## The rules
 
@@ -66,17 +69,15 @@ whenever the base image or an earlier phase changes.
 
 ## The warning
 
-Because that is easy to miss, the build says so every time:
+Because that is easy to miss, the steps of such a group say so in the
+build output every time, also when they come from the cache:
 
 ```text
-phase "features": group "sudo" has no run but is not independent of the
-state before it. It is built on that state and will be rebuilt whenever
-the base image or an earlier phase changes.
-  /etc/sudoers.d has mode.uid.gid 750.0.0 there, the group would create it as 755.0.0
+[features/sudo, WARNING: not independent of earlier state: /etc/sudoers.d has mode.uid.gid 750.0.0 there, not 755.0.0] copy files/sudoers-wheel -> /etc/sudoers.d/10-wheel
 ```
 
-The steps of such a group also carry the note `depends on earlier state`
-in the build output.
+The note names the first path in the way and says how many more there
+are.
 
 What you can do about it:
 

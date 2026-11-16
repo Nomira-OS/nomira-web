@@ -177,7 +177,8 @@ built on that state instead if
 - one of its files or symbolic links meets a directory or a symbolic
   link there.
 
-The build reports this as a warning that names the group and the paths.
+The steps of such a group carry the note `WARNING: not independent of
+earlier state` with the first path in the way.
 
 ## Known limits
 
@@ -187,7 +188,5 @@ The build reports this as a warning that names the group and the paths.
   their own.
 - The platform follows the build host; multi-architecture builds are
   open.
-- Covered by tests, but not yet run in a real build: `env`,
-  `run --no-cache`, `labels`, `include`, collectors, the long form of
-  groups, `expects`, and building groups without `run` on an empty
-  state.
+- Checked by end-to-end tests with a real BuildKit: everything on this
+  page except args, `run --no-cache`, `labels` and `--chown`.

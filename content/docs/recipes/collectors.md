@@ -2,8 +2,11 @@
 title: Collectors
 lead: Groups say what they need; one command does it for all of them.
 weight: 12
-untested: true
 ---
+
+> The mechanism is checked by end-to-end tests with a real BuildKit. The
+> collectors shown here for pacman and systemd have not been run on the
+> nomira base image yet.
 
 ## The problem they solve
 

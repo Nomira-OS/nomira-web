@@ -61,5 +61,5 @@ recipe.
 - The sources of `copy` always refer to the recipe directory, not to the
   included file.
 
-Includes are covered by the parser tests; a real build with them has not
-been run yet.
+Includes, group files and their stages are checked by end-to-end tests
+with a real BuildKit.

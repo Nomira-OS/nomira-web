@@ -43,7 +43,8 @@ collect: run pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-init
 `/usr/local`, `/opt` and `/home` are symbolic links into `/var`, and
 some directories, `/etc/sudoers.d` for one, are not readable by
 everyone. A group that copies into such a place still works, but it is
-built on the system instead of on its own and the build warns about it,
+built on the system instead of on its own and the build output says
+so,
 see [What gets rebuilt](../../recipes/rebuilds/).
 
 ## Kernel arguments

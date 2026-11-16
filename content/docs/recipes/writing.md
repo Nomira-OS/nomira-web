@@ -5,7 +5,8 @@ weight: 10
 ---
 
 > Collectors, the long form of groups and `expects` are new. They are
-> covered by tests but have not been run in a real build yet.
+> checked by end-to-end tests on small test images; a whole system on
+> the nomira base image has not been built with them yet.
 
 ## A small example
 

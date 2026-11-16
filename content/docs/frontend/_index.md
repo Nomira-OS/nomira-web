@@ -38,7 +38,7 @@ image nor a change in an earlier phase rebuilds such a group.
 
 This is done only where it provably gives the same tree. A check on
 every build compares the group with the state before it and falls back
-to building on that state otherwise, with a warning. See
+to building on that state otherwise, with a warning in the build output. See
 [What gets rebuilt](../recipes/rebuilds/).
 
 ## Collectors
@@ -48,6 +48,15 @@ may contribute words to it. That is how packages are installed in one
 transaction while each feature still names its own. The frontend knows
 nothing about package managers; a collector is any command. See
 [Collectors](../recipes/collectors/).
+
+## How it is tested
+
+Besides unit tests, every change builds a set of small recipes with a
+real BuildKit and checks the results: conflicts between writes and
+deletions, collectors, includes, that a group without `run` comes from
+the cache after the base image changed, and that symbolic links and
+directory modes survive. No image of the frontend is published unless
+these pass.
 
 ## What it deliberately is not
 
