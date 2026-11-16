@@ -177,6 +177,8 @@ built on that state instead if
 - one of its files or symbolic links meets a directory or a symbolic
   link there.
 
+The build reports this as a warning that names the group and the paths.
+
 ## Known limits
 
 - `copy` does not support paths with spaces; `--chown` is numeric only.

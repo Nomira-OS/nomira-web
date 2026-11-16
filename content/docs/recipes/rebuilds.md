@@ -45,18 +45,46 @@ After a change to `terminal`: only `terminal` is rebuilt, then
 ## Checked, not assumed
 
 Building a group on its own is only correct if laying it on top gives
-the same result as copying into the system directly. nomira checks that
-on every build and quietly builds the group the ordinary way if
+the same result as copying into the system directly. Two things can get
+in the way:
 
-- a directory the group copies into is a symbolic link in the system, or
-  exists there with another mode or owner, or
-- the group puts a file where the system has a directory or a symbolic
-  link, or the other way round.
+- **A symbolic link in the path.** In the base image `/usr/local` is a
+  link into `/var`. Copied directly, a file for `/usr/local/bin` follows
+  the link. Laid on top, the group would bring a real directory
+  `/usr/local` and replace the link.
+- **A directory with its own mode or owner.** `/etc/sudoers.d` is not
+  readable by everyone. A group built on its own creates the directory
+  with default rights; laid on top, those would replace the restricted
+  ones.
 
-You do not have to do anything for this. The only effect is that such a
-group is rebuilt when the system before it changes. In the nomira base
-image `/usr/local`, `/opt` and `/home` are symbolic links, and
-directories such as `/etc/sudoers.d` have a restricted mode.
+The same goes for a file that meets a directory, or the other way round.
+
+nomira checks this on every build. Where one of these applies, it builds
+the group the ordinary way, on the system. The result is then right in
+every case. What you lose is the independence: such a group is rebuilt
+whenever the base image or an earlier phase changes.
+
+## The warning
+
+Because that is easy to miss, the build says so every time:
+
+```text
+phase "features": group "sudo" has no run but is not independent of the
+state before it. It is built on that state and will be rebuilt whenever
+the base image or an earlier phase changes.
+  /etc/sudoers.d has mode.uid.gid 750.0.0 there, the group would create it as 755.0.0
+```
+
+The steps of such a group also carry the note `depends on earlier state`
+in the build output.
+
+What you can do about it:
+
+- **Accept it.** For a small group the rebuild costs a second.
+- **Split the group.** Move the one command that touches such a path
+  into a group of its own, so that the rest stays independent.
+- **Choose another path** where there is one: `/usr/lib/…` instead of
+  `/usr/local/…`, for example.
 
 ## Overrides that outlive their target
 

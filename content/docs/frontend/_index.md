@@ -38,7 +38,7 @@ image nor a change in an earlier phase rebuilds such a group.
 
 This is done only where it provably gives the same tree. A check on
 every build compares the group with the state before it and falls back
-to building on that state otherwise. See
+to building on that state otherwise, with a warning. See
 [What gets rebuilt](../recipes/rebuilds/).
 
 ## Collectors
