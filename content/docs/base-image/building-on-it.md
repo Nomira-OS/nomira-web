@@ -18,24 +18,33 @@ weight: 40
 - The package database is in `/usr/lib/sysimage`, not in `/var`, so that
   it is part of the image.
 - The package cache is in `/usr/lib/sysimage/cache/pacman/pkg`. A cache
-  mount must point there:
+  mount must point there.
+- Install packages with a [collector](../../recipes/collectors/). Two
+  groups that each call pacman would both write the package database
+  and conflict.
 
 ```yaml
-- run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm kmscon
+- name: packages
+  collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items}
 ```
-
-- Put all package installations of a phase into one group. They all
-  write the package database, so two groups that install packages
-  conflict.
 
 ## Kernel, modules, firmware
 
 After adding or changing the kernel, kernel modules or firmware that is
-needed early, regenerate the initramfs:
+needed early, regenerate the initramfs. The simplest place is the end of
+the package collector:
 
 ```yaml
-- run /usr/libexec/nomira-initramfs
+collect: run pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
 ```
+
+## Symbolic links and restricted directories
+
+`/usr/local`, `/opt` and `/home` are symbolic links into `/var`, and
+some directories, `/etc/sudoers.d` for one, are not readable by
+everyone. A group that copies into such a place still works; it is just
+built on the system instead of on its own, see
+[What gets rebuilt](../../recipes/rebuilds/).
 
 ## Kernel arguments
 

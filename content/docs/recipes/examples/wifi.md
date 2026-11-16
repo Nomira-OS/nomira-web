@@ -33,14 +33,19 @@ method=auto
 
 ## The group
 
-In a phase after the one that installs `networkmanager`:
-
 ```yaml
-  - name: configuration
+  - name: features
     groups:
       wifi:
-        - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
+        packages: [networkmanager]
+        services: [NetworkManager.service]
+        commands:
+          - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 ```
+
+This assumes the collectors `packages` and `services` from the
+[quick start](../../../getting-started/quickstart/). If another group
+already asks for NetworkManager, naming it again does no harm.
 
 NetworkManager ignores connection files that others can read, hence
 `--chmod=0600`.

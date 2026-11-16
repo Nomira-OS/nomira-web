@@ -33,19 +33,31 @@ prepare:
 
 phases:
   - name: packages
-    groups:
-      system:
-        - run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm kmscon
-  - name: configs
+    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items}
+
+  - name: features
     validation: allow-identical
     shared: [/usr/lib/tmpfiles.d/]
     env: {MAKEFLAGS: -j4}
     groups:
-      kmscon:
-        - env THEME=dark
-        - copy --chmod=0644 files/kmscon/ /etc/kmscon/
+      network:
+        - copy files/nm/ /etc/NetworkManager/
+      terminal:
+        packages: [kmscon]
+        services: [kmsconvt@tty1.service]
+        expects: [/usr/lib/systemd/system/kmsconvt@.service]
+        prepare:
+          theme:
+            from: docker.io/library/alpine:3.22
+            commands: [run mkdir /out && echo dark > /out/theme.conf]
+        commands:
+          - copy --chmod=0644 files/kmscon/ /etc/kmscon/
+          - copy --from=theme /out/theme.conf /etc/kmscon/theme.conf
       aur:
         - copy --from=aurbuild /out/ /usr/lib/aur/
+
+  - name: services
+    collect: run systemctl enable ${items}
 ```
 
 ## settings
@@ -65,22 +77,52 @@ phases:
 ## prepare
 
 Optional named stages, as in a multi-stage build. Each has `from` (an
-image) and `commands`. A phase copies from a stage with
-`copy --from=<stage>`.
+image) and `commands`. A group copies from a stage with
+`copy --from=<stage>`. Stages at the top of the recipe are available to
+all groups; a group can also have stages of its own.
 
 ## phases
 
-A list; the order matters. Each phase has:
+A list; the order matters. Each phase has a `name`, required and unique,
+and either `groups` or `collect`.
 
 | Field | Meaning |
 |---|---|
-| `name` | Required and unique; appears in messages |
-| `groups` | Mapping from group name to a list of commands. Groups are independent |
-| `validation` | Overrides the default policy for this phase |
-| `shared` | Paths exempt from the check. A trailing `/` makes it a prefix |
-| `env` | Environment for the groups of this phase |
+| `groups` | Mapping from group name to a group. Groups are independent |
+| `collect` | A `run` command containing `${items}`; makes the phase a collector |
+| `validation` | Overrides the default policy for this phase (groups only) |
+| `shared` | Paths exempt from the check. A trailing `/` makes it a prefix (groups only) |
+| `env` | Environment for the commands of this phase |
 
-A phase with a single group is the serial case and skips the check.
+A phase with a single group that uses `run` is the serial case and skips
+the check.
+
+## Groups
+
+The short form is a list of commands. The long form is a mapping:
+
+| Key | Meaning |
+|---|---|
+| `commands` | The list of commands |
+| `prepare` | Stages local to this group. They win over stages of the same name at the top |
+| `expects` | Clean absolute paths that must exist in the state the phase starts from |
+| `include` | Read the group from a file; no other key next to it |
+| any other key | A contribution, a list of items, to the collector phase of that name |
+
+A group needs commands or at least one contribution.
+
+## Collectors
+
+`${items}` is replaced by the contributions of all groups of the recipe,
+sorted and without duplicates, separated by spaces. Without
+contributions the phase is skipped.
+
+- A collector cannot be named `commands`, `prepare`, `expects` or
+  `include`.
+- An item consists of letters, digits and `@%+=:,./_-` and does not
+  start with `-`.
+- A contribution to a name that is not a collector is an error.
+- `items` cannot be used as the name of an arg.
 
 ## Commands
 
@@ -123,12 +165,27 @@ Rules that hold under both policies:
   it.
 - Changing only mode or owner counts as writing the path.
 
+## Groups without run
+
+A group without `run` is built on an empty state and merged, so that it
+does not depend on the base image or on earlier phases. On every build a
+check compares it with the state the phase starts from. The group is
+built on that state instead if
+
+- one of its directories is a symbolic link or anything but a directory
+  there, or exists with another mode, owner or group, or
+- one of its files or symbolic links meets a directory or a symbolic
+  link there.
+
 ## Known limits
 
 - `copy` does not support paths with spaces; `--chown` is numeric only.
+- `copy --from` inside a `prepare` stage is not supported yet.
 - Extended attributes and hard links are not yet recorded as writes of
   their own.
 - The platform follows the build host; multi-architecture builds are
   open.
-- New in the schema and covered by tests, but not yet run in a real
-  build: `env`, `run --no-cache`, `labels` and `include`.
+- Covered by tests, but not yet run in a real build: `env`,
+  `run --no-cache`, `labels`, `include`, collectors, the long form of
+  groups, `expects`, and building groups without `run` on an empty
+  state.

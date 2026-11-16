@@ -39,7 +39,12 @@ survives updates. To let the group `wheel` use `sudo`, add a file to
 your recipe rather than editing the running system:
 
 ```yaml
-- run echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/10-wheel && chmod 0440 /etc/sudoers.d/10-wheel
+sudo:
+  - copy --chmod=0440 files/sudoers-wheel /etc/sudoers.d/10-wheel
+```
+
+```sh
+echo '%wheel ALL=(ALL:ALL) ALL' > files/sudoers-wheel
 ```
 
 ## Make it your own

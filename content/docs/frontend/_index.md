@@ -29,10 +29,31 @@ phase "configs": declared-independent groups are not disjoint (policy: strict):
   groups "a" and "b": /etc/a (both write)
 ```
 
+## Groups that do not depend on what came before
+
+A group without `run` only copies files. It never sees the state before
+it, so the frontend builds it apart from that state and merges the
+result, the way `COPY --link` works in a Dockerfile. Neither a new base
+image nor a change in an earlier phase rebuilds such a group.
+
+This is done only where it provably gives the same tree. A check on
+every build compares the group with the state before it and falls back
+to building on that state otherwise. See
+[What gets rebuilt](../recipes/rebuilds/).
+
+## Collectors
+
+A phase can also be a single command that receives a list: every group
+may contribute words to it. That is how packages are installed in one
+transaction while each feature still names its own. The frontend knows
+nothing about package managers; a collector is any command. See
+[Collectors](../recipes/collectors/).
+
 ## What it deliberately is not
 
 - **Not a collection of modules.** There are three commands: `run`,
-  `copy` and `env`. Everything else is shell.
+  `copy` and `env`, and collectors that pass a list to a command of your
+  choice. Everything else is shell.
 - **Not declarative.** A recipe lists commands that run in order. What
   the frontend adds is structure: which steps are independent, and the
   proof that they are.

@@ -26,18 +26,24 @@ settings:
 
 phases:
   - name: packages
-    groups:
-      system:
-        - run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm networkmanager linux-firmware intel-ucode openssh
-        - run /usr/libexec/nomira-initramfs
+    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
 
-  - name: configuration
+  - name: features
     groups:
-      services:
-        - run systemctl enable NetworkManager.service sshd.service
+      hardware:
+        packages: [linux-firmware, intel-ucode]
+      network:
+        packages: [networkmanager]
+        services: [NetworkManager.service]
+      ssh:
+        packages: [openssh]
+        services: [sshd.service]
       locale:
         - copy files/locale.conf /etc/locale.conf
         - copy files/vconsole.conf /etc/vconsole.conf
+
+  - name: services
+    collect: run systemctl enable ${items}
 ```
 
 And the two files the group `locale` copies:
@@ -54,15 +60,14 @@ use `amd-ucode` instead of `intel-ucode`.
 
 What the recipe says:
 
-- **Two phases**, one after the other: first packages, then
-  configuration.
-- **`packages` has one group.** Package installations all change the
-  package database, so they cannot be independent.
-- **`configuration` has two groups**, `services` and `locale`. They
-  touch different files, so they build at the same time. The build
-  checks that this is true.
-- The second `run` regenerates the initramfs so that firmware and
-  microcode needed early are in it.
+- **Four features**: `hardware`, `network`, `ssh` and `locale`. Each
+  names the packages and services it needs, or the files it brings.
+- **Two collectors**: the phase `packages` installs everything the
+  features asked for in one step and then regenerates the initramfs, so
+  that firmware and microcode needed early are in it. The phase
+  `services` enables the services.
+- The features are independent of each other. The build checks that
+  they do not touch the same files.
 
 ## 2. Check it
 
@@ -95,15 +100,20 @@ one.
 
 ## 5. Change something
 
-Add a third group to the phase `configuration`:
+Add a feature to the phase `features`:
 
 ```yaml
       motd:
-        - run echo 'Built with nomira.' > /etc/motd
+        - copy files/motd /etc/motd
 ```
 
-Build again. Only the new group is built; `services` and `locale` come
-from the cache.
+```sh
+echo 'Built with nomira.' > files/motd
+```
+
+Build again. The packages are not installed again, and the other
+features come from the cache. Only the new group is built; after it the
+services are enabled once more, which takes a moment.
 
 ## Next
 

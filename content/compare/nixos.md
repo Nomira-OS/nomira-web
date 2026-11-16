@@ -48,7 +48,7 @@ each piece of software describes.
 | Checks before the build | Options and types are evaluated; many errors show up before the build | Only the structure of the recipe; errors in content show up during the build or the test boot |
 | Independence of the parts | Follows from the language | Declared in the recipe, verified on every build |
 | Repeatability | A lock file pins all inputs | The date in the Arch archive pins the package set; finished images by their digest |
-| Rebuild after a change | Only the affected packages | The affected group and all following phases |
+| Rebuild after a change | Only the affected packages | The affected group and later steps that run commands |
 | Packages | nixpkgs: very large, packaged specially | Arch repositories and AUR, unchanged |
 | Several versions side by side | Yes | No |
 | Updates and way back | Atomic, any number of earlier states | Atomic with bootc, usually the previous state |

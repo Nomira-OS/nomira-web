@@ -53,7 +53,7 @@ shape yourself.
 | How declarative | More: you list packages and files, the tool does the steps | Less: you write the steps yourself |
 | Arbitrary build steps | Through the overlay and the hooks arkdep-build offers | Any shell command, anywhere in the recipe |
 | Building | arkdep-build installs the packages into a fresh tree and packs it | BuildKit builds layers; unchanged parts come from the cache |
-| Rebuild after a change | The whole image | The changed group and all following phases |
+| Rebuild after a change | The whole image | The changed group and later steps that run commands |
 | Image format | An archive, published on a web server with a small database file | An OCI container image, in any container registry |
 | Deployment | arkdep unpacks the image into a btrfs subvolume | bootc switches to the container image |
 | Requirements on the machine | btrfs and systemd-boot | What bootc supports; the boot loader for the Arch image is still an open point |

@@ -1,8 +1,11 @@
 ---
 title: Writing recipes
-lead: A recipe builds your system in phases and groups.
+lead: A recipe builds your system in phases and groups. Keep run out of the groups, and most of it survives a new base image.
 weight: 10
 ---
+
+> Collectors, the long form of groups and `expects` are new. They are
+> covered by tests but have not been run in a real build yet.
 
 ## A small example
 
@@ -15,49 +18,101 @@ settings:
 
 phases:
   - name: packages
-    groups:
-      system:
-        - run pacman -S --needed --noconfirm networkmanager kmscon
+    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items}
 
-  - name: configuration
+  - name: features
     groups:
       terminal:
-        - copy files/kmscon/ /etc/kmscon/
+        packages: [kmscon]
+        services: [kmsconvt@tty1.service]
+        commands:
+          - copy files/kmscon/ /etc/kmscon/
       network:
-        - copy files/nm/ /etc/NetworkManager/system-connections/
+        packages: [networkmanager]
+        services: [NetworkManager.service]
+        commands:
+          - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 
-  - name: finish
-    groups:
-      services:
-        - run systemctl enable NetworkManager.service
+  - name: services
+    collect: run systemctl enable ${items}
 ```
 
-## Phases and groups
+Read it like this: there are two features, `terminal` and `network`.
+Each says which packages and services it needs and which files it
+brings. Two phases, `packages` and `services`, collect those wishes and
+carry them out in one step each.
 
-- **Phases** are a list and run in that order.
-- **Groups** of a phase have names and no order. They run at the same
-  time and must not change the same files.
-- A phase with a single group is the simple case: one step after
-  another.
+## Phases
 
-Rule of thumb: package installations belong in a single group, because
-they all change the package database. Configuration splits well into
-groups.
+Phases are a list and run in that order. A phase is one of two kinds:
+
+- **A phase with `groups`** builds independent parts at the same time.
+- **A phase with `collect`** runs one command, see
+  [Collectors](../collectors/).
+
+## Groups
+
+Groups of a phase have names and no order. They are built at the same
+time and must not change the same files; the build checks that.
+
+A group has two forms. The short one is a list of commands:
+
+```yaml
+network:
+  - copy files/nm/ /etc/NetworkManager/system-connections/
+```
+
+The long one is a mapping. Four keys have a fixed meaning:
+
+| Key | Meaning |
+|---|---|
+| `commands` | The list of commands |
+| `prepare` | Build stages that only this group uses |
+| `expects` | Paths that must exist before the group is applied |
+| `include` | Read the group from a file, see [Splitting recipes](../includes/) |
+
+Every other key, such as `packages` above, is a contribution to the
+collector of that name. A group may consist of contributions alone:
+
+```yaml
+editor:
+  packages: [vim]
+```
 
 ## The three commands
 
 | Command | Purpose |
 |---|---|
+| `copy` | Copies files from the recipe directory, or from a `prepare` stage, into the image |
 | `run` | Runs a shell command |
-| `copy` | Copies files from the recipe directory into the image |
 | `env` | Sets a variable for the following commands of the group |
 
 Useful additions:
 
+- `copy --chmod=0644` and `copy --chown=0:0` set mode and owner.
+- `copy --from=<stage>` copies from a `prepare` stage.
 - `run --mount=type=cache,target=/path` keeps a directory between
   builds, the package cache for instance.
 - `run --no-cache` always runs a step.
-- `copy --chmod=0644` and `copy --chown=0:0` set mode and owner.
+
+## Prefer copy to run
+
+A group that only copies does not look at the system it is applied to,
+so nothing that happens before it can make it stale. A group that uses
+`run` is executed on the system as it is at that point, and has to run
+again whenever that changes, for instance with every new base image.
+
+So the aim is: **`run` belongs in collectors and `prepare` stages,
+groups copy.** What that means for common tasks:
+
+| Task | Instead of `run` in a group |
+|---|---|
+| Install a package | Contribute it to a `packages` collector |
+| Enable a service | Contribute it to a `services` collector |
+| Generate a file with a script | Run the script in a `prepare` stage, copy the result |
+| Write a one-line file | Keep the file in the recipe and copy it |
+
+More on this in [What gets rebuilt](../rebuilds/).
 
 ## Where files belong
 

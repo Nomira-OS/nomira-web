@@ -45,9 +45,9 @@ do not touch the same files. It is made for Arch Linux.
 | Topic | BlueBuild | nomira |
 |---|---|---|
 | Recipe | YAML: a list of modules, run in order | YAML: phases in order, each with independent groups |
-| Building blocks | About 25 modules, among them `dnf`, `files`, `systemd`, `fonts`, `default-flatpaks`, `script`; your own modules as scripts | Three commands: `run`, `copy`, `env`. Everything else is shell |
+| Building blocks | About 25 modules, among them `dnf`, `files`, `systemd`, `fonts`, `default-flatpaks`, `script`; your own modules as scripts | Three commands (`run`, `copy`, `env`) and collectors that hand a list to a command of your choice |
 | How it builds | The CLI generates a Containerfile; each module becomes a `RUN` step | A BuildKit frontend translates the recipe directly into a build graph |
-| Rebuild after a change | As in any Containerfile: the changed step and those after it | The changed group and all following phases; sibling groups come from the cache |
+| Rebuild after a change | As in any Containerfile: the changed step and those after it | The changed group and later steps that run commands; sibling groups come from the cache |
 | Check for conflicts | Not needed, steps run one after another | On every build: groups of a phase must not write the same files |
 | Base systems | Atomic Fedora and images based on it are supported officially; Arch, Debian, openSUSE and others through bootc are experimental | Arch Linux only, with our own minimal base image |
 | Build tools | Works with the usual container tools | Needs BuildKit |

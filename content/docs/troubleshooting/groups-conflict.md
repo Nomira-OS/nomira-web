@@ -58,5 +58,5 @@ this only when you know that the order does not matter.
 ## The usual suspect: packages
 
 Two groups that both install packages always conflict, because both
-write the package database. Put all package installations of a phase
-into one group.
+write the package database. Let the groups name their packages and
+install them in one step with a [collector](../../recipes/collectors/).
