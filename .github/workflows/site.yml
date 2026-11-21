@@ -18,7 +18,7 @@ concurrency:
 
 env:
   # renovate: datasource=github-releases depName=gohugoio/hugo
-  HUGO_VERSION: v0.170.0
+  HUGO_VERSION: v0.170.1
 
 jobs:
   build:
