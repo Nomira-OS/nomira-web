@@ -128,6 +128,7 @@ After changing the kernel or adding firmware that is needed early,
 ## Build and check
 
 ```sh
+export NOMIRA_RECIPE="$PWD/recipe.yml"   # or pass -f each time
 nomira lint      # check the structure of the recipe
 nomira build     # build the image
 nomira graph     # print the pipeline as a diagram

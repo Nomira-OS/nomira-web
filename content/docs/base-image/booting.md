@@ -24,6 +24,11 @@ fails on Arch Linux
 systemd-boot needs none of that. bootc supports systemd-boot only with
 the composefs backend, hence both.
 
+## Boot loader updates
+
+bootc installs systemd-boot once. `systemd-boot-update.service`, enabled
+by default, updates it at boot when the image brings a newer one.
+
 ## What the composefs backend lacks
 
 From the bootc 1.17 documentation, the points that matter here:

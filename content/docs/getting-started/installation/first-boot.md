@@ -8,7 +8,8 @@ untested: true
 ## Questions
 
 The system asks on the console for locale, keymap, time zone and root
-password, unless the image sets them. Then log in as `root`.
+password, unless the image sets them, and then for a first user. Log in
+as that user.
 
 ## Check
 
@@ -21,14 +22,20 @@ aa-status | head -n 3   # AppArmor
 
 ## Users
 
-Create users as on any Arch system, see
-[Users and groups](https://wiki.archlinux.org/title/Users_and_groups). Home directories live in
-`/var/home` and survive updates.
+Users are managed by [systemd-homed](https://wiki.archlinux.org/title/Systemd-homed);
+each home is encrypted. More users:
+
+```sh
+sudo homectl create alice --member-of=wheel
+```
+
+Members of `wheel` may use `sudo`. If the first user is not in `wheel`,
+log in as `root` and run `homectl update <user> --member-of=wheel`.
 
 ## From now on
 
-The system changes through its recipe. Edit it on the machine and
-switch:
+The system changes through its recipe in `/etc/nomira`, which the
+[quick start](../../quickstart/) recipe puts there. Edit it and switch:
 
 ```sh
 sudo nomira switch

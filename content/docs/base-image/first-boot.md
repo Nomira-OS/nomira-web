@@ -1,6 +1,6 @@
 ---
 title: First boot
-lead: The image does not set locale, keymap, time zone or root password. The first boot asks.
+lead: The image does not set locale, keymap, time zone, root password or a user. The first boot asks.
 weight: 20
 untested: true
 ---
@@ -13,10 +13,8 @@ is still open:
 - time zone
 - root password
 
-Then log in as `root` with that password. No other user is created; add
-one as described in
-[Users and groups](https://wiki.archlinux.org/title/Users_and_groups),
-or in the recipe.
+Then `systemd-homed-firstboot` asks for a first user, whose home is
+encrypted, see [Security](../security/#home-directories).
 
 ## Answering in the recipe
 

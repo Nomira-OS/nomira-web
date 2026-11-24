@@ -13,12 +13,13 @@ untested: true
    at `/run/buildkit/buildkitd.sock`); otherwise a podman container
    `nomira-buildkitd`, which the CLI creates when needed.
 2. **Build** the recipe with `buildctl`. The check of the groups runs in
-   the frontend. The result is the OCI directory `.nomira/<name>.oci`.
+   the frontend. The result is an OCI directory,
+   [see where](../commands/#where-the-result-goes).
    BuildKit only writes layers that are not there yet.
 3. **Check** the image, see below. The checks run it from
    containers-storage, so only for them is it copied there.
 4. **Switch**: only when everything has passed,
-   `bootc switch --transport oci .nomira/<name>.oci`. bootc reads the
+   `bootc switch --transport oci` with that directory. bootc reads the
    directory and imports only the layers it does not have yet.
 
 Nothing on the running system changes before step 4.

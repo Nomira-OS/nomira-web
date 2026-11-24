@@ -34,6 +34,9 @@ phases:
       locale:
         - copy files/locale.conf /etc/locale.conf
         - copy files/vconsole.conf /etc/vconsole.conf
+      recipe:
+        - copy recipe.yml /etc/nomira/recipe.yml
+        - copy files/ /etc/nomira/files/
 
   - name: services
     collect: run systemctl enable ${items}
@@ -55,14 +58,19 @@ Adapt it to your machine:
 
 Each group names what it needs. The phase `packages` installs all of it
 in one step and rebuilds the initramfs; the phase `services` enables the
-services.
+services. The group `recipe` puts the recipe into the system, to
+`/etc/nomira`, where `nomira` looks for it on the installed machine.
 
 ## 2. Check and build
 
 ```sh
+export NOMIRA_RECIPE="$PWD/recipe.yml"
 nomira lint
 nomira build
 ```
+
+Without `-f`, nomira uses `$NOMIRA_RECIPE`, otherwise the machine's own
+recipe in `/etc/nomira`.
 
 The result is the directory `.nomira/mysystem.oci`.
 

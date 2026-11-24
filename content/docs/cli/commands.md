@@ -5,7 +5,7 @@ weight: 10
 ---
 
 ```text
-nomira build    [flags]          build the recipe into an OCI archive
+nomira build    [flags]          build the recipe into an OCI layout directory
 nomira switch   [flags]          build, validate, then bootc switch
 nomira validate [flags] [image]  run validation.d hooks and the boot test
 nomira lint     [flags]          check the recipe
@@ -19,7 +19,7 @@ nomira version                   print the version
 
 | Flag | Meaning |
 |---|---|
-| `-f recipe.yml` | Entry file of the recipe |
+| `-f recipe.yml` | Entry file of the recipe; default `$NOMIRA_RECIPE`, otherwise `/etc/nomira/recipe.yml` |
 | `--dry-run` | Only print the commands, run nothing |
 | `--build-arg NAME=VALUE` | Override an arg declared in `settings.args` |
 | `--frontend IMAGE` | Frontend image; otherwise the `# syntax=` line of the recipe, otherwise `ghcr.io/nomira-os/nomira:1-alpha` |
@@ -33,12 +33,14 @@ Not every flag applies to every command.
 
 | Variable | Meaning |
 |---|---|
+| `NOMIRA_RECIPE` | Recipe to use without `-f` |
 | `BUILDKIT_HOST` | Use this buildkitd instead of looking for one |
 | `NOMIRA_BUILDKIT_IMAGE` | Image for the buildkitd container that the CLI manages |
 | `NOMIRA_SUDO` | Command used to become root (default: `sudo`) |
 
 ## Where the result goes
 
-`nomira build` writes the directory `.nomira/<name>.oci` next to the
-recipe, an OCI image layout. A rebuild adds only the layers that
+`nomira build` writes an OCI image layout directory: for the machine's
+recipe in `/etc/nomira` to `/var/lib/nomira/<name>.oci`, for a recipe
+anywhere else to `.nomira/<name>.oci` next to it. A rebuild adds only the layers that
 changed and removes those no longer used.
