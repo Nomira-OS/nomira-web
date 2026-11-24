@@ -26,55 +26,21 @@ yet; signing comes with Secure Boot.
 The recipe builds it the way bootc documents it for sealed images: the
 phase `kernel` takes kernel and initramfs out, the phase `uki` runs
 `bootc container ukify` on the system without them. The initramfs comes
-from a prepare stage that starts from the phase `packages`: dracut runs
-there, only when the packages change, and its result is only mounted,
-never part of the image. The image brings bootc, dracut and ukify.
+from a prepare stage that starts from the phase that installs what boot
+needs: dracut runs there, only when those packages change, and its result
+is only mounted, never part of the image. The image brings bootc, dracut
+and ukify. The [`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) does all of it:
 
-```yaml
-prepare:
-  initramfs:
-    from: packages
-    commands:
-      - >-
-        run --mount=type=tmpfs,target=/tmp mkdir /out &&
-        for d in /usr/lib/modules/*/; do k="$(basename "$d")";
-        TMPDIR=/tmp SOURCE_DATE_EPOCH=0 dracut --kver "$k" "/out/$k.img"; done &&
-        sha256sum /out/*.img
-
-phases:
-  # … packages, features, services …
-  - name: kernel
-    groups:
-      out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
-
-  - name: uki
-    groups:
-      uki:
-        - >-
-          run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=packages,source=/usr/lib/modules,target=/kernels
-          --mount=type=bind,from=initramfs,source=/out,target=/initramfs
-          --mount=type=tmpfs,target=/tmp
-          mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
-          cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
-          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --erofs-version v1-only --
-          --output "/boot/EFI/Linux/$k.efi"; done
-```
-
-`packages` is the phase that installs the kernel and the packages the
-initramfs needs; use the name of yours. Install everything else in a
-collector after the stage's phase, as the
-[quick start](../../getting-started/quickstart/) does with `boot` and
-`packages`: adding an application then neither reruns dracut nor
-reinstalls the firmware. `--erofs-version v1-only` makes bootc compute
-the digest once instead of twice (the second is a fallback for older
-bootc versions, which the image's own bootc does not need). Configuration from later phases
-is not in the initramfs. What it should know, the keymap in
-`/etc/vconsole.conf` for instance, goes into a phase between `packages`
-and the stage, and the stage starts from that phase. The
-[quick start](../../getting-started/quickstart/) sets none and lets the
-first boot ask.
+- Packages for boot (firmware, microcode, disk tools) go to a collector
+  `boot` before the stage, everything else to a collector `packages`
+  after it. Adding an application then neither reruns dracut nor
+  reinstalls the firmware.
+- `--erofs-version v1-only` makes bootc compute the digest once instead of
+  twice; the second is a fallback for older bootc versions, which the
+  image's own bootc does not need.
+- Configuration from later phases is not in the initramfs. What it should
+  know, the keymap in `/etc/vconsole.conf` for instance, goes into a phase
+  between `boot` and the stage, and the stage starts from that phase.
 
 The stage runs again when anything in its phase or before changes, a
 small tool as much as the kernel. That is fine for soft reboots: dracut builds

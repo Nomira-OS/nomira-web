@@ -16,8 +16,8 @@ boot process, and the test still failed.
 
 ## What to do
 
-- Add network and SSH to the image, as the recipe in the
-  [quick start](../../getting-started/quickstart/) does.
+- Add network and SSH to the image, as the
+  [`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) does.
 - Or skip the test for this run:
 
 ```sh

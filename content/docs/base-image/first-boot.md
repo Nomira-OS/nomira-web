@@ -22,7 +22,7 @@ Arch's glibc ships the compiled locale `C.UTF-8` only, and `/usr` is
 read-only on the installed system, so `locale-gen` cannot add any there.
 For the answer to the locale question to work, the image needs the
 locales: the package `glibc-locales` brings all of them, as the
-[quick start](../../getting-started/quickstart/) does; a recipe that wants
+[`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) does; a recipe that wants
 only some runs `locale-gen` at build time (see
 [Locale](https://wiki.archlinux.org/title/Locale)).
 

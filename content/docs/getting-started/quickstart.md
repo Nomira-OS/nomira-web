@@ -9,35 +9,16 @@ You need the [nomira CLI](../../cli/install/).
 
 ## 1. Write the recipe
 
-In a new directory, create `recipe.yml`:
+In a new directory, create `recipe.yml`, the
+[minimal example](https://github.com/Nomira-OS/arch-base/blob/main/examples/minimal/recipe.yml):
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:1-alpha
+# syntax=ghcr.io/nomira-os/nomira:sha-5184de4
 settings:
   name: mysystem
-  base: ghcr.io/nomira-os/arch-base:TAG
-
-prepare:
-  initramfs:
-    from: boot
-    commands:
-      - >-
-        run --mount=type=tmpfs,target=/tmp mkdir /out &&
-        for d in /usr/lib/modules/*/; do k="$(basename "$d")";
-        TMPDIR=/tmp SOURCE_DATE_EPOCH=0 dracut --kver "$k" "/out/$k.img"; done &&
-        sha256sum /out/*.img
+  base: ghcr.io/nomira-os/arch-base:sha-15a1ff2
 
 phases:
-  # What boot needs: firmware, microcode, and everything else the
-  # initramfs has to contain. Changes here rebuild the initramfs.
-  - name: boot
-    collect: >-
-      run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
-      --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
-      pacman-key --init && pacman-key --populate &&
-      pacman -S --needed --noconfirm ${items}
-
-  # Everything else. Changes here leave the initramfs as it is.
   - name: packages
     collect: >-
       run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
@@ -47,82 +28,22 @@ phases:
 
   - name: features
     groups:
-      hardware:
-        boot: [linux-firmware, intel-ucode]
       network:
         packages: [networkmanager]
         services: [NetworkManager.service]
-      ssh:
-        packages: [openssh]
-        services: [sshd.service]
-      editor:
-        packages: [nano]
-      language:
-        packages: [glibc-locales]
-      recipe:
-        - copy recipe.yml /etc/nomira/recipe.yml
-        - copy files/ /etc/nomira/files/
 
   - name: services
     collect: run systemctl enable ${items}
-
-  - name: kernel
-    groups:
-      out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
-
-  - name: uki
-    groups:
-      uki:
-        - >-
-          run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=boot,source=/usr/lib/modules,target=/kernels
-          --mount=type=bind,from=initramfs,source=/out,target=/initramfs
-          --mount=type=tmpfs,target=/tmp
-          mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
-          cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
-          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --erofs-version v1-only --
-          --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
-```sh
-mkdir files
-```
+The group `network` names what it needs; the phase `packages` installs
+the packages of all groups in one step, and `services` enables the
+services. The pacman keyring lives in a tmpfs for that step only, so no
+private key ends up in the image.
 
-Each group names what it needs, and the collector phases install it, all
-of a kind in one step:
-
-- **`boot`** installs what the system needs to start: firmware,
-  microcode, and anything else the initramfs has to contain (disk tools
-  for an unusual setup, for instance). The pacman keyring lives in a
-  tmpfs for that step only, so no private key ends up in the image.
-- **`packages`** installs everything else. A package added here installs
-  in seconds and leaves the initramfs alone.
-- **`services`** enables the services.
-- The group **`recipe`** puts the recipe into the system, to
-  `/etc/nomira`, where `nomira` looks for it on the installed machine.
-- The stage **`initramfs`** and the phases **`kernel`** and **`uki`**
-  replace kernel and initramfs with a
-  [unified kernel image](../../base-image/booting/#unified-kernel-image).
-  The initramfs is built only when `boot` changes, and never lands in
-  the image itself.
-
-The recipe sets no language, keymap or time zone: the first boot asks for
-them, and `glibc-locales` brings every language, so any answer works. To
-fix them in the image instead, copy `/etc/locale.conf` and
-`/etc/vconsole.conf` in a phase between `boot` and the stage's phase, and
-let the stage start from that phase; the initramfs then also knows the
-keymap, which matters only for a passphrase typed at boot.
-
-Adapt it to your machine:
-
-- `TAG`: a tag of the [base image](https://github.com/orgs/Nomira-OS/packages).
-- `hardware`: the firmware and microcode your machine needs, see
-  [Linux firmware](https://wiki.archlinux.org/title/Linux_firmware) and [Microcode](https://wiki.archlinux.org/title/Microcode).
-- `network`: NetworkManager is an example; any option from
-  [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
-- `editor`: the base image has no editor; you need one to change the
-  recipe on the installed machine. Any other editor works as well.
+A system for a real machine needs more, firmware above all; the
+[installation guide](../installation/prepare/) starts from a complete
+example.
 
 ## 2. Check and build
 
@@ -141,7 +62,7 @@ The result is the directory `.nomira/mysystem.oci`.
 
 ```sh
 skopeo copy oci:.nomira/mysystem.oci containers-storage:localhost/mysystem:latest
-podman run --rm localhost/mysystem:latest pacman -Q linux-firmware openssh
+podman run --rm localhost/mysystem:latest pacman -Q networkmanager
 ```
 
 ## 4. Change something
@@ -154,7 +75,7 @@ Add a group to `features` and build again:
 ```
 
 ```sh
-echo 'Built with nomira.' > files/motd
+mkdir -p files && echo 'Built with nomira.' > files/motd
 nomira build
 ```
 

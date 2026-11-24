@@ -1,22 +1,24 @@
 ---
 title: Prepare the image
-lead: Build an image with network and firmware, and load it on the machine you install from.
+lead: Build a complete system from an example, and load it on the machine you install from.
 weight: 10
 untested: true
 ---
 
 ## Build
 
-The base image has no network management and no firmware. A machine
-installed from it boots, but cannot go online, so it cannot fix that
-itself. Build the recipe from the [quick start](../../quickstart/), or
-your own with at least:
+Start from the [`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml): firmware, network,
+SSH, an editor, all languages, the recipe itself in `/etc/nomira`, and a
+[unified kernel image](../../../base-image/booting/#unified-kernel-image).
+Its [README](https://github.com/Nomira-OS/arch-base/blob/main/examples/README.md) says what to adapt; the firmware first, since
+a machine without its network firmware cannot go online to fix that.
 
-| What | Arch Wiki |
-|---|---|
-| Network management | [Network configuration](https://wiki.archlinux.org/title/Network_configuration) |
-| Firmware and microcode | [Linux firmware](https://wiki.archlinux.org/title/Linux_firmware), [Microcode](https://wiki.archlinux.org/title/Microcode) |
-| SSH, if you want remote access | [OpenSSH](https://wiki.archlinux.org/title/OpenSSH) |
+```sh
+mkdir ~/recipe && cd ~/recipe
+curl -fLO https://raw.githubusercontent.com/Nomira-OS/arch-base/main/examples/uki/recipe.yml
+export NOMIRA_RECIPE="$PWD/recipe.yml"
+nomira build
+```
 
 ## Load
 

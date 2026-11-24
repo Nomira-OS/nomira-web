@@ -36,7 +36,7 @@ user without it, log in as `root` and run
 ## From now on
 
 The system changes through its recipe in `/etc/nomira`, which the
-[quick start](../../quickstart/) recipe puts there. Edit it and switch:
+[`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) puts there. Edit it and update:
 
 ```sh
 sudo nano /etc/nomira/recipe.yml

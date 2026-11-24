@@ -49,8 +49,8 @@ method=auto
           - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 ```
 
-This assumes the collectors `packages` and `services` from the
-[quick start](../../../getting-started/quickstart/). If another group
+This assumes the collectors `packages` and `services` that the
+[example recipes](https://github.com/Nomira-OS/arch-base/tree/main/examples) have. If another group
 already asks for NetworkManager, naming it again does no harm.
 
 NetworkManager ignores connection files that others can read, hence
