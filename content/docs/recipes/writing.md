@@ -38,6 +38,9 @@ phases:
     collect: run systemctl enable ${items}
 ```
 
+NetworkManager stands for any network manager here; the Arch Wiki lists
+the choices in [Network configuration](https://wiki.archlinux.org/title/Network_configuration).
+
 Read it like this: there are two features, `terminal` and `network`.
 Each says which packages and services it needs and which files it
 brings. Two phases, `packages` and `services`, collect those wishes and

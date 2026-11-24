@@ -86,4 +86,6 @@ bootable, use a separate disk.
 - **Storage backend.** The commands pass `--composefs-backend`, as the
   upstream Arch image does. Whether `nomira switch` works on a system
   installed this way has not been tried either.
+- **Updating systemd-boot** after the installation is not set up yet,
+  see [Updates and the way back](../../operating/updates/#the-boot-loader).
 - **Secure Boot** is not set up.

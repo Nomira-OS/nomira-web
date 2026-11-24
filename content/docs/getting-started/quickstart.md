@@ -62,6 +62,9 @@ What the recipe says:
 
 - **Four features**: `hardware`, `network`, `ssh` and `locale`. Each
   names the packages and services it needs, or the files it brings.
+- **NetworkManager is an example.** Any network manager from the
+  [Arch Wiki](https://wiki.archlinux.org/title/Network_configuration) works the same way: name its package and its
+  service in the group `network`.
 - **Two collectors**: the phase `packages` installs everything the
   features asked for in one step and then regenerates the initramfs, so
   that firmware and microcode needed early are in it. The phase

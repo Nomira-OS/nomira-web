@@ -1,9 +1,15 @@
 ---
 title: Wi-Fi on first boot
-lead: Let a machine without a cable join a network the first time it starts.
+lead: Let a machine without a cable join a network the first time it starts. The example uses NetworkManager.
 weight: 10
 untested: true
 ---
+
+This example uses NetworkManager, as the quick start does. Other
+network managers keep their connections elsewhere, see
+[Network configuration](https://wiki.archlinux.org/title/Network_configuration) in the Arch Wiki. What matters for a
+recipe is that the file lives below `/etc` or `/usr`: files below `/var`
+are not part of the image.
 
 NetworkManager reads connections from files in
 `/etc/NetworkManager/system-connections/`. A recipe can put one there.

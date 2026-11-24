@@ -24,7 +24,9 @@ settings:
 ## What is deliberately missing
 
 Network management, firmware, SSH, a desktop, and the boot test with
-bcvk (it would need QEMU). Your recipe chooses those.
+bcvk (it would need QEMU). Your recipe chooses those; for the network,
+the Arch Wiki compares the options in
+[Network configuration](https://wiki.archlinux.org/title/Network_configuration).
 
 ## What has been tried
 

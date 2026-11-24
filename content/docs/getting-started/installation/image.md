@@ -9,7 +9,7 @@ untested: true
 
 | Missing | Consequence | Arch package |
 |---|---|---|
-| Network management | No connection, wired or wireless | `networkmanager` |
+| Network management | No connection, wired or wireless | Your choice, see [Network configuration](https://wiki.archlinux.org/title/Network_configuration) in the Arch Wiki |
 | Firmware | Wi-Fi and many graphics cards do not work | `linux-firmware` |
 | CPU microcode | Processor fixes are not loaded | `intel-ucode` or `amd-ucode` |
 | SSH server | No remote login | `openssh` |
@@ -19,8 +19,10 @@ cannot fix this itself. These have to be in the image you install.
 
 ## Build it
 
-The recipe from the [quick start](../../quickstart/) adds exactly these.
-Build it on any Linux:
+The recipe from the [quick start](../../quickstart/) adds all of these,
+with NetworkManager as its example for the network. Replace it with any
+other network manager the Arch Wiki describes; the recipe only has to
+install it and enable its service. Build it on any Linux:
 
 ```sh
 nomira lint

@@ -16,16 +16,14 @@ image.
 
 ```sh
 bootc status                 # which image is running
-systemctl is-active NetworkManager
-nmcli device status          # network devices and their state
+ip address                   # network devices and their addresses
+ping -c 1 archlinux.org      # name resolution and connection
 aa-status | head -n 3        # AppArmor
 ```
 
-Connect to a Wi-Fi network if the image did not bring one along:
-
-```sh
-nmtui
-```
+How to join a Wi-Fi network depends on the network manager in your
+image; the [Arch Wiki](https://wiki.archlinux.org/title/Network_configuration) describes each one. With NetworkManager, as
+in the quick start, it is `nmtui`.
 
 ## Create a user
 
