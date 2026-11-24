@@ -63,8 +63,11 @@ phases:
 
 `packages` is the phase that installs the kernel and the packages the
 initramfs needs; use the name of yours. Configuration from later phases
-is not in the initramfs; that matters for the keymap if a passphrase is
-typed before the system starts, not for a TPM-unlocked disk.
+is not in the initramfs. What it should know, the keymap in
+`/etc/vconsole.conf` for instance, goes into a phase between `packages`
+and the stage, and the stage starts from that phase; the
+[quick start](../../getting-started/quickstart/) does that with a phase
+`console`.
 
 A recipe without the stage and the two phases boots kernel and initramfs
 the classic way, and must run dracut after changing the kernel or early

@@ -17,6 +17,23 @@ publishes it; nothing changes on the running system. `bootc upgrade`
 takes the new image. It takes effect on the next boot; with `--apply`
 the machine reboots right away.
 
+## Without a full reboot
+
+When kernel, initramfs and kernel arguments stay the same, bootc can
+switch to the new image with a soft reboot: systemd stops and starts
+userspace on the new system, the kernel keeps running.
+
+```sh
+sudo bootc upgrade --apply --soft-reboot=auto
+```
+
+With a [unified kernel image](../../base-image/booting/#unified-kernel-image)
+that is the case whenever the packages did not change, since the
+initramfs then comes unchanged from the cache. If a soft reboot is not
+possible, `auto` does nothing on the composefs backend instead of
+rebooting; `sudo reboot` then. `bootc status --verbose` shows whether the staged
+image can be soft-rebooted into.
+
 ## Getting newer packages
 
 The package set depends on the base image. Enter a newer release in

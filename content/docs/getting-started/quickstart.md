@@ -19,7 +19,7 @@ settings:
 
 prepare:
   initramfs:
-    from: packages
+    from: console
     commands:
       - >-
         run --mount=type=tmpfs,target=/tmp mkdir /out &&
@@ -34,6 +34,12 @@ phases:
       pacman-key --init && pacman-key --populate &&
       pacman -S --needed --noconfirm ${items}
 
+  - name: console
+    groups:
+      locale:
+        - copy files/locale.conf /etc/locale.conf
+        - copy files/vconsole.conf /etc/vconsole.conf
+
   - name: features
     groups:
       hardware:
@@ -46,9 +52,6 @@ phases:
         services: [sshd.service]
       editor:
         packages: [nano]
-      locale:
-        - copy files/locale.conf /etc/locale.conf
-        - copy files/vconsole.conf /etc/vconsole.conf
       recipe:
         - copy recipe.yml /etc/nomira/recipe.yml
         - copy files/ /etc/nomira/files/
@@ -65,7 +68,7 @@ phases:
       uki:
         - >-
           run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=packages,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=console,source=/usr/lib/modules,target=/kernels
           --mount=type=bind,from=initramfs,source=/out,target=/initramfs
           --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
@@ -78,7 +81,7 @@ phases:
 ```sh
 mkdir files
 echo 'LANG=en_US.UTF-8' > files/locale.conf
-echo 'KEYMAP=us' > files/vconsole.conf
+echo 'KEYMAP=us' > files/vconsole.conf   # localectl list-keymaps shows all
 ```
 
 Adapt it to your machine:
@@ -98,8 +101,10 @@ services. The group `recipe` puts the recipe into the system, to
 `/etc/nomira`, where `nomira` looks for it on the installed machine. The
 stage `initramfs` and the last two phases replace kernel and initramfs
 with a [unified kernel image](../../base-image/booting/#unified-kernel-image):
-the initramfs is built only when the packages change, and never lands in
-the image itself.
+the initramfs is built only when the packages or the console settings
+change, and never lands in the image itself. The phase `console` comes
+before it, so that the initramfs knows the keymap, for instance for a
+passphrase typed at boot.
 
 ## 2. Check and build
 
