@@ -19,7 +19,7 @@ settings:
 
 phases:
   - name: packages
-    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
+    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg nomira-pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
 
   - name: features
     groups:
@@ -64,12 +64,12 @@ nomira lint
 nomira build
 ```
 
-The result is `.nomira/mysystem.oci.tar`.
+The result is the directory `.nomira/mysystem.oci`.
 
 ## 3. Look inside
 
 ```sh
-skopeo copy oci-archive:.nomira/mysystem.oci.tar containers-storage:localhost/mysystem:latest
+skopeo copy oci:.nomira/mysystem.oci containers-storage:localhost/mysystem:latest
 podman run --rm localhost/mysystem:latest pacman -Q linux-firmware openssh
 ```
 

@@ -20,8 +20,8 @@ your own with at least:
 
 ## Load
 
-Copy `.nomira/mysystem.oci.tar` to the machine you install from, then:
+Copy the directory `.nomira/mysystem.oci` to the machine you install from, then:
 
 ```sh
-sudo skopeo copy oci-archive:mysystem.oci.tar containers-storage:localhost/mysystem:latest
+sudo skopeo copy oci:mysystem.oci containers-storage:localhost/mysystem:latest
 ```

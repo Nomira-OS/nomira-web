@@ -24,7 +24,7 @@ of the recipe contributed under the name of the phase.
 ```yaml
 phases:
   - name: packages
-    collect: run pacman -S --needed --noconfirm ${items}
+    collect: run nomira-pacman -S --needed --noconfirm ${items}
 
   - name: features
     groups:
@@ -57,7 +57,7 @@ a contribution from changing the meaning of the command.
 
 ```yaml
 - name: packages
-  collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items}
+  collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg nomira-pacman -S --needed --noconfirm ${items}
 
 - name: services
   collect: run systemctl enable ${items}

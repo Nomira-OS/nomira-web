@@ -19,7 +19,7 @@ settings:
 
 phases:
   - name: packages
-    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman -S --needed --noconfirm ${items}
+    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg nomira-pacman -S --needed --noconfirm ${items}
 
   - name: features
     groups:

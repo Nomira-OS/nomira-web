@@ -13,6 +13,11 @@ is still open:
 - time zone
 - root password
 
+Then log in as `root` with that password. No other user is created; add
+one as described in
+[Users and groups](https://wiki.archlinux.org/title/Users_and_groups),
+or in the recipe.
+
 ## Answering in the recipe
 
 A recipe that writes the values to `/etc` gets no question for them:

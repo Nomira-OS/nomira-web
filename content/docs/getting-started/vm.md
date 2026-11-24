@@ -19,7 +19,7 @@ README describes. The AUR has packages for it, which we have not tried.
 ## Start
 
 ```sh
-skopeo copy oci-archive:.nomira/mysystem.oci.tar containers-storage:localhost/mysystem:latest
+skopeo copy oci:.nomira/mysystem.oci containers-storage:localhost/mysystem:latest
 bcvk ephemeral run --console -it --name nomira-test localhost/mysystem:latest
 ```
 

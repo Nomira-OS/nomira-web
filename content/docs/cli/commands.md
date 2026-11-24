@@ -39,5 +39,6 @@ Not every flag applies to every command.
 
 ## Where the result goes
 
-`nomira build` writes `.nomira/<name>.oci.tar` next to the recipe. The
-archive is an ordinary OCI image.
+`nomira build` writes the directory `.nomira/<name>.oci` next to the
+recipe, an OCI image layout. A rebuild adds only the layers that
+changed and removes those no longer used.
