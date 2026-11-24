@@ -34,12 +34,13 @@ weight: 40
 
 ## Kernel, modules, firmware
 
-After adding or changing the kernel, kernel modules or firmware that is
-needed early, regenerate the initramfs. The simplest place is the end of
-the package collector:
+With a [unified kernel image](../booting/#unified-kernel-image) the
+recipe builds the initramfs for it. Without one, run dracut after adding
+or changing the kernel, kernel modules or firmware that is needed early,
+for instance at the end of the package collector:
 
 ```yaml
-collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
+collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items} && for d in /usr/lib/modules/*/; do dracut --force --kver "$(basename "$d")" "${d}initramfs.img"; done
 ```
 
 ## Symbolic links and restricted directories

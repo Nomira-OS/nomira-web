@@ -66,7 +66,6 @@ do:
 
 Limits of this way:
 
-- `nomira switch` and `nomira upgrade` cannot work from a container:
-  they change the host. On an installed nomira system the CLI is on the host anyway.
+- `bootc upgrade` runs on the host, not in the container. On an installed nomira system the CLI is on the host anyway.
 - Files in `.nomira/` belong to root.
 

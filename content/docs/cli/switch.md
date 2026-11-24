@@ -1,6 +1,6 @@
 ---
-title: Build, switch, upgrade
-lead: nomira build builds, checks and publishes an image; switch and upgrade mean what they mean in bootc.
+title: Build and deploy
+lead: nomira build builds, checks and publishes an image; bootc takes it from there.
 weight: 20
 untested: true
 ---
@@ -24,31 +24,33 @@ untested: true
 `build` never touches the running system. `--secret id=ID,src=PATH`
 passes a file to steps that mount it as a secret.
 
-## nomira switch and nomira upgrade
+## Deploying is bootc's
 
-As in bootc, `switch` changes which image the system follows, and
-`upgrade` takes a new version of it:
+nomira has no command that changes the running system. The output
+directory is an image source, like a registry, and bootc follows it:
 
-| | Does |
-|---|---|
-| `nomira switch` | `bootc switch --transport oci` with the output directory. Once; from then on the system follows the recipe's images |
-| `nomira upgrade` | `nomira build`, then `bootc upgrade`. For every change |
+```sh
+sudo nomira build      # build, check, publish
+sudo bootc upgrade     # take the new image; --apply reboots right away
+```
 
-`sudo nomira build` followed by `sudo bootc upgrade` is the same as
-`sudo nomira upgrade`. `--apply` reboots right away. Staging, the boot
-entry, `bootc rollback` and `bootc status` are bootc's.
+A system installed as in
+[Installation](../../getting-started/installation/) follows the output
+directory from the start. Any other one is pointed at it once:
 
-A system installed as in [Installation](../../getting-started/installation/)
-follows the output directory from the start and needs no `switch`.
+```sh
+sudo bootc switch --transport oci /var/lib/nomira/mysystem.oci
+```
+
+`bootc status`, `bootc rollback` and bootc's automatic update timer work
+as with any other image source.
 
 ## As root or not
 
-On a nomira system, run them with `sudo`. `build` then uses the
-system-wide buildkitd, which the base image starts on demand.
-
-Without root, `build` falls back to the podman container, and `switch`
-and `upgrade` call `sudo` for bootc. This is meant for developing
-recipes on another machine.
+On a nomira system, run `nomira build` with `sudo`. It then uses the
+system-wide buildkitd, which the base image starts on demand. Without
+root, it falls back to the podman container; this is meant for
+developing recipes on another machine.
 
 ## The checks
 

@@ -122,8 +122,9 @@ In the finished system `/usr` is read-only, `/etc` is merged on updates,
 and `/var` is not part of the image. Put the content of the system into
 `/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
 
-After changing the kernel or adding firmware that is needed early,
-`/usr/libexec/nomira-initramfs` regenerates the initramfs.
+After changing the kernel or adding firmware that is needed early, the
+initramfs has to be built again, see
+[Kernel, modules, firmware](../../base-image/building-on-it/#kernel-modules-firmware).
 
 ## Build and check
 

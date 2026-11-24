@@ -40,6 +40,7 @@ The system changes through its recipe in `/etc/nomira`, which the
 
 ```sh
 sudo nano /etc/nomira/recipe.yml
-sudo nomira upgrade
+sudo nomira build
+sudo bootc upgrade
 sudo reboot
 ```

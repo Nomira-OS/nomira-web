@@ -6,8 +6,6 @@ weight: 10
 
 ```text
 nomira build    [flags]          build the recipe, check and publish the image
-nomira switch   [flags]          let the system follow the recipe's images (once)
-nomira upgrade  [flags]          build, then bootc upgrade
 nomira validate [flags] [image]  run validation.d hooks and the boot test
 nomira lint     [flags]          check the recipe
 nomira graph    [flags]          print the pipeline as a Mermaid flowchart
@@ -27,7 +25,6 @@ nomira version                   print the version
 | `--frontend IMAGE` | Frontend image; otherwise the `# syntax=` line of the recipe, otherwise `ghcr.io/nomira-os/nomira:1-alpha` |
 | `--name NAME` | Image name; otherwise `settings.name`, otherwise the directory name |
 | `--no-boot-test` | Skip the bcvk boot test |
-| `--apply` | Reboot into the new image right after `switch` or `upgrade` |
 
 Not every flag applies to every command.
 
@@ -38,7 +35,6 @@ Not every flag applies to every command.
 | `NOMIRA_RECIPE` | Recipe to use without `-f` |
 | `BUILDKIT_HOST` | Use this buildkitd instead of looking for one |
 | `NOMIRA_BUILDKIT_IMAGE` | Image for the buildkitd container that the CLI manages |
-| `NOMIRA_SUDO` | Command used to become root (default: `sudo`) |
 
 ## Where the result goes
 

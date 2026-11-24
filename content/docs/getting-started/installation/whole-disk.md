@@ -44,7 +44,7 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
 |---|---|
 | `--filesystem ext4` | Root filesystem; `xfs` and `btrfs` are possible too |
 | `--wipe` | Erase the disk |
-| `--target-transport oci --target-imgref …` | Updates come from the directory `nomira build` publishes to on the installed system; `nomira upgrade` then works without `nomira switch` |
+| `--target-transport oci --target-imgref …` | `bootc upgrade` takes updates from the directory `nomira build` publishes to on the installed system |
 | `--skip-fetch-check` | That directory does not exist yet |
 | `--block-setup tpm2-luks` | Optional: encrypt the root partition and unlock it with the TPM |
 

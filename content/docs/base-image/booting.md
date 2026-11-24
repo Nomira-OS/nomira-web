@@ -23,14 +23,25 @@ composefs digest of the system, so the UKI only boots the system it was
 built for. bootc installs the UKI instead of the kernel. It is not signed
 yet; signing comes with Secure Boot.
 
-The recipe builds it, with two phases at the end, the way bootc
-documents it for sealed images: `kernel` takes kernel and initramfs out,
-`uki` runs `bootc container ukify` on the system without them. The
-kernel comes from the phase before, mounted read-only, and dracut builds
-the initramfs in a tmpfs, so it only ever exists inside the UKI. The
-image brings bootc, dracut and ukify.
+The recipe builds it the way bootc documents it for sealed images: the
+phase `kernel` takes kernel and initramfs out, the phase `uki` runs
+`bootc container ukify` on the system without them. The initramfs comes
+from a prepare stage that starts from the phase `packages`: dracut runs
+there, only when the packages change, and its result is only mounted,
+never part of the image. The image brings bootc, dracut and ukify.
 
 ```yaml
+prepare:
+  initramfs:
+    from: packages
+    commands:
+      - >-
+        run --mount=type=tmpfs,target=/tmp mkdir /out &&
+        for d in /usr/lib/modules/*/; do k="$(basename "$d")";
+        TMPDIR=/tmp dracut --kver "$k" "/out/$k.img"; done
+
+phases:
+  # … packages, features, services …
   - name: kernel
     groups:
       out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
@@ -40,21 +51,25 @@ image brings bootc, dracut and ukify.
       uki:
         - >-
           run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=packages,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=initramfs,source=/out,target=/initramfs
           --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do k="$(basename "$d")";
-          mkdir "/tmp/$k" && cp "$d/vmlinuz" "/tmp/$k/" &&
-          TMPDIR=/tmp dracut --kver "$k" "/tmp/$k/initramfs.img" &&
+          for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
+          cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
           bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
           --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
-`services` is the phase before `kernel`; use the name of yours. dracut
-runs on every build that changes the system, since the UKI depends on
-all of it. A recipe without these two phases boots kernel and initramfs
-the classic way and must rebuild the initramfs itself, for instance with
-`/usr/libexec/nomira-initramfs` at the end of the package collector.
+`packages` is the phase that installs the kernel and the packages the
+initramfs needs; use the name of yours. Configuration from later phases
+is not in the initramfs; that matters for the keymap if a passphrase is
+typed before the system starts, not for a TPM-unlocked disk.
+
+A recipe without the stage and the two phases boots kernel and initramfs
+the classic way, and must run dracut after changing the kernel or early
+firmware, for instance at the end of the package collector:
+`dracut --force --kver <kver> /usr/lib/modules/<kver>/initramfs.img`.
 
 What that means:
 

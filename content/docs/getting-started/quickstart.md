@@ -17,6 +17,15 @@ settings:
   name: mysystem
   base: ghcr.io/nomira-os/nomira-image:TAG
 
+prepare:
+  initramfs:
+    from: packages
+    commands:
+      - >-
+        run --mount=type=tmpfs,target=/tmp mkdir /out &&
+        for d in /usr/lib/modules/*/; do k="$(basename "$d")";
+        TMPDIR=/tmp dracut --kver "$k" "/out/$k.img"; done
+
 phases:
   - name: packages
     collect: >-
@@ -56,12 +65,12 @@ phases:
       uki:
         - >-
           run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=packages,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=initramfs,source=/out,target=/initramfs
           --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do k="$(basename "$d")";
-          mkdir "/tmp/$k" && cp "$d/vmlinuz" "/tmp/$k/" &&
-          TMPDIR=/tmp dracut --kver "$k" "/tmp/$k/initramfs.img" &&
+          for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
+          cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
           bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
           --output "/boot/EFI/Linux/$k.efi"; done
 ```
@@ -87,9 +96,10 @@ in one step; the pacman keyring lives in a tmpfs for that step only, so
 no private key ends up in the image; the phase `services` enables the
 services. The group `recipe` puts the recipe into the system, to
 `/etc/nomira`, where `nomira` looks for it on the installed machine. The
-last two phases replace kernel and initramfs with a
-[unified kernel image](../../base-image/booting/#unified-kernel-image); the
-initramfs is only built for it and never lands in the image itself.
+stage `initramfs` and the last two phases replace kernel and initramfs
+with a [unified kernel image](../../base-image/booting/#unified-kernel-image):
+the initramfs is built only when the packages change, and never lands in
+the image itself.
 
 ## 2. Check and build
 

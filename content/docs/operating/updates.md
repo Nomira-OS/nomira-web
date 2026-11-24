@@ -8,13 +8,14 @@ untested: true
 ## Updating your own system
 
 ```sh
-sudo nomira upgrade
+sudo nomira build
+sudo bootc upgrade
 ```
 
-That is `nomira build` (build, check, publish) and then `bootc upgrade`.
-Nothing changes on the running system before the checks have passed. The
-new system takes effect on the next boot; with `--apply` the machine
-reboots right away.
+`nomira build` builds the recipe, checks the result and only then
+publishes it; nothing changes on the running system. `bootc upgrade`
+takes the new image. It takes effect on the next boot; with `--apply`
+the machine reboots right away.
 
 ## Getting newer packages
 
