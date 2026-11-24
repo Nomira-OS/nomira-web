@@ -15,6 +15,31 @@ weight: 15
 
 No options are needed for either.
 
+## Unified kernel image
+
+nomira adds a unified kernel image (UKI) to every image it builds:
+kernel, initramfs and kernel command line in one file. The command line
+carries the composefs digest of the system, so the UKI only boots the
+system it was built for. bootc installs the UKI instead of the kernel.
+It is not signed yet; signing comes with Secure Boot.
+
+What that means:
+
+- **No `root=`.** The UKI is built before the system is installed, so it
+  cannot name the root partition. systemd finds it by its GPT partition
+  type (*Linux root (x86-64)*), which `bootc install to-disk` sets. For
+  an [installation over an existing Linux](../../getting-started/installation/alongside/),
+  the partition may have another type; change it, or build with
+  `--no-uki`.
+- **Kernel arguments come from the image**, from
+  `/usr/lib/bootc/kargs.d`, when the UKI is built. Arguments passed to
+  `bootc install --karg` may not reach a UKI; we have not tried.
+- **fs-verity is enforced.** The root filesystem needs it: ext4 created
+  by bootc and btrfs have it, an existing ext4 may not
+  (`tune2fs -O verity`).
+- **Older installations** boot without a UKI. Whether `bootc switch`
+  takes them to an image with one is untested; reinstall if it fails.
+
 ## Why not GRUB
 
 bootc installs GRUB through bootupd. bootupd records metadata about the

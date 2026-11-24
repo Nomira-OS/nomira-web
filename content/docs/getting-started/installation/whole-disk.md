@@ -45,7 +45,7 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
 | `--filesystem ext4` | Root filesystem; `xfs` and `btrfs` are possible too |
 | `--wipe` | Erase the disk |
 | `--target-transport …`, `--skip-fetch-check` | The image was loaded locally; leave both out for an image from a registry |
-| `--karg NAME=VALUE` | Optional: a kernel argument for this machine |
+| `--block-setup tpm2-luks` | Optional: encrypt the root partition and unlock it with the TPM |
 
 ## 4. Reboot
 

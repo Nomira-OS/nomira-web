@@ -16,13 +16,18 @@ untested: true
    the frontend. The result is an OCI directory,
    [see where](../commands/#where-the-result-goes).
    BuildKit only writes layers that are not there yet.
-3. **Check** the image, see below. The checks run it from
-   containers-storage, so only for them is it copied there.
-4. **Switch**: only when everything has passed,
+3. **Build the unified kernel image** (UKI), unless `--no-uki`. The image
+   builds it itself: podman runs it with its own file system mounted,
+   and its bootc puts kernel, initramfs and a command line with the
+   composefs digest into one file. The CLI adds that file as one more
+   layer; all other layers stay as they are. See
+   [Boot loader and storage](../../base-image/booting/#unified-kernel-image).
+4. **Check** the image, see below.
+5. **Switch**: only when everything has passed,
    `bootc switch --transport oci` with that directory. bootc reads the
    directory and imports only the layers it does not have yet.
 
-Nothing on the running system changes before step 4.
+Nothing on the running system changes before step 5.
 `nomira switch --dry-run` shows the exact sequence of commands.
 
 ## As root or not

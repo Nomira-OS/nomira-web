@@ -25,6 +25,7 @@ nomira version                   print the version
 | `--frontend IMAGE` | Frontend image; otherwise the `# syntax=` line of the recipe, otherwise `ghcr.io/nomira-os/nomira:1-alpha` |
 | `--name NAME` | Image name; otherwise `settings.name`, otherwise the directory name |
 | `--no-boot-test` | Skip the bcvk boot test |
+| `--no-uki` | Build no unified kernel image |
 | `--apply` | Reboot into the new image right after `switch` |
 
 Not every flag applies to every command.
