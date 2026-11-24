@@ -69,4 +69,16 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
 ```
 
 Boot `nomira.raw` in a VM with UEFI firmware, for example
-virt-manager, or QEMU with OVMF.
+virt-manager, or QEMU with OVMF (Arch packages `qemu-desktop`,
+`edk2-ovmf`):
+
+```sh
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd nomira-vars.fd
+qemu-system-x86_64 -enable-kvm -machine q35 -cpu host -m 4G \
+  -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+  -drive if=pflash,format=raw,file=nomira-vars.fd \
+  -drive file=nomira.raw,format=raw,if=virtio \
+  -nic user,model=virtio-net-pci,hostfwd=tcp::2222-:22
+```
+
+Port 2222 on the host reaches SSH in the VM, if the image has it.
