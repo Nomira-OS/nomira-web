@@ -26,6 +26,14 @@ does not have to know a date.
 
 To get newer packages, refer to a newer base image.
 
+## Layers
+
+The image is split into layers by package: each layer holds one package
+or a few that change at a similar rate, 64 layers at most. A new base
+image that updates a few packages changes only their layers, so an
+update downloads little. The layers are built reproducibly from the
+date of the image, so a package that did not change keeps its layer.
+
 ## How exact this is
 
 Tags can be moved. To be sure that a rebuild starts from the same bytes,
@@ -36,9 +44,8 @@ settings:
   base: ghcr.io/nomira-os/nomira-image@sha256:…
 ```
 
-The package set is then fixed. A rebuild of your recipe is still not
-bit-for-bit identical, because build steps may write timestamps and the
-like.
+The package set is then fixed. The tag stays readable if you keep it in
+front of the digest: `nomira-image:TAG@sha256:…`.
 
 ## Verifying an image
 
