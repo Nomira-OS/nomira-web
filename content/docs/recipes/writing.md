@@ -15,7 +15,7 @@ weight: 10
 settings:
   name: mysystem
   description: My system
-  base: ghcr.io/nomira-os/nomira-image:TAG
+  base: ghcr.io/nomira-os/arch-base:TAG
 
 phases:
   - name: packages

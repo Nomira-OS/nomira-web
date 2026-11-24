@@ -9,7 +9,7 @@ a landing page for the frontend, comparisons (NixOS, BlueBuild, Arkane
 Linux), FAQ and documentation.
 
 Sibling repositories: `nomira` (BuildKit frontend), `nomira-cli`,
-`nomira-image` (base image), `ci` (shared workflows).
+`arch-base` (base image), `ci` (shared workflows).
 
 ## Rules
 

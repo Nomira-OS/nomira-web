@@ -46,7 +46,7 @@ nomira() {
     -v "$PWD":/work -w /work \
     -v nomira-buildkit:/var/lib/buildkit \
     -v nomira-containers:/var/lib/containers \
-    ghcr.io/nomira-os/nomira-image:TAG \
+    ghcr.io/nomira-os/arch-base:TAG \
     sh -c 'buildkitd >/var/log/buildkitd.log 2>&1 & sleep 2; exec nomira "$@"' nomira "$@"
 }
 

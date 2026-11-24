@@ -15,7 +15,7 @@ In a new directory, create `recipe.yml`:
 # syntax=ghcr.io/nomira-os/nomira:1-alpha
 settings:
   name: mysystem
-  base: ghcr.io/nomira-os/nomira-image:TAG
+  base: ghcr.io/nomira-os/arch-base:TAG
 
 prepare:
   initramfs:

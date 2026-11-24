@@ -12,7 +12,7 @@ commands. It is replaced by the content of the file.
 ```yaml
 # recipe.yml
 settings:
-  base: ghcr.io/nomira-os/nomira-image:TAG
+  base: ghcr.io/nomira-os/arch-base:TAG
 
 phases:
   - include: phases/collectors.yml          # one phase or a list of phases

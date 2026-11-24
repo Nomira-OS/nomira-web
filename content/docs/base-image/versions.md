@@ -41,11 +41,11 @@ refer to the digest of the image:
 
 ```yaml
 settings:
-  base: ghcr.io/nomira-os/nomira-image@sha256:…
+  base: ghcr.io/nomira-os/arch-base@sha256:…
 ```
 
 The package set is then fixed. The tag stays readable if you keep it in
-front of the digest: `nomira-image:TAG@sha256:…`.
+front of the digest: `arch-base:TAG@sha256:…`.
 
 ## Verifying an image
 

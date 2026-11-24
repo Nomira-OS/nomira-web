@@ -8,7 +8,7 @@ Recipes for a nomira system start from this image:
 
 ```yaml
 settings:
-  base: ghcr.io/nomira-os/nomira-image:TAG
+  base: ghcr.io/nomira-os/arch-base:TAG
 ```
 
 ## What is in it
@@ -34,4 +34,4 @@ The image builds in CI and passes `bootc container lint`. An earlier
 build booted in a VM to the end of the boot process. CI does not boot
 the image yet, and installation on hardware has not been tried.
 
-Source: [github.com/Nomira-OS/nomira-image](https://github.com/Nomira-OS/nomira-image)
+Source: [github.com/Nomira-OS/arch-base](https://github.com/Nomira-OS/arch-base)

@@ -48,7 +48,7 @@ problems as an issue.
 
 Related repositories: [nomira](https://github.com/Nomira-OS/nomira) (the
 build frontend), [nomira-cli](https://github.com/Nomira-OS/nomira-cli),
-[nomira-image](https://github.com/Nomira-OS/nomira-image) (the base
+[arch-base](https://github.com/Nomira-OS/arch-base) (the base
 image), [ci](https://github.com/Nomira-OS/ci) (shared CI).
 
 ## Licence
