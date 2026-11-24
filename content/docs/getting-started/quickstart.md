@@ -28,7 +28,9 @@ prepare:
         sha256sum /out/*.img
 
 phases:
-  - name: packages
+  # What boot needs: firmware, microcode, and everything else the
+  # initramfs has to contain. Changes here rebuild the initramfs.
+  - name: boot
     collect: >-
       run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
       --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
@@ -41,10 +43,18 @@ phases:
         - copy files/locale.conf /etc/locale.conf
         - copy files/vconsole.conf /etc/vconsole.conf
 
+  # Everything else. Changes here leave the initramfs as it is.
+  - name: packages
+    collect: >-
+      run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
+      --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
+      pacman-key --init && pacman-key --populate &&
+      pacman -S --needed --noconfirm ${items}
+
   - name: features
     groups:
       hardware:
-        packages: [linux-firmware, intel-ucode]
+        boot: [linux-firmware, intel-ucode]
       network:
         packages: [networkmanager]
         services: [NetworkManager.service]
@@ -75,7 +85,7 @@ phases:
           mkdir -p /boot/EFI/Linux &&
           for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
           cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
-          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
+          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --erofs-version v1-only --
           --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
@@ -85,27 +95,34 @@ echo 'LANG=en_US.UTF-8' > files/locale.conf
 echo 'KEYMAP=us' > files/vconsole.conf   # localectl list-keymaps shows all
 ```
 
+Each group names what it needs, and the collector phases install it, all
+of a kind in one step:
+
+- **`boot`** installs what the system needs to start: firmware,
+  microcode, and anything else the initramfs has to contain (disk tools
+  for an unusual setup, for instance). The pacman keyring lives in a
+  tmpfs for that step only, so no private key ends up in the image.
+- **`console`** sets locale and keymap, so the initramfs knows them too.
+- **`packages`** installs everything else. A package added here installs
+  in seconds and leaves the initramfs alone.
+- **`services`** enables the services.
+- The group **`recipe`** puts the recipe into the system, to
+  `/etc/nomira`, where `nomira` looks for it on the installed machine.
+- The stage **`initramfs`** and the phases **`kernel`** and **`uki`**
+  replace kernel and initramfs with a
+  [unified kernel image](../../base-image/booting/#unified-kernel-image).
+  The initramfs is built only when `boot` or `console` change, and never
+  lands in the image itself.
+
 Adapt it to your machine:
 
 - `TAG`: a tag of the [base image](https://github.com/orgs/Nomira-OS/packages).
 - `hardware`: the firmware and microcode your machine needs, see
   [Linux firmware](https://wiki.archlinux.org/title/Linux_firmware) and [Microcode](https://wiki.archlinux.org/title/Microcode).
-- `editor`: the base image has no editor; you need one to change the
-  recipe on the installed machine. Any other editor works as well.
 - `network`: NetworkManager is an example; any option from
   [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
-
-Each group names what it needs. The phase `packages` installs all of it
-in one step; the pacman keyring lives in a tmpfs for that step only, so
-no private key ends up in the image; the phase `services` enables the
-services. The group `recipe` puts the recipe into the system, to
-`/etc/nomira`, where `nomira` looks for it on the installed machine. The
-stage `initramfs` and the last two phases replace kernel and initramfs
-with a [unified kernel image](../../base-image/booting/#unified-kernel-image):
-the initramfs is built only when the packages or the console settings
-change, and never lands in the image itself. The phase `console` comes
-before it, so that the initramfs knows the keymap, for instance for a
-passphrase typed at boot.
+- `editor`: the base image has no editor; you need one to change the
+  recipe on the installed machine. Any other editor works as well.
 
 ## 2. Check and build
 

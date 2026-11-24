@@ -58,12 +58,18 @@ phases:
           mkdir -p /boot/EFI/Linux &&
           for d in /kernels/*; do k="$(basename "$d")"; mkdir "/tmp/$k" &&
           cp "$d/vmlinuz" "/tmp/$k/" && cp "/initramfs/$k.img" "/tmp/$k/initramfs.img" &&
-          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
+          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --erofs-version v1-only --
           --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
 `packages` is the phase that installs the kernel and the packages the
-initramfs needs; use the name of yours. Configuration from later phases
+initramfs needs; use the name of yours. Install everything else in a
+collector after the stage's phase, as the
+[quick start](../../getting-started/quickstart/) does with `boot` and
+`packages`: adding an application then neither reruns dracut nor
+reinstalls the firmware. `--erofs-version v1-only` makes bootc compute
+the digest once instead of twice (the second is a fallback for older
+bootc versions, which the image's own bootc does not need). Configuration from later phases
 is not in the initramfs. What it should know, the keymap in
 `/etc/vconsole.conf` for instance, goes into a phase between `packages`
 and the stage, and the stage starts from that phase; the
