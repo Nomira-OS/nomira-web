@@ -13,21 +13,22 @@ untested: true
    at `/run/buildkit/buildkitd.sock`); otherwise a podman container
    `nomira-buildkitd`, which the CLI creates when needed.
 2. **Build** the recipe with `buildctl`. The check of the groups runs in
-   the frontend. The result is an OCI directory,
+   the frontend, and for a bootc base image the frontend ends with a
+   [unified kernel image](../../base-image/booting/#unified-kernel-image)
+   (`--no-uki` turns it off). The result is an OCI directory,
    [see where](../commands/#where-the-result-goes).
    BuildKit only writes layers that are not there yet.
-3. **Build the unified kernel image** (UKI), unless `--no-uki`. The image
-   builds it itself: podman runs it with its own file system mounted,
-   and its bootc puts kernel, initramfs and a command line with the
-   composefs digest into one file. The CLI adds that file as one more
-   layer; all other layers stay as they are. See
-   [Boot loader and storage](../../base-image/booting/#unified-kernel-image).
-4. **Check** the image, see below.
-5. **Switch**: only when everything has passed,
+3. **Check** the image, see below. The checks run it from
+   containers-storage, so only for them is it copied there.
+4. **Switch**: only when everything has passed,
    `bootc switch --transport oci` with that directory. bootc reads the
    directory and imports only the layers it does not have yet.
 
-Nothing on the running system changes before step 5.
+Nothing on the running system changes before step 4.
+
+`nomira switch` is a thin layer over bootc: build, check, then
+`bootc switch`. Everything after that, staging, the boot entry, `bootc
+rollback`, `bootc status`, is bootc's.
 `nomira switch --dry-run` shows the exact sequence of commands.
 
 ## As root or not

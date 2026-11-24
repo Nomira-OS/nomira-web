@@ -71,6 +71,7 @@ phases:
 | `toolbox` | Image with busybox tools used by the check; has a default |
 | `labels` | Labels on the finished image |
 | `env` | Environment for all `run` commands, at build time only |
+| `uki` | `true` or `false`: end with a unified kernel image. Default: if `base` is a bootc image (label `containers.bootc=1`). `--opt uki=` overrides it |
 | `args` | Declared build arguments with defaults; `--build-arg` overrides them |
 | `platforms`, `tags` | Checked and reported, but not acted on by the frontend. The caller decides |
 
