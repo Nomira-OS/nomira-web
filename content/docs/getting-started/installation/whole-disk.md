@@ -9,11 +9,21 @@ Use this for a new machine, an empty disk or a VM.
 
 ## 1. Boot a live system
 
-Any Linux with Podman works. With the Arch ISO:
+Any Linux with Podman works. With the Arch ISO, boot it in UEFI mode
+(`ls /sys/firmware/efi` must list something), then:
 
 ```sh
+mount -o remount,size=8G /run/archiso/cowspace
 pacman -Sy --noconfirm podman skopeo
 ```
+
+The first line gives the live system room for the image. On the ISO,
+every file you add lives in RAM, in a space of a few hundred megabytes
+by default; a system image needs a few gigabytes. Choose a size that
+fits the RAM of the machine.
+
+bootc itself does not need to be installed; it comes with the image, see
+[You do not install bootc](../#you-do-not-install-bootc).
 
 Then load your image as described in
 [Prepare the image](../image/).
@@ -33,7 +43,6 @@ not of a partition. Check it twice: the next command erases it.
 sudo podman run --rm --privileged --pid=host --ipc=host \
   -v /dev:/dev \
   -v /var/lib/containers:/var/lib/containers \
-  --security-opt label=type:unconfined_t \
   localhost/mysystem:latest \
   bootc install to-disk \
     --composefs-backend \
@@ -83,7 +92,6 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
   -v /dev:/dev \
   -v /var/lib/containers:/var/lib/containers \
   -v .:/output \
-  --security-opt label=type:unconfined_t \
   localhost/mysystem:latest \
   bootc install to-disk \
     --composefs-backend --bootloader systemd --filesystem ext4 \

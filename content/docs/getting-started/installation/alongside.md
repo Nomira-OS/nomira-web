@@ -35,6 +35,10 @@ described in [Prepare the image](../image/). On Arch:
 sudo pacman -S --needed podman skopeo
 ```
 
+bootc itself does not need to be installed; it comes with the image, see
+[You do not install bootc](../#you-do-not-install-bootc). The existing
+system must boot with UEFI and have an EFI system partition.
+
 ## 2. Install
 
 ```sh
@@ -42,7 +46,6 @@ sudo podman run --rm --privileged --pid=host \
   -v /dev:/dev \
   -v /var/lib/containers:/var/lib/containers \
   -v /:/target \
-  --security-opt label=type:unconfined_t \
   localhost/mysystem:latest \
   bootc install to-existing-root \
     --composefs-backend \

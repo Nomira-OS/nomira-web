@@ -13,9 +13,44 @@ untested: true
 ## How it works
 
 nomira has no installer of its own. A bootc image installs itself: you
-run the image as a container on any Linux, and the `bootc` inside it
-writes the system to a disk. The machine you install from only needs
-Podman and root.
+run the image as a container, and the `bootc` inside it writes the
+system to a disk.
+
+## You do not install bootc
+
+bootc is part of the nomira base image, and so is everything it calls
+during an installation: `bootctl` and the systemd-boot loader (both come
+with the `systemd` package), and the tools to partition and format a
+disk. The commands on these pages all run `bootc` from inside your
+image with `podman run`. Nothing of bootc goes onto the machine you
+install from.
+
+What that machine needs, on Arch Linux:
+
+| Purpose | Package |
+|---|---|
+| Running the image | `podman` |
+| Loading the built image | `skopeo` |
+
+And root, a UEFI firmware, and enough room for the image in
+`/var/lib/containers`, see [Prepare the image](image/).
+
+An installed nomira system has bootc as well, because it is the image.
+`nomira switch` uses that copy. So there is no point at which you
+install bootc yourself. The AUR has a `bootc` package; nomira does not
+need it, and we have not tried it.
+
+## Why systemd-boot and not GRUB
+
+bootc installs GRUB through a second tool, bootupd. bootupd asks the
+package manager about the boot loader files and only knows rpm, so it
+fails on Arch Linux ([bootupd issue #468](https://github.com/coreos/bootupd/issues/468)).
+bootc installs systemd-boot itself, with `bootctl`, which needs no
+package manager. That is why every command here passes
+`--bootloader systemd` together with `--composefs-backend`; bootc
+supports systemd-boot only with that backend. bootupd is therefore not
+in the base image. Leaving out `--bootloader systemd` selects GRUB and
+makes the installation fail.
 
 ## The steps
 
@@ -45,10 +80,9 @@ bootable, use a separate disk.
 
 ## Open points
 
-- **Boot loader.** The base image does not ship a boot loader package of
-  its own. The commands here select systemd-boot, which needs a machine
-  that boots with UEFI. Whether this works with the nomira image is the
-  main thing still to be tried.
+- **Boot loader.** systemd-boot needs a machine that boots with UEFI;
+  BIOS machines are not supported. Whether the installation works with
+  the nomira image is the main thing still to be tried.
 - **Storage backend.** The commands pass `--composefs-backend`, as the
   upstream Arch image does. Whether `nomira switch` works on a system
   installed this way has not been tried either.
