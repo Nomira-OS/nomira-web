@@ -29,7 +29,7 @@ files it copies. A new base image leaves it alone.
 ```yaml
 phases:
   - name: packages
-    collect: run nomira-pacman -S --needed --noconfirm ${items}
+    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
   - name: features
     groups:
       terminal: {include: features/terminal.yml}   # copies only

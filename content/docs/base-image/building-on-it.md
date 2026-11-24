@@ -19,18 +19,17 @@ weight: 40
   it is part of the image.
 - The package cache is in `/usr/lib/sysimage/cache/pacman/pkg`. A cache
   mount must point there.
-- Call `nomira-pacman` instead of `pacman`; it takes the same arguments.
-  The image ships no pacman keyring, because a keyring holds a private
-  key that would then be the same on every machine. `nomira-pacman`
-  sets up a throwaway keyring for each call, retries when the Arch Linux
-  Archive is slow, and makes install dates reproducible.
+- The image ships no pacman keyring, because a keyring holds a private
+  key that would then be the same on every machine. A step that runs
+  pacman sets one up in a tmpfs (`--mount=type=tmpfs`), so it never
+  ends up in the image.
 - Install packages with a [collector](../../recipes/collectors/). Two
   groups that each call pacman would both write the package database
   and conflict.
 
 ```yaml
 - name: packages
-  collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg nomira-pacman -S --needed --noconfirm ${items}
+  collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 ```
 
 ## Kernel, modules, firmware
@@ -40,7 +39,7 @@ needed early, regenerate the initramfs. The simplest place is the end of
 the package collector:
 
 ```yaml
-collect: run nomira-pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
+collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
 ```
 
 ## Symbolic links and restricted directories

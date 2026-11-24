@@ -19,7 +19,12 @@ settings:
 
 phases:
   - name: packages
-    collect: run --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg nomira-pacman -S --needed --noconfirm ${items} && /usr/libexec/nomira-initramfs
+    collect: >-
+      run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
+      --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
+      pacman-key --init && pacman-key --populate &&
+      pacman -S --needed --noconfirm ${items} &&
+      /usr/libexec/nomira-initramfs
 
   - name: features
     groups:
@@ -57,7 +62,8 @@ Adapt it to your machine:
   [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
 
 Each group names what it needs. The phase `packages` installs all of it
-in one step and rebuilds the initramfs; the phase `services` enables the
+in one step and rebuilds the initramfs; the pacman keyring lives in a
+tmpfs for that step only, so no private key ends up in the image; the phase `services` enables the
 services. The group `recipe` puts the recipe into the system, to
 `/etc/nomira`, where `nomira` looks for it on the installed machine.
 
