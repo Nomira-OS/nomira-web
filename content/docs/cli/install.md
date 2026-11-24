@@ -66,7 +66,7 @@ do:
 
 Limits of this way:
 
-- `nomira switch` cannot work from a container: it has to change the
-  host. On an installed nomira system the CLI is on the host anyway.
+- `nomira switch` and `nomira upgrade` cannot work from a container:
+  they change the host. On an installed nomira system the CLI is on the host anyway.
 - Files in `.nomira/` belong to root.
 

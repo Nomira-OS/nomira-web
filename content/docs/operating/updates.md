@@ -8,19 +8,18 @@ untested: true
 ## Updating your own system
 
 ```sh
-sudo nomira build
-sudo nomira switch
+sudo nomira upgrade
 ```
 
-`build` builds the recipe and checks the result; nothing changes on the
-running system. `switch` hands the checked image to bootc. The new system
-takes effect on the next boot; with `--apply` the machine reboots right
-away.
+That is `nomira build` (build, check, publish) and then `bootc upgrade`.
+Nothing changes on the running system before the checks have passed. The
+new system takes effect on the next boot; with `--apply` the machine
+reboots right away.
 
 ## Getting newer packages
 
 The package set depends on the base image. Enter a newer release in
-`settings.base`, then build and switch. All packages, including
+`settings.base` and upgrade. All packages, including
 those from your recipe, then come from the newer set.
 
 ## Back to the previous state

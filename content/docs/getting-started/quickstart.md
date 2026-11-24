@@ -23,8 +23,7 @@ phases:
       run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
       --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
       pacman-key --init && pacman-key --populate &&
-      pacman -S --needed --noconfirm ${items} &&
-      /usr/libexec/nomira-initramfs
+      pacman -S --needed --noconfirm ${items}
 
   - name: features
     groups:
@@ -58,10 +57,13 @@ phases:
         - >-
           run --mount=type=bind,from=kernel,target=/target
           --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do
-          bootc container ukify --rootfs /target --kernel-dir "$d" --
-          --output "/boot/EFI/Linux/$(basename "$d").efi"; done
+          for d in /kernels/*; do k="$(basename "$d")";
+          mkdir "/tmp/$k" && cp "$d/vmlinuz" "/tmp/$k/" &&
+          TMPDIR=/tmp dracut --kver "$k" "/tmp/$k/initramfs.img" &&
+          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
+          --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
 ```sh
@@ -81,12 +83,13 @@ Adapt it to your machine:
   [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
 
 Each group names what it needs. The phase `packages` installs all of it
-in one step and rebuilds the initramfs; the pacman keyring lives in a
-tmpfs for that step only, so no private key ends up in the image; the phase `services` enables the
+in one step; the pacman keyring lives in a tmpfs for that step only, so
+no private key ends up in the image; the phase `services` enables the
 services. The group `recipe` puts the recipe into the system, to
 `/etc/nomira`, where `nomira` looks for it on the installed machine. The
 last two phases replace kernel and initramfs with a
-[unified kernel image](../../base-image/booting/#unified-kernel-image).
+[unified kernel image](../../base-image/booting/#unified-kernel-image); the
+initramfs is only built for it and never lands in the image itself.
 
 ## 2. Check and build
 

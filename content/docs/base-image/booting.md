@@ -24,27 +24,37 @@ built for. bootc installs the UKI instead of the kernel. It is not signed
 yet; signing comes with Secure Boot.
 
 The recipe builds it, with two phases at the end, the way bootc
-documents it for sealed images: one takes kernel and initramfs out, the
-next runs `bootc container ukify` on the system without them, with the
-kernel mounted from the phase before. The image brings bootc and ukify.
+documents it for sealed images: `kernel` takes kernel and initramfs out,
+`uki` runs `bootc container ukify` on the system without them. The
+kernel comes from the phase before, mounted read-only, and dracut builds
+the initramfs in a tmpfs, so it only ever exists inside the UKI. The
+image brings bootc, dracut and ukify.
 
 ```yaml
   - name: kernel
     groups:
       out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
+
   - name: uki
     groups:
       uki:
         - >-
           run --mount=type=bind,from=kernel,target=/target
           --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
-          for d in /kernels/*; do
-          bootc container ukify --rootfs /target --kernel-dir "$d" --
-          --output "/boot/EFI/Linux/$(basename "$d").efi"; done
+          for d in /kernels/*; do k="$(basename "$d")";
+          mkdir "/tmp/$k" && cp "$d/vmlinuz" "/tmp/$k/" &&
+          TMPDIR=/tmp dracut --kver "$k" "/tmp/$k/initramfs.img" &&
+          bootc container ukify --rootfs /target --kernel-dir "/tmp/$k" --
+          --output "/boot/EFI/Linux/$k.efi"; done
 ```
 
-`services` is the phase before `kernel`; use the name of yours.
+`services` is the phase before `kernel`; use the name of yours. dracut
+runs on every build that changes the system, since the UKI depends on
+all of it. A recipe without these two phases boots kernel and initramfs
+the classic way and must rebuild the initramfs itself, for instance with
+`/usr/libexec/nomira-initramfs` at the end of the package collector.
 
 What that means:
 

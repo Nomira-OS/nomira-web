@@ -38,7 +38,7 @@ sudo podman run --rm --privileged --pid=host \
   -v /:/target \
   localhost/mysystem:latest \
   bootc install to-existing-root \
-    --target-transport containers-storage \
+    --target-transport oci --target-imgref /var/lib/nomira/mysystem.oci \
     --skip-fetch-check
 ```
 

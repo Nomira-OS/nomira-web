@@ -35,7 +35,7 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
   bootc install to-disk \
     --filesystem ext4 \
     --wipe \
-    --target-transport containers-storage \
+    --target-transport oci --target-imgref /var/lib/nomira/mysystem.oci \
     --skip-fetch-check \
     /dev/DISK
 ```
@@ -44,7 +44,8 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
 |---|---|
 | `--filesystem ext4` | Root filesystem; `xfs` and `btrfs` are possible too |
 | `--wipe` | Erase the disk |
-| `--target-transport …`, `--skip-fetch-check` | The image was loaded locally; leave both out for an image from a registry |
+| `--target-transport oci --target-imgref …` | Updates come from the directory `nomira build` publishes to on the installed system; `nomira upgrade` then works without `nomira switch` |
+| `--skip-fetch-check` | That directory does not exist yet |
 | `--block-setup tpm2-luks` | Optional: encrypt the root partition and unlock it with the TPM |
 
 ## 4. Reboot
@@ -64,7 +65,8 @@ sudo podman run --rm --privileged --pid=host --ipc=host \
   localhost/mysystem:latest \
   bootc install to-disk \
     --filesystem ext4 \
-    --target-transport containers-storage --skip-fetch-check \
+    --target-transport oci --target-imgref /var/lib/nomira/mysystem.oci \
+    --skip-fetch-check \
     --generic-image --via-loopback /output/nomira.raw
 ```
 
