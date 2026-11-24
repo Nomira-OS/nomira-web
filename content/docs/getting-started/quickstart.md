@@ -36,6 +36,8 @@ phases:
       ssh:
         packages: [openssh]
         services: [sshd.service]
+      editor:
+        packages: [nano]
       locale:
         - copy files/locale.conf /etc/locale.conf
         - copy files/vconsole.conf /etc/vconsole.conf
@@ -58,6 +60,8 @@ Adapt it to your machine:
 - `TAG`: a tag of the [base image](https://github.com/orgs/Nomira-OS/packages).
 - `hardware`: the firmware and microcode your machine needs, see
   [Linux firmware](https://wiki.archlinux.org/title/Linux_firmware) and [Microcode](https://wiki.archlinux.org/title/Microcode).
+- `editor`: the base image has no editor; you need one to change the
+  recipe on the installed machine. Any other editor works as well.
 - `network`: NetworkManager is an example; any option from
   [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
 

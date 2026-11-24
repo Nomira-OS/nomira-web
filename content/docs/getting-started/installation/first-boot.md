@@ -29,8 +29,9 @@ each home is encrypted. More users:
 sudo homectl create alice --member-of=wheel
 ```
 
-Members of `wheel` may use `sudo`. If the first user is not in `wheel`,
-log in as `root` and run `homectl update <user> --member-of=wheel`.
+The first user is put into `wheel`, whose members may use `sudo`. For a
+user without it, log in as `root` and run
+`homectl update <user> --member-of=wheel`.
 
 ## From now on
 
@@ -38,6 +39,7 @@ The system changes through its recipe in `/etc/nomira`, which the
 [quick start](../../quickstart/) recipe puts there. Edit it and switch:
 
 ```sh
+sudo nano /etc/nomira/recipe.yml
 sudo nomira switch
 sudo reboot
 ```
