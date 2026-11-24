@@ -19,7 +19,7 @@ settings:
 
 prepare:
   initramfs:
-    from: console
+    from: boot
     commands:
       - >-
         run --mount=type=tmpfs,target=/tmp mkdir /out &&
@@ -36,12 +36,6 @@ phases:
       --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg
       pacman-key --init && pacman-key --populate &&
       pacman -S --needed --noconfirm ${items}
-
-  - name: console
-    groups:
-      locale:
-        - copy files/locale.conf /etc/locale.conf
-        - copy files/vconsole.conf /etc/vconsole.conf
 
   # Everything else. Changes here leave the initramfs as it is.
   - name: packages
@@ -63,6 +57,8 @@ phases:
         services: [sshd.service]
       editor:
         packages: [nano]
+      language:
+        packages: [glibc-locales]
       recipe:
         - copy recipe.yml /etc/nomira/recipe.yml
         - copy files/ /etc/nomira/files/
@@ -79,7 +75,7 @@ phases:
       uki:
         - >-
           run --mount=type=bind,from=kernel,target=/target
-          --mount=type=bind,from=console,source=/usr/lib/modules,target=/kernels
+          --mount=type=bind,from=boot,source=/usr/lib/modules,target=/kernels
           --mount=type=bind,from=initramfs,source=/out,target=/initramfs
           --mount=type=tmpfs,target=/tmp
           mkdir -p /boot/EFI/Linux &&
@@ -91,8 +87,6 @@ phases:
 
 ```sh
 mkdir files
-echo 'LANG=en_US.UTF-8' > files/locale.conf
-echo 'KEYMAP=us' > files/vconsole.conf   # localectl list-keymaps shows all
 ```
 
 Each group names what it needs, and the collector phases install it, all
@@ -102,7 +96,6 @@ of a kind in one step:
   microcode, and anything else the initramfs has to contain (disk tools
   for an unusual setup, for instance). The pacman keyring lives in a
   tmpfs for that step only, so no private key ends up in the image.
-- **`console`** sets locale and keymap, so the initramfs knows them too.
 - **`packages`** installs everything else. A package added here installs
   in seconds and leaves the initramfs alone.
 - **`services`** enables the services.
@@ -111,8 +104,15 @@ of a kind in one step:
 - The stage **`initramfs`** and the phases **`kernel`** and **`uki`**
   replace kernel and initramfs with a
   [unified kernel image](../../base-image/booting/#unified-kernel-image).
-  The initramfs is built only when `boot` or `console` change, and never
-  lands in the image itself.
+  The initramfs is built only when `boot` changes, and never lands in
+  the image itself.
+
+The recipe sets no language, keymap or time zone: the first boot asks for
+them, and `glibc-locales` brings every language, so any answer works. To
+fix them in the image instead, copy `/etc/locale.conf` and
+`/etc/vconsole.conf` in a phase between `boot` and the stage's phase, and
+let the stage start from that phase; the initramfs then also knows the
+keymap, which matters only for a passphrase typed at boot.
 
 Adapt it to your machine:
 

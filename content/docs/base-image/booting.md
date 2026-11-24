@@ -72,9 +72,9 @@ the digest once instead of twice (the second is a fallback for older
 bootc versions, which the image's own bootc does not need). Configuration from later phases
 is not in the initramfs. What it should know, the keymap in
 `/etc/vconsole.conf` for instance, goes into a phase between `packages`
-and the stage, and the stage starts from that phase; the
-[quick start](../../getting-started/quickstart/) does that with a phase
-`console`.
+and the stage, and the stage starts from that phase. The
+[quick start](../../getting-started/quickstart/) sets none and lets the
+first boot ask.
 
 The stage runs again when anything in `packages` or `console` changes,
 nano as much as the kernel. That is fine for soft reboots: dracut builds

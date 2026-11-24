@@ -16,6 +16,16 @@ is still open:
 Then `systemd-homed-firstboot` asks for a first user, whose home is
 encrypted, see [Security](../security/#home-directories).
 
+## Languages
+
+Arch's glibc ships the compiled locale `C.UTF-8` only, and `/usr` is
+read-only on the installed system, so `locale-gen` cannot add any there.
+For the answer to the locale question to work, the image needs the
+locales: the package `glibc-locales` brings all of them, as the
+[quick start](../../getting-started/quickstart/) does; a recipe that wants
+only some runs `locale-gen` at build time (see
+[Locale](https://wiki.archlinux.org/title/Locale)).
+
 ## Answering in the recipe
 
 A recipe that writes the values to `/etc` gets no question for them:
