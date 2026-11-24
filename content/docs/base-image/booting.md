@@ -76,8 +76,8 @@ and the stage, and the stage starts from that phase. The
 [quick start](../../getting-started/quickstart/) sets none and lets the
 first boot ask.
 
-The stage runs again when anything in `packages` or `console` changes,
-nano as much as the kernel. That is fine for soft reboots: dracut builds
+The stage runs again when anything in its phase or before changes, a
+small tool as much as the kernel. That is fine for soft reboots: dracut builds
 reproducibly (`reproducible=yes` in the image, `SOURCE_DATE_EPOCH` fixed
 here), so a package that adds nothing to the initramfs yields the same
 bytes, and bootc compares the bytes of kernel and initramfs, not when
