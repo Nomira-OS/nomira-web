@@ -301,3 +301,11 @@ tbody tr:last-child > * { border-bottom: 0; }
 .wide-table .table-scroll { margin: 0; background: var(--bg); }
 .wide-table tbody td:first-of-type, .wide-table thead th:nth-child(2) { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .fineprint { color: var(--muted); font-size: 0.95rem; max-width: 46rem; margin: 1.5rem 0 0; }
+
+/* Copy buttons, added by copy.js. */
+.code { position: relative; }
+.code > pre { margin: 0; }
+.prose .code { margin: 1.2rem 0; }
+.code .copy { position: absolute; top: 0.45rem; right: 0.45rem; min-height: 32px; padding: 0 0.7rem; font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; opacity: 0.85; }
+.code .copy:hover, .code .copy:focus-visible { opacity: 1; border-color: var(--accent); }
+.code:hover .copy { opacity: 1; }
