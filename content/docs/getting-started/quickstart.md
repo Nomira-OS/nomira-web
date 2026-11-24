@@ -24,7 +24,8 @@ prepare:
       - >-
         run --mount=type=tmpfs,target=/tmp mkdir /out &&
         for d in /usr/lib/modules/*/; do k="$(basename "$d")";
-        TMPDIR=/tmp dracut --kver "$k" "/out/$k.img"; done
+        TMPDIR=/tmp SOURCE_DATE_EPOCH=0 dracut --kver "$k" "/out/$k.img"; done &&
+        sha256sum /out/*.img
 
 phases:
   - name: packages

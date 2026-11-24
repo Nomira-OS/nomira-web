@@ -38,7 +38,8 @@ prepare:
       - >-
         run --mount=type=tmpfs,target=/tmp mkdir /out &&
         for d in /usr/lib/modules/*/; do k="$(basename "$d")";
-        TMPDIR=/tmp dracut --kver "$k" "/out/$k.img"; done
+        TMPDIR=/tmp SOURCE_DATE_EPOCH=0 dracut --kver "$k" "/out/$k.img"; done &&
+        sha256sum /out/*.img
 
 phases:
   # … packages, features, services …
@@ -68,6 +69,13 @@ is not in the initramfs. What it should know, the keymap in
 and the stage, and the stage starts from that phase; the
 [quick start](../../getting-started/quickstart/) does that with a phase
 `console`.
+
+The stage runs again when anything in `packages` or `console` changes,
+nano as much as the kernel. That is fine for soft reboots: dracut builds
+reproducibly (`reproducible=yes` in the image, `SOURCE_DATE_EPOCH` fixed
+here), so a package that adds nothing to the initramfs yields the same
+bytes, and bootc compares the bytes of kernel and initramfs, not when
+they were built. The log shows the checksum of every initramfs.
 
 A recipe without the stage and the two phases boots kernel and initramfs
 the classic way, and must run dracut after changing the kernel or early
