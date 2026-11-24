@@ -1,11 +1,11 @@
 ---
-title: What switch does
-lead: nomira switch builds, checks and only then touches the running system.
+title: Build and switch
+lead: nomira build builds and checks the image; nomira switch hands it to bootc.
 weight: 20
 untested: true
 ---
 
-## The steps
+## nomira build
 
 1. **Find buildkitd**, in this order: `BUILDKIT_HOST` if set; a
    buildkitd running locally (first the user's own at
@@ -13,38 +13,43 @@ untested: true
    at `/run/buildkit/buildkitd.sock`); otherwise a podman container
    `nomira-buildkitd`, which the CLI creates when needed.
 2. **Build** the recipe with `buildctl`. The check of the groups runs in
-   the frontend, and for a bootc base image the frontend ends with a
-   [unified kernel image](../../base-image/booting/#unified-kernel-image)
-   (`--no-uki` turns it off). The result is an OCI directory,
+   the frontend. The result is an OCI directory,
    [see where](../commands/#where-the-result-goes).
    BuildKit only writes layers that are not there yet.
 3. **Check** the image, see below. The checks run it from
    containers-storage, so only for them is it copied there.
-4. **Switch**: only when everything has passed,
-   `bootc switch --transport oci` with that directory. bootc reads the
-   directory and imports only the layers it does not have yet.
+4. **Record** that the image passed: `<name>.oci.checked` next to the
+   directory holds its digest.
 
-Nothing on the running system changes before step 4.
+`build` never touches the running system.
 
-`nomira switch` is a thin layer over bootc: build, check, then
-`bootc switch`. Everything after that, staging, the boot entry, `bootc
-rollback`, `bootc status`, is bootc's.
-`nomira switch --dry-run` shows the exact sequence of commands.
+## nomira switch
+
+`bootc switch --transport oci` with that directory, nothing else. bootc
+reads the directory and imports only the layers it does not have yet.
+Staging, the boot entry, `bootc rollback` and `bootc status` are bootc's.
+`switch` refuses an image that has not passed the checks of
+`nomira build`, or that has changed since.
+
+```sh
+sudo nomira build
+sudo nomira switch          # --apply reboots right away
+```
 
 ## As root or not
 
-On a nomira system, run `sudo nomira switch`. The CLI then uses the
+On a nomira system, run both with `sudo`. `build` then uses the
 system-wide buildkitd, which the base image starts on demand.
 
-Without root, the CLI falls back to the podman container and calls
-`sudo` only for the last step. This is meant for developing recipes on
-another machine.
+Without root, `build` falls back to the podman container, and `switch`
+calls `sudo` for bootc. This is meant for developing recipes on another
+machine.
 
-## Checks before the switch
+## The checks
 
 **Your own hooks.** Every `validation.d/*.sh` next to the recipe runs in
-sorted order, with the image name in `$IMG`. A hook that fails stops the
-switch. Example, `validation.d/10-lint.sh`:
+sorted order, with the image name in `$IMG`. A hook that fails fails the
+build. Example, `validation.d/10-lint.sh`:
 
 ```sh
 podman run --rm "$IMG" bootc container lint --fatal-warnings
@@ -60,4 +65,4 @@ The boot test connects over SSH. It therefore needs a network service
 and `sshd` to be active in the tested image; otherwise it runs into a
 timeout. The bare base image has neither.
 
-`nomira validate` runs the same checks without building or switching.
+`nomira validate` runs the same checks without building.

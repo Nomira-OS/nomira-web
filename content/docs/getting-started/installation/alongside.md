@@ -10,8 +10,8 @@ restoring it.
 
 The image's [unified kernel image](../../../base-image/booting/#unified-kernel-image)
 needs a root partition of GPT type *Linux root (x86-64)* and a
-filesystem with fs-verity. If yours has neither, build with
-`nomira build --no-uki`.
+filesystem with fs-verity. If yours has neither, leave the phases
+`kernel` and `uki` out of the recipe.
 
 ## What happens
 

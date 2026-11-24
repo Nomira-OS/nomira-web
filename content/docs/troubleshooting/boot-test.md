@@ -1,6 +1,6 @@
 ---
 title: The boot test times out
-lead: nomira switch or nomira validate waits for the VM and gives up.
+lead: nomira build or nomira validate waits for the VM and gives up.
 weight: 20
 ---
 
@@ -21,7 +21,7 @@ boot process, and the test still failed.
 - Or skip the test for this run:
 
 ```sh
-nomira switch --no-boot-test
+nomira build --no-boot-test
 ```
 
 - To look at the boot yourself, start the image with

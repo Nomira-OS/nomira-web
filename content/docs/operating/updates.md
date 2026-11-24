@@ -8,25 +8,27 @@ untested: true
 ## Updating your own system
 
 ```sh
+sudo nomira build
 sudo nomira switch
 ```
 
-The command builds the recipe, checks the result and only then hands the
-image to bootc. Until then nothing changes on the running system. The
-new system takes effect on the next boot; with `--apply` the machine
-reboots right away.
-
-`nomira switch --dry-run` shows which commands would run.
+`build` builds the recipe and checks the result; nothing changes on the
+running system. `switch` hands the checked image to bootc. The new system
+takes effect on the next boot; with `--apply` the machine reboots right
+away.
 
 ## Getting newer packages
 
 The package set depends on the base image. Enter a newer release in
-`settings.base` and run `sudo nomira switch`. All packages, including
+`settings.base`, then build and switch. All packages, including
 those from your recipe, then come from the newer set.
 
 ## Back to the previous state
 
-bootc keeps the previous state. You can select it in the boot menu; to
+bootc keeps two systems: the one running and the one before it, plus a
+new one waiting for the next boot. A new `switch` replaces only the
+waiting one, never the running one; after a reboot the one that was
+running becomes the previous one. You can select it in the boot menu; to
 go back permanently:
 
 ```sh

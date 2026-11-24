@@ -17,15 +17,34 @@ No options are needed for either.
 
 ## Unified kernel image
 
-The nomira frontend ends every build on a bootc image with a unified
-kernel image (UKI): kernel, initramfs and kernel command line in one
-file, in `/boot/EFI/Linux`. The command line carries the composefs digest
-of the system, so the UKI only boots the system it was built for. The
-steps are the ones bootc documents for sealed images
-(`bootc container split-kernel-and-rootfs`, `bootc container ukify`),
-run inside the image with its own bootc and ukify. bootc installs the
-UKI instead of the kernel. It is not signed yet; signing comes with
-Secure Boot.
+A unified kernel image (UKI) puts kernel, initramfs and kernel command
+line into one file, in `/boot/EFI/Linux`. The command line carries the
+composefs digest of the system, so the UKI only boots the system it was
+built for. bootc installs the UKI instead of the kernel. It is not signed
+yet; signing comes with Secure Boot.
+
+The recipe builds it, with two phases at the end, the way bootc
+documents it for sealed images: one takes kernel and initramfs out, the
+next runs `bootc container ukify` on the system without them, with the
+kernel mounted from the phase before. The image brings bootc and ukify.
+
+```yaml
+  - name: kernel
+    groups:
+      out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
+  - name: uki
+    groups:
+      uki:
+        - >-
+          run --mount=type=bind,from=kernel,target=/target
+          --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          mkdir -p /boot/EFI/Linux &&
+          for d in /kernels/*; do
+          bootc container ukify --rootfs /target --kernel-dir "$d" --
+          --output "/boot/EFI/Linux/$(basename "$d").efi"; done
+```
+
+`services` is the phase before `kernel`; use the name of yours.
 
 What that means:
 
@@ -33,8 +52,8 @@ What that means:
   cannot name the root partition. systemd finds it by its GPT partition
   type (*Linux root (x86-64)*), which `bootc install to-disk` sets. For
   an [installation over an existing Linux](../../getting-started/installation/alongside/),
-  the partition may have another type; change it, or build with
-  `--no-uki`.
+  the partition may have another type; change it, or leave the UKI
+  phases out.
 - **Kernel arguments come from the image**, from
   `/usr/lib/bootc/kargs.d`, when the UKI is built. Arguments passed to
   `bootc install --karg` may not reach a UKI; we have not tried.

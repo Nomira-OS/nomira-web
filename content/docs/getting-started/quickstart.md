@@ -47,6 +47,21 @@ phases:
 
   - name: services
     collect: run systemctl enable ${items}
+
+  - name: kernel
+    groups:
+      out: ["run rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img"]
+
+  - name: uki
+    groups:
+      uki:
+        - >-
+          run --mount=type=bind,from=kernel,target=/target
+          --mount=type=bind,from=services,source=/usr/lib/modules,target=/kernels
+          mkdir -p /boot/EFI/Linux &&
+          for d in /kernels/*; do
+          bootc container ukify --rootfs /target --kernel-dir "$d" --
+          --output "/boot/EFI/Linux/$(basename "$d").efi"; done
 ```
 
 ```sh
@@ -69,7 +84,9 @@ Each group names what it needs. The phase `packages` installs all of it
 in one step and rebuilds the initramfs; the pacman keyring lives in a
 tmpfs for that step only, so no private key ends up in the image; the phase `services` enables the
 services. The group `recipe` puts the recipe into the system, to
-`/etc/nomira`, where `nomira` looks for it on the installed machine.
+`/etc/nomira`, where `nomira` looks for it on the installed machine. The
+last two phases replace kernel and initramfs with a
+[unified kernel image](../../base-image/booting/#unified-kernel-image).
 
 ## 2. Check and build
 

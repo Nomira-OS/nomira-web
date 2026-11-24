@@ -5,8 +5,8 @@ weight: 10
 ---
 
 ```text
-nomira build    [flags]          build the recipe into an OCI layout directory
-nomira switch   [flags]          build, validate, then bootc switch
+nomira build    [flags]          build the recipe and check the image
+nomira switch   [flags]          hand the last checked build to bootc switch
 nomira validate [flags] [image]  run validation.d hooks and the boot test
 nomira lint     [flags]          check the recipe
 nomira graph    [flags]          print the pipeline as a Mermaid flowchart
@@ -25,7 +25,6 @@ nomira version                   print the version
 | `--frontend IMAGE` | Frontend image; otherwise the `# syntax=` line of the recipe, otherwise `ghcr.io/nomira-os/nomira:1-alpha` |
 | `--name NAME` | Image name; otherwise `settings.name`, otherwise the directory name |
 | `--no-boot-test` | Skip the bcvk boot test |
-| `--no-uki` | Build no unified kernel image |
 | `--apply` | Reboot into the new image right after `switch` |
 
 Not every flag applies to every command.

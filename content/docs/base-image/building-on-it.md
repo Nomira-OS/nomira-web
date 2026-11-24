@@ -63,4 +63,4 @@ kargs = ["quiet"]
 ## Building on the machine
 
 `buildkit.socket` is enabled. buildkitd runs as root and only on demand:
-it starts when `sudo nomira switch` talks to it.
+it starts when `sudo nomira build` talks to it.
