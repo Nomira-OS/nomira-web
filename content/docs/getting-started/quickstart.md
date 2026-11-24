@@ -1,27 +1,20 @@
 ---
 title: Quick start
-lead: Build a system image you could actually install. Nothing on your own system changes.
-weight: 20
+lead: Build a system image you could install. Nothing on your machine changes.
+weight: 10
 untested: true
 ---
 
-You need the [CLI](../install-cli/). The recipe below builds on the
-nomira base image and adds what a real machine needs first: network,
-firmware and SSH.
-
-Building the same recipe structure on a small test image has been
-tried. This recipe on the nomira base image has not been built by us
-yet.
+You need the [nomira CLI](../../cli/install/).
 
 ## 1. Write the recipe
 
-Create a directory, and in it the file `recipe.yml`:
+In a new directory, create `recipe.yml`:
 
 ```yaml
 # syntax=ghcr.io/nomira-os/nomira:1-alpha
 settings:
   name: mysystem
-  description: nomira base with network, firmware and SSH
   base: ghcr.io/nomira-os/nomira-image:TAG
 
 phases:
@@ -46,64 +39,43 @@ phases:
     collect: run systemctl enable ${items}
 ```
 
-And the two files the group `locale` copies:
-
 ```sh
-mkdir -p files
+mkdir files
 echo 'LANG=en_US.UTF-8' > files/locale.conf
 echo 'KEYMAP=us' > files/vconsole.conf
 ```
 
-Replace `TAG` with a tag of the base image, see
-[Tags and package set](../../base-image/versions/). On an AMD machine
-use `amd-ucode` instead of `intel-ucode`.
+Adapt it to your machine:
 
-What the recipe says:
+- `TAG`: a tag of the [base image](https://github.com/orgs/Nomira-OS/packages).
+- `hardware`: the firmware and microcode your machine needs, see
+  [Linux firmware](https://wiki.archlinux.org/title/Linux_firmware) and [Microcode](https://wiki.archlinux.org/title/Microcode).
+- `network`: NetworkManager is an example; any option from
+  [Network configuration](https://wiki.archlinux.org/title/Network_configuration) works the same way.
 
-- **Four features**: `hardware`, `network`, `ssh` and `locale`. Each
-  names the packages and services it needs, or the files it brings.
-- **NetworkManager is an example.** Any network manager from the
-  [Arch Wiki](https://wiki.archlinux.org/title/Network_configuration) works the same way: name its package and its
-  service in the group `network`.
-- **Two collectors**: the phase `packages` installs everything the
-  features asked for in one step and then regenerates the initramfs, so
-  that firmware and microcode needed early are in it. The phase
-  `services` enables the services.
-- The features are independent of each other. The build checks that
-  they do not touch the same files.
+Each group names what it needs. The phase `packages` installs all of it
+in one step and rebuilds the initramfs; the phase `services` enables the
+services.
 
-## 2. Check it
+## 2. Check and build
 
 ```sh
 nomira lint
-```
-
-This only reads the recipe. It finds typing errors and unknown fields
-before anything is built.
-
-## 3. Build it
-
-```sh
 nomira build
 ```
 
-The first build downloads the base image and the packages; later builds
-reuse what has not changed. The result is the archive
-`.nomira/mysystem.oci.tar`.
+The result is `.nomira/mysystem.oci.tar`.
 
-## 4. Look at the result
+## 3. Look inside
 
 ```sh
 skopeo copy oci-archive:.nomira/mysystem.oci.tar containers-storage:localhost/mysystem:latest
-podman run --rm localhost/mysystem:latest pacman -Q networkmanager openssh
+podman run --rm localhost/mysystem:latest pacman -Q linux-firmware openssh
 ```
 
-The image is an ordinary container image, so you can inspect it like
-one.
+## 4. Change something
 
-## 5. Change something
-
-Add a feature to the phase `features`:
+Add a group to `features` and build again:
 
 ```yaml
       motd:
@@ -112,16 +84,7 @@ Add a feature to the phase `features`:
 
 ```sh
 echo 'Built with nomira.' > files/motd
+nomira build
 ```
 
-Build again. The packages are not installed again, and the other
-features come from the cache. Only the new group is built; after it the
-services are enabled once more, which takes a moment.
-
-## Next
-
-- [Start the image in a VM](../vm/)
-- [Install it](../installation/)
-- [More about writing recipes](../../recipes/writing/)
-- If the build stops with "groups are not disjoint":
-  [Groups conflict](../../troubleshooting/groups-conflict/)
+Only the new group is built; the others come from the cache.

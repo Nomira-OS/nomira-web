@@ -8,11 +8,6 @@ The CLI is a thin layer. It knows the frontend only as a container image
 and calls the tools that do the work: `buildctl` builds, `skopeo` moves
 the image, `bootc` switches. The frontend stays usable without it.
 
-## Getting it
-
-See [Install the CLI](../getting-started/install-cli/). The base image
-already contains it.
-
 ## What has been tried
 
 `lint` and `build` have been run for real. `switch` and `validate` are

@@ -24,5 +24,5 @@ boot process, and the test still failed.
 nomira switch --no-boot-test
 ```
 
-- To look at the boot yourself, start the image with a console, see
-  [Starting in a VM](../../getting-started/vm/).
+- To look at the boot yourself, start the image with
+  `bcvk ephemeral run --console -it`.

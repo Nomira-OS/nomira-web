@@ -1,7 +1,7 @@
 ---
 title: Install the CLI
-lead: Everything else in these docs uses the nomira command. Get it first.
-weight: 10
+lead: Build the nomira command line, or run it from the base image.
+weight: 5
 ---
 
 There is no release and no package yet. Until there is, you have two
@@ -36,7 +36,7 @@ sudo pacman -S --needed podman buildkit skopeo
 
 > **Not tried yet.** This should work, but nobody has run it so far.
 
-The [base image](../../base-image/) contains the CLI together with
+The base image contains the CLI together with
 Podman, BuildKit and skopeo. You download that image anyway, because
 recipes build on it. So the machine needs nothing but Podman:
 
@@ -70,4 +70,3 @@ Limits of this way:
   host. On an installed nomira system the CLI is on the host anyway.
 - Files in `.nomira/` belong to root.
 
-Continue with the [quick start](../quickstart/).

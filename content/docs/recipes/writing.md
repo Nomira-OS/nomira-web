@@ -73,7 +73,7 @@ The long one is a mapping. Four keys have a fixed meaning:
 | `commands` | The list of commands |
 | `prepare` | Build stages that only this group uses |
 | `expects` | Paths that must exist before the group is applied |
-| `include` | Read the group from a file, see [Splitting recipes](../includes/) |
+| `include` | Read the group from a file |
 
 Every other key, such as `packages` above, is a contribution to the
 collector of that name. A group may consist of contributions alone:
@@ -116,8 +116,6 @@ groups copy.** What that means for common tasks:
 | Generate a file with a script | Run the script in a `prepare` stage, copy the result |
 | Write a one-line file | Keep the file in the recipe and copy it |
 
-More on this in [What gets rebuilt](../rebuilds/).
-
 ## Where files belong
 
 In the finished system `/usr` is read-only, `/etc` is merged on updates,
@@ -125,8 +123,7 @@ and `/var` is not part of the image. Put the content of the system into
 `/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
 
 After changing the kernel or adding firmware that is needed early,
-`/usr/libexec/nomira-initramfs` regenerates the initramfs. More in
-[Building on the base image](../../base-image/building-on-it/).
+`/usr/libexec/nomira-initramfs` regenerates the initramfs.
 
 ## Build and check
 

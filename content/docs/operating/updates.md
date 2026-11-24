@@ -33,20 +33,6 @@ go back permanently:
 sudo bootc rollback
 ```
 
-## The boot loader
-
-Every switch writes new boot entries, a kernel and an initramfs to the
-EFI system partition. bootc does that, and nothing else is needed for
-it.
-
-systemd-boot itself is not updated by bootc. It stays at the version it
-was installed with; it keeps booting newer kernels, but its own fixes do
-not arrive. systemd has a service for this, `systemd-boot-update.service`,
-which copies a newer systemd-boot from the running system to the EFI
-system partition at boot. The base image does not enable it yet, because
-we have not checked whether it finds the EFI system partition on a
-nomira system.
-
 ## What is kept
 
 - `/etc`: your changes stay and are merged with the new image.
