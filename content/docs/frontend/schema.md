@@ -33,7 +33,7 @@ prepare:
 
 phases:
   - name: packages
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 
   - name: features
     validation: allow-identical
@@ -74,8 +74,9 @@ phases:
 | `args` | Declared build arguments with defaults, used as `${NAME}`. Callers of BuildKit may override them (`--opt build-arg:NAME=…`); the nomira CLI does not |
 | `compression` | `zstd` (default), `gzip` or `uncompressed`: compression of the exported layers. The CLI acts on it |
 | `secrets` | For each secret id that a step mounts, the file on the build machine that provides it, relative to the recipe or absolute. The CLI passes them to BuildKit |
-| `source_date_epoch` | Seconds since 1970. Every `run` sees it as `SOURCE_DATE_EPOCH`, the image takes it as its creation time, and the file times in the recipe's layers are clamped to it (the CLI asks BuildKit for that). Default: the creation time of the base image |
-| `record` | `true` (default), `false` or a phase name: where the image gets a copy of the recipe in `/usr/share/nomira/recipe`, see below |
+| `source_date_epoch` | Seconds since 1970. Every `run` sees it as `SOURCE_DATE_EPOCH`, the image takes it as its creation time, and the file times in the recipe's layers are clamped to it (the CLI asks BuildKit for that). Default (`true`): the creation time of the base image. `false` turns all of it off |
+| `record` | `true` (default) or `false`: whether the image gets a copy of the recipe in `/usr/share/nomira/recipe`, see below |
+| `volatile` | Paths every `run` gets as an empty tmpfs, so that nothing written there ends up in the image. Default `[/run, /tmp, /var/cache, /var/log, /var/tmp]`; `[]` turns it off |
 | `platforms`, `tags` | Checked and reported, but not acted on by the frontend. The caller decides |
 
 **The record.** Every image carries the recipe it was built from: the
@@ -88,7 +89,18 @@ recipe. The record is added after the last phase before the first one
 that reads an earlier phase (a bind mount or copy from it, or a prepare
 stage that starts from it), so that what such a phase derives, a UKI with
 its digest for instance, covers it; without such a phase, after the last
-one. A phase name puts it after that phase, `false` leaves it out.
+one. As late as that, a change to the recipe only rebuilds what comes
+after it.
+
+**Volatile paths.** On a bootc system `/run` and `/tmp` are tmpfs, and
+bootc takes `/var` from an image only at the first install, never with an
+update. Logs, caches and temporary files written during the build are
+therefore build artifacts; `bootc container lint` warns about them. The
+frontend gives every `run` an empty tmpfs at the `volatile` paths, so
+they never reach a layer, and the image stays the same however often it
+is built. A `--mount` at the same path takes the place of the tmpfs, and
+mounts below it, a package cache in `/var/cache/pacman/pkg` for
+instance, work as usual.
 
 **What is loaded.** From the recipe directory the frontend reads only
 the entry file and the files it includes, and only what `copy` commands

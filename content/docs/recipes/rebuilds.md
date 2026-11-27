@@ -15,6 +15,7 @@ weight: 14
 | A group | That group, and every later phase that uses `run` |
 | The items of a collector | The collector, and every later phase that uses `run` |
 | The base image | Collectors and groups that use `run` |
+| Anything in the recipe | The [record](../../frontend/schema/#settings), and every phase after it |
 | Nothing | Nothing |
 
 Sibling groups of a changed group always stay in the cache.
@@ -23,6 +24,35 @@ The second column says "that uses `run`" for a reason. A group that only
 copies files does not look at what came before it. nomira builds it on
 its own and lays the result on top, so its cache depends only on the
 files it copies. A new base image leaves it alone.
+
+## Large collectors
+
+A collector runs once with all its items. When one item changes, it runs
+again with all of them: pacman takes the packages from the cache mount
+instead of downloading them, but still unpacks every one, runs every
+hook and, when firmware or a kernel is among them, builds the initramfs
+again. The result is the same; only the time grows with the collector.
+
+When that matters, split the collector: what rarely changes goes to a
+collector of its own before the others, with the same command.
+
+```yaml
+phases:
+  - name: firmware        # changes with new hardware, rarely
+    collect: run … pacman -S --needed --noconfirm ${items}
+  - name: packages        # changes often
+    collect: run … pacman -S --needed --noconfirm ${items}
+  - name: features
+    groups:
+      hardware:
+        firmware: [linux-firmware-intel, intel-ucode]
+      editor:
+        packages: [nano]
+```
+
+Adding an editor then reruns only `packages` and what follows; the
+firmware stays in the cache. Which collector a package goes to never
+changes what ends up in the image.
 
 ## An example
 

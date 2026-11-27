@@ -17,8 +17,11 @@ weight: 40
 
 - The package database is in `/usr/lib/sysimage`, not in `/var`, so that
   it is part of the image.
-- The package cache is in `/usr/lib/sysimage/cache/pacman/pkg`. A cache
-  mount must point there.
+- Cache and log are where Arch has them, in `/var/cache/pacman/pkg` and
+  `/var/log/pacman.log`. The frontend gives every step a tmpfs over
+  `/var/cache` and `/var/log` ([`volatile`](../../frontend/schema/#settings)),
+  so neither ends up in the image; a cache mount at
+  `/var/cache/pacman/pkg` keeps the downloads across builds.
 - The image ships no pacman keyring, because a keyring holds a private
   key that would then be the same on every machine. A step that runs
   pacman sets one up in a tmpfs (`--mount=type=tmpfs`), so it never
@@ -29,7 +32,7 @@ weight: 40
 
 ```yaml
 - name: packages
-  collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/usr/lib/sysimage/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+  collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 ```
 
 ## Kernel, modules, firmware
@@ -41,8 +44,8 @@ it, see [The initramfs follows the packages](../booting/#the-initramfs-follows-t
 ## Reproducible layers
 
 pacman's install dates become `SOURCE_DATE_EPOCH` (a hook in the image;
-the frontend sets the variable for every step), the pacman log goes to
-`/dev/null`, and the nomira CLI clamps the file times of every layer to
+the frontend sets the variable for every step), logs and caches never
+reach a layer, and the nomira CLI clamps the file times of every layer to
 the same time. The same recipe on the same base image thus gives the
 same layers, wherever it is built. The time is
 [`settings.source_date_epoch`](../../frontend/schema/#settings), by
