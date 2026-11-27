@@ -33,7 +33,8 @@ builds it once; after that it follows the packages:
 |---|---|
 | A package that goes into the initramfs (kernel, firmware, a dracut module, …) | The base image's package manager hooks rebuild it in the same step |
 | Any other package | Nothing; the initramfs stays byte for byte the same |
-| Configuration copied by the recipe (`/etc/vconsole.conf`, …) | Nothing; a recipe that wants it in the initramfs runs dracut after the copy |
+| Configuration copied by the recipe (`/etc/vconsole.conf`, …) | Nothing by itself; a late phase rebuilds it (arch-base: `initramfs.yml`) |
+| Nothing that goes into the initramfs, although a hook fired | The base image may take the initramfs it built before from a cache instead of running dracut again |
 
 How the hooks work is specific to each base image:
 [arch-base](../arch-base/building-on-it/#the-initramfs). A recipe never

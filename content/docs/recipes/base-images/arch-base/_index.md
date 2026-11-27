@@ -35,9 +35,10 @@ the repository:
 
 | Part | What it adds |
 |---|---|
-| `mounts.yml` | A tmpfs over `/run`, `/tmp`, `/var/log`, `/var/tmp`; pacman's downloads in a BuildKit cache |
+| `mounts.yml` | A tmpfs over `/run`, `/tmp`, `/var/log`, `/var/tmp`; pacman's downloads and the initramfs cache in BuildKit caches |
 | `packages.yml` | The collector `packages`, one `pacman -S` for all groups; the keyring in a BuildKit cache |
 | `services.yml` | The collector `services`, one `systemctl enable` |
+| `initramfs.yml` | The initramfs once more, late, for configuration copied after the packages |
 | `lint.yml` | `bootc container lint` on the finished system |
 | `uki.yml` | A [unified kernel image](../boot/#unified-kernel-image); import it last |
 
