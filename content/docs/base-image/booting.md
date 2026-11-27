@@ -25,34 +25,38 @@ yet; signing comes with Secure Boot.
 
 The recipe builds it the way bootc documents it for sealed images: the
 phase `kernel` takes kernel and initramfs out, the phase `uki` runs
-`bootc container ukify` on the system without them. The initramfs comes
-from a prepare stage that starts from the phase that installs what boot
-needs: dracut runs there, only when those packages change, and its result
-is only mounted, never part of the image. The image brings bootc, dracut
-and ukify. The [`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) does all of it:
+`bootc container ukify` on the system without them, with kernel and
+initramfs as the phase before `kernel` left them. Nothing is rebuilt for
+the UKI. The image brings bootc, dracut and ukify. The
+[`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml)
+does all of it:
 
-- Packages for boot (firmware, microcode, disk tools) go to a collector
-  `boot` before the stage, everything else to a collector `packages`
-  after it. Adding an application then neither reruns dracut nor
-  reinstalls the firmware.
 - `--erofs-version v1-only` makes bootc compute the digest once instead of
   twice; the second is a fallback for older bootc versions, which the
   image's own bootc does not need.
-- Configuration from later phases is not in the initramfs. What it should
-  know, the keymap in `/etc/vconsole.conf` for instance, goes into a phase
-  between `boot` and the stage, and the stage starts from that phase.
+- The [recipe record](../../frontend/schema/#settings) comes right before
+  `uki`, so the digest covers it.
 
-The stage runs again when anything in its phase or before changes, a
-small tool as much as the kernel. That is fine for soft reboots: dracut builds
-reproducibly (`reproducible=yes` in the image, `SOURCE_DATE_EPOCH` fixed
-here), so a package that adds nothing to the initramfs yields the same
-bytes, and bootc compares the bytes of kernel and initramfs, not when
-they were built. The log shows the checksum of every initramfs.
+## The initramfs follows the packages
 
-A recipe without the stage and the two phases boots kernel and initramfs
-the classic way, and must run dracut after changing the kernel or early
-firmware, for instance at the end of the package collector:
-`dracut --force --kver <kver> /usr/lib/modules/<kver>/initramfs.img`.
+As on any Arch system, pacman hooks keep the initramfs up to date: when a
+package changes what goes into it (a kernel, firmware, a dracut module),
+dracut builds `/usr/lib/modules/<kver>/initramfs.img` again in the same
+step. The hooks have the triggers of Arch's own dracut hooks, which the
+image masks because they write a host-specific initramfs to `/boot`. A
+recipe therefore never decides which packages need a new initramfs, with
+or without a UKI.
+
+dracut builds reproducibly (`reproducible=yes` in the image, and the
+frontend sets `SOURCE_DATE_EPOCH` for every step), so the same packages
+give the same bytes, and bootc compares the bytes of kernel and
+initramfs, not when they were built. That keeps
+[soft reboots](../../operating/updates/#without-a-full-reboot) possible.
+
+Configuration copied into the image (no package involved) does not
+trigger the hooks. What the initramfs should know, the keymap in
+`/etc/vconsole.conf` for instance, needs dracut run after the copy:
+`for d in /usr/lib/modules/*/; do dracut --force --tmpdir /tmp --kver "$(basename "$d")" "${d}initramfs.img"; done`.
 
 What that means:
 

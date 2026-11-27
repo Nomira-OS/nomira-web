@@ -34,14 +34,19 @@ weight: 40
 
 ## Kernel, modules, firmware
 
-With a [unified kernel image](../booting/#unified-kernel-image) the
-recipe builds the initramfs for it. Without one, run dracut after adding
-or changing the kernel, kernel modules or firmware that is needed early,
-for instance at the end of the package collector:
+Install them like any other package. The image's pacman hooks rebuild
+the initramfs in the same step whenever a package changes what goes into
+it, see [The initramfs follows the packages](../booting/#the-initramfs-follows-the-packages).
 
-```yaml
-collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items} && for d in /usr/lib/modules/*/; do dracut --force --kver "$(basename "$d")" "${d}initramfs.img"; done
-```
+## Reproducible layers
+
+pacman's install dates become `SOURCE_DATE_EPOCH` (a hook in the image;
+the frontend sets the variable for every step), the pacman log goes to
+`/dev/null`, and the nomira CLI clamps the file times of every layer to
+the same time. The same recipe on the same base image thus gives the
+same layers, wherever it is built. The time is
+[`settings.source_date_epoch`](../../frontend/schema/#settings), by
+default the creation time of the base image.
 
 ## Symbolic links and restricted directories
 

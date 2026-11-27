@@ -8,7 +8,7 @@ untested: true
 ## Build
 
 Start from the [`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml): firmware, network,
-SSH, an editor, all languages, the recipe itself in `/etc/nomira`, and a
+SSH, an editor, all languages, and a
 [unified kernel image](../../../base-image/booting/#unified-kernel-image).
 Its [README](https://github.com/Nomira-OS/arch-base/blob/main/examples/README.md) says what to adapt; the firmware first, since
 a machine without its network firmware cannot go online to fix that.

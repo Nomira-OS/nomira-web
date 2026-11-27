@@ -122,9 +122,12 @@ In the finished system `/usr` is read-only, `/etc` is merged on updates,
 and `/var` is not part of the image. Put the content of the system into
 `/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
 
-After changing the kernel or adding firmware that is needed early, the
-initramfs has to be built again, see
-[Kernel, modules, firmware](../../base-image/building-on-it/#kernel-modules-firmware).
+The initramfs is rebuilt by the base image whenever a package needs it,
+see [Kernel, modules, firmware](../../base-image/building-on-it/#kernel-modules-firmware).
+
+Every image carries its recipe in `/usr/share/nomira/recipe`, and the
+first boot copies it to `/etc/nomira`; see `record` in the
+[schema](../../frontend/schema/#settings).
 
 ## Build and check
 

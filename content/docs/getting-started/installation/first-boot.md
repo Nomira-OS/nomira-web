@@ -35,8 +35,9 @@ user without it, log in as `root` and run
 
 ## From now on
 
-The system changes through its recipe in `/etc/nomira`, which the
-[`uki` example](https://github.com/Nomira-OS/arch-base/blob/main/examples/uki/recipe.yml) puts there. Edit it and update:
+The system changes through its recipe in `/etc/nomira`. Every image
+carries the recipe it was built from in `/usr/share/nomira/recipe`, and
+the first boot copies it to `/etc/nomira`. Edit it and update:
 
 ```sh
 sudo nano /etc/nomira/recipe.yml

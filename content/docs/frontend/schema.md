@@ -74,7 +74,26 @@ phases:
 | `args` | Declared build arguments with defaults, used as `${NAME}`. Callers of BuildKit may override them (`--opt build-arg:NAME=…`); the nomira CLI does not |
 | `compression` | `zstd` (default), `gzip` or `uncompressed`: compression of the exported layers. The CLI acts on it |
 | `secrets` | For each secret id that a step mounts, the file on the build machine that provides it, relative to the recipe or absolute. The CLI passes them to BuildKit |
+| `source_date_epoch` | Seconds since 1970. Every `run` sees it as `SOURCE_DATE_EPOCH`, the image takes it as its creation time, and the file times in the recipe's layers are clamped to it (the CLI asks BuildKit for that). Default: the creation time of the base image |
+| `record` | `true` (default), `false` or a phase name: where the image gets a copy of the recipe in `/usr/share/nomira/recipe`, see below |
 | `platforms`, `tags` | Checked and reported, but not acted on by the frontend. The caller decides |
+
+**The record.** Every image carries the recipe it was built from: the
+entry file, every included file and everything the `copy` commands take
+from the recipe directory, below `/usr/share/nomira/recipe`, at their
+paths relative to the recipe. Below `/usr` it is read-only and part of
+the verified image, so local changes cannot make it lie; the base image
+copies it to `/etc/nomira` on the first boot, as the machine's editable
+recipe. The record is added after the last phase before the first one
+that reads an earlier phase (a bind mount or copy from it, or a prepare
+stage that starts from it), so that what such a phase derives, a UKI with
+its digest for instance, covers it; without such a phase, after the last
+one. A phase name puts it after that phase, `false` leaves it out.
+
+**What is loaded.** From the recipe directory the frontend reads only
+the entry file and the files it includes, and only what `copy` commands
+name; nothing else leaves the machine. `.nomira/`, the CLI's build
+output, is always left out.
 
 ## prepare
 

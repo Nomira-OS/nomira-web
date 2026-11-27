@@ -28,8 +28,9 @@ sudo bootc upgrade --apply --soft-reboot=auto
 ```
 
 With a [unified kernel image](../../base-image/booting/#unified-kernel-image)
-that is the case whenever the packages did not change, since the
-initramfs then comes unchanged from the cache. If a soft reboot is not
+that is the case whenever no package changed what goes into the
+initramfs: it is then either not rebuilt at all or rebuilt to the same
+bytes. If a soft reboot is not
 possible, `auto` does nothing on the composefs backend instead of
 rebooting; `sudo reboot` then. `bootc status --verbose` shows whether the staged
 image can be soft-rebooted into.
