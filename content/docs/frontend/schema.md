@@ -153,6 +153,11 @@ contributions the collector is skipped.
 - An item consists of letters, digits and `@%+=:,./_-` and does not
   start with `-`.
 - A contribution to a name that is not a collector is an error.
+- `collect` may instead be a mapping: `resolve` (with `${items}`, prints
+  per file name, URL, `sha256:<hex>` and optionally a key), `each` (once
+  per bucket, files in `/nomira/in`, result in `/nomira/out`) and the
+  optional `then` (on the merged result, all files in `/nomira/in`). See
+  [Collectors that fan out](../../recipes/collectors/#collectors-that-fan-out).
 
 ## Commands
 
@@ -210,6 +215,7 @@ What a BuildKit client passes with `--opt`; the nomira CLI sets them.
 | `mode` | `build` (default), `lint` (only parse the recipe and its imports) or `resolve` (output the merged recipe as `recipe.yml`); lint and resolve also output `version` |
 | `image-resolve-mode` | `default`, `pull` or `local`, for the base image and stages |
 | `toolbox` | The busybox image the checks run in; has a default |
+| `check` | `on` (default) or `off`: the conflict checks between groups and between buckets |
 
 ## Known limits
 

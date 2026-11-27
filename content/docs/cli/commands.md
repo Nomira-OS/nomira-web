@@ -31,6 +31,7 @@ the image are steps of the recipe, such as `run bootc container lint`.
 | `--compression gzip` | Layer compression: `zstd` (default), `gzip`, `uncompressed` |
 | `--secret id=ID,src=FILE` | A secret the recipe mounts; may be repeated |
 | `--pull always` | `always` pull images again (a moved `latest`), pull `missing` ones (default), `never` |
+| `--no-check` | Skip the conflict checks between groups and between buckets: faster, less safe |
 | `--config FILE` | The `nomira.conf` to read |
 
 Flags may come before or after the other arguments.

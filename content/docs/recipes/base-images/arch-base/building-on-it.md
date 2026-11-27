@@ -18,21 +18,25 @@ The layout every base image shares, `/usr`, `/etc` and `/var`, is on
   `/var/log`, and a cache at `/var/cache/pacman/pkg` that keeps the
   downloads across builds. `mounts.yml` does that.
 - The image ships no pacman keyring, because a keyring holds a private
-  key that would then be the same on every machine. The collector keeps
-  one in a BuildKit cache on the build machine, so it never ends up in
-  the image.
+  key that would then be the same on every machine. It needs none for
+  `packages.yml`: the sync database was checked when the image was
+  built, and BuildKit checks every package against its sha256 from it.
 - Install packages with a [collector](../../../collectors/). Two groups
   that each call pacman would both write the package database and
-  conflict. `packages.yml` is that collector:
+  conflict. `packages.yml` is that collector, one that fans out:
 
-```yaml
-build:
-  packages:
-    collect: >-
-      run --mount=type=cache,target=/etc/pacman.d/gnupg,id=pacman-keyring,sharing=locked
-      { [ -s /etc/pacman.d/gnupg/trustdb.gpg ] || pacman-key --init; } &&
-      pacman-key --populate && pacman -S --needed --noconfirm ${items}
-```
+| Step | What pacman does there |
+|---|---|
+| resolve | `pacman -Sp --needed --print-format '%n %l sha256:%h %e'`: the packages to install with their dependencies, URL, sha256 and pkgbase as the key |
+| each | `pacman --root /nomira/out -U --nodeps --noscriptlet` with every hook removed: only the files of one bucket's packages, with the image's `NoExtract` lines and file capabilities |
+| then | `pacman -U --overwrite '*'` with `NoExtract = *` and a `!` for every path a hook triggers on: database, install scripts and hooks as in a normal install, no file written again except those; then `depmod` and the initramfs script |
+
+  libalpm ignores files under `NoExtract` for path triggers, hence the
+  negations. Modules and firmware stay excluded, so that they are not
+  written twice; that is why `then` runs `depmod` and the initramfs
+  script itself, the latter taking an unchanged initramfs from its cache.
+  Tried by hand against a normal install of cups: the same hooks, no
+  file missing. Not yet in a real build.
 
 - The mirrorlist points to the day of the Arch Linux Archive the image
   was built from, so `pacman -S` installs from the same package set; see

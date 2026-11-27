@@ -35,6 +35,7 @@ BuildKit to solve it.
 | Group without `run` | built on `scratch`, merged as is | only the group's commands and copied files |
 | Merge of a phase | `Merge(S, Δ₁ … Δₙ)` ([MergeOp](https://github.com/moby/buildkit/blob/master/docs/dev/merge-diff.md)) | the layers merged |
 | Collector | a group with one `Exec` on `S` with `${items}` | `S` and the sorted items |
+| Collector that fans out | see below | per bucket: `S` and the bucket's files |
 | Stage | its own `Image` | its base and commands |
 
 A phase with a single group that runs is serial: no diff, no merge, no
@@ -51,11 +52,46 @@ check.
   provably gives the same tree as building it on `S` (no symbolic links,
   modes or types in the way). Otherwise it falls back, with a warning in
   the step names.
-- **Expects.** Paths a group needs from `S` are checked on every build
-  without invalidating the group.
-
 These execs mount whole systems read-only and are named `[check …]` in
 the output.
+
+- **Buckets.** For a collector that fans out, pass 1 of the conflict
+  check runs between its buckets, strictly: a file in two buckets is a
+  conflict.
+
+The build option `check=off` (`nomira build --no-check`) skips the
+conflict checks between groups and between buckets; the guard stays.
+
+## A collector that fans out
+
+What runs in which order, and what runs side by side. Every box on one
+level runs in parallel; a level starts when what it needs is done.
+
+```text
+S  (the state the phase starts from)
+│
+├─ resolve ──────────────────────────────── 1 exec on S, solved at once:
+│    prints: name  URL  sha256:<hex>  [key]   the frontend reads the list
+│                                             before it builds the rest
+├─ fetch file 1 │ fetch file 2 │ … │ file n   BuildKit, by checksum, parallel,
+│                                             cached across all builds
+├─ each bucket 03 │ each bucket 17 │ …        1 exec per bucket on S, parallel;
+│    /nomira/in: the bucket's files            an unchanged bucket is cached
+│    /nomira/out → the bucket's layer          and its layer exported as before
+│
+├─ check: no file in two buckets ─────────── pass 1 per bucket, parallel
+│                                             (skipped with check=off)
+├─ Merge(S, bucket layers…) ──────────────── order fixed, decides nothing
+│
+└─ then ─────────────────────────────────── 1 exec on the merged result,
+     /nomira/in: all files                    reruns when any bucket changed
+     → the collector's result, merged with the other groups of the phase
+```
+
+A file's bucket depends on its key alone, by rendezvous hashing over 64
+buckets: adding or removing a file changes only its own bucket, and
+every bucket is built on `S` on its own, so no bucket waits for another.
+The later phases wait for `then`, as they wait for any phase.
 
 ## Cache keys
 
