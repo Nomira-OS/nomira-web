@@ -23,7 +23,7 @@ nomira version                   print the version
 | `-f recipe.yml` | Entry file of the recipe; default `$NOMIRA_RECIPE`, otherwise `/etc/nomira/recipe.yml` |
 | `-o DIR` | Output directory, see below for the default |
 | `--dry-run` | Only print the commands, run nothing |
-| `--progress plain` | A log with every step and its time (text output) |
+| `--progress plain` | buildctl's own progress display (`plain`, `tty`, `auto`) instead of nomira's (`nomira`, the default) |
 | `--no-boot-test` | Skip the bcvk boot test |
 | `--log-format json` | Output for log collectors, see [Output](#output); default `text` |
 | `--color never` | Colour in text output: `auto` (on a terminal, unless `NO_COLOR` is set), `always` or `never` |
@@ -84,9 +84,24 @@ nomira recipe diff docker://ghcr.io/me/laptop:1 recipe.yml
 ## Output
 
 Text output, the default, puts the time since the start in front of
-every line, shows the commands nomira runs in bold and frames the output
-of buildctl with two rules. Colour on a terminal, unless `NO_COLOR` is
-set.
+every line and shows the commands nomira runs in bold. The build itself
+appears one line per event: a finished step with its time, a step still
+running after three seconds, the output of steps indented below them.
+Steps from the cache are only counted; bookkeeping such as resolving
+images or the frontend's checks shows only when it fails or is slow.
+`--progress plain` or `tty` shows buildctl's own display instead.
+Colour on a terminal, unless `NO_COLOR` is set.
+
+```text
+ 0:00  + buildctl … build …
+ 0:03  ▸ [1/5 packages] run pacman -S --needed --noconfirm … …
+        │ [1/5 packages] installing nano...
+ 0:41  ✓ [1/5 packages] run pacman -S --needed --noconfirm …  0:41
+ 0:42  ✓ [3/5 features/ssh] copy files/sshd/ /etc/ssh/sshd_config.d/  0.0s
+ 0:58  ✓ [5/5 uki/uki] run mkdir -p /boot/EFI/Linux && …  0:16
+ 1:04  ✓ exporting to oci image format  6.1s
+ 1:04  • 9 steps from the cache
+```
 
 `--log-format json` writes one JSON object per line to stderr, for Loki,
 an OpenTelemetry collector or any other log collector:
