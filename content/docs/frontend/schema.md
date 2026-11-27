@@ -23,8 +23,6 @@ settings:
     LANG: C.UTF-8
   args:
     VERSION: "1.0"
-  platforms: [linux/amd64]
-  tags: ["${VERSION}", stable]
 
 stages:
   aurbuild:
@@ -73,12 +71,17 @@ build:
 | `labels` | Labels on the finished image |
 | `env` | Environment for all `run` commands, at build time only |
 | `args` | Declared build arguments with defaults, used as `${NAME}`. Callers of BuildKit may override them (`--opt build-arg:NAME=…`); the nomira CLI does not |
-| `compression` | `zstd` (default), `gzip` or `uncompressed`: compression of the exported layers. The CLI acts on it |
-| `secrets` | For each secret id that a step mounts, the file on the build machine that provides it, relative to the recipe or absolute. The CLI passes them to BuildKit |
 | `source_date_epoch` | Seconds since 1970. Every `run` sees it as `SOURCE_DATE_EPOCH`, the image takes it as its creation time, and the file times in the recipe's layers are clamped to it (the CLI asks BuildKit for that). Default (`true`): the creation time of the base image. `false` turns all of it off |
 | `record` | `true` (default) or `false`: whether the image carries the resolved recipe in its label `org.nomira.recipe`, see below |
 | `volatile` | Paths every `run` gets as an empty tmpfs, so that nothing written there ends up in the image. Default `[/run, /tmp, /var/cache, /var/log, /var/tmp]`; `[]` turns it off |
-| `platforms`, `tags` | Checked and reported, but not acted on by the frontend. The caller decides |
+
+**Not in a recipe:** what only the BuildKit client can set: platform,
+image names, layer compression, `rewrite-timestamp`, the files behind
+secrets, the pull policy. They are flags of the client, for the nomira
+CLI also lines in [nomira.conf](../../architecture/client/#nomiraconf).
+A recipe that still has `compression`, `secrets`, `tags` or `platforms`
+in its settings is rejected with a note where they went. See
+[Who decides what](../../architecture/client/#who-decides-what).
 
 **The record.** Every image carries the recipe it was built from in its
 label `org.nomira.recipe`: resolved, with all [imports](../../recipes/imports/)

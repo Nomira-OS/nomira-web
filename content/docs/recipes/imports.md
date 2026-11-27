@@ -43,7 +43,7 @@ importing file. The rules are those of JSON Merge Patch (RFC 7386):
 - **Mappings are merged** key by key: settings, labels, env, stages,
   phases, groups.
 - **Everything else is replaced** by the later file: strings, numbers,
-  and lists, such as a group's commands or packages and `settings.tags`.
+  and lists, such as a group's commands or packages and `settings.volatile`.
 - **`key: null` removes** a key: a group, a stage, a phase, a label.
 
 ## Order

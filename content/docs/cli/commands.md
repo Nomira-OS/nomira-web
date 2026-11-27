@@ -28,19 +28,49 @@ nomira version                   print the version
 | `--log-format json` | Output for log collectors, see [Output](#output); default `text` |
 | `--color never` | Colour in text output: `auto` (on a terminal, unless `NO_COLOR` is set), `always` or `never` |
 | `--origin` | `recipe diff`: also compare where each part came from |
+| `--name NAME` | Image name, for the output directory and local copies; default `settings.name` |
+| `--compression gzip` | Layer compression: `zstd` (default), `gzip`, `uncompressed` |
+| `--secret id=ID,src=FILE` | A secret the recipe mounts; may be repeated |
+| `--pull always` | `always` pull images again (a moved `latest`), pull `missing` ones (default), `never` |
+| `--config FILE` | The `nomira.conf` to read |
 
 Flags may come before or after the other arguments.
 
-Not every flag applies to every command. No flag changes the image:
-the frontend (the recipe's first line, `# syntax=…`), base image, args,
-compression and secrets all come from the recipe, so the same recipe
-builds the same image whoever runs it.
+Not every flag applies to every command. What a frontend can act on is
+in the recipe; what only the BuildKit client can set is a flag: see
+[Who decides what](../../architecture/client/#who-decides-what).
+
+## nomira.conf
+
+Flags for repeated runs go into `nomira.conf` next to the recipe, or the
+file `--config` or `$NOMIRA_CONFIG` names, one `flag = value` per line:
+
+```ini
+# /etc/nomira/nomira.conf
+name = laptop
+compression = zstd
+secret = id=db.key,src=keys/db.key       # relative to this file
+secret = id=db.crt,src=/etc/kernel/secureboot/db.crt
+pull = always
+```
+
+The command line and the flag's environment variable win over the file.
+A flag of another command is skipped, a name no command knows is an
+error. `f`, `config` and `dry-run` cannot be set there.
+
+## Versions
+
+`nomira version` prints the CLI's version; before a build nomira compares
+it with the frontend's. The same `major.minor` works together; patches do
+not matter. Another `major.minor`, or a build that is not a release
+(`sha-…`), gives a warning and builds anyway.
 
 ## Environment variables
 
 | Variable | Meaning |
 |---|---|
 | `NOMIRA_RECIPE` | Recipe to use without `-f` |
+| `NOMIRA_CONFIG` | `nomira.conf` to read |
 | `BUILDKIT_HOST` | Use this buildkitd instead of looking for one |
 | `NOMIRA_BUILDKIT_IMAGE` | Image for the buildkitd container that the CLI manages |
 | `NOMIRA_LOG_FORMAT` | `text` or `json`, as `--log-format` |

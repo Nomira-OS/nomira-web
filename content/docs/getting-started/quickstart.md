@@ -13,10 +13,10 @@ In a new directory, create `recipe.yml`, the
 [minimal example](https://github.com/Nomira-OS/arch-base/blob/main/examples/minimal/recipe.yml):
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:sha-367f87a
+# syntax=ghcr.io/nomira-os/nomira:sha-434c4f5
 settings:
   name: mysystem
-  base: ghcr.io/nomira-os/arch-base:sha-492224c
+  base: ghcr.io/nomira-os/arch-base:sha-33740cd
 
 build:
   packages:

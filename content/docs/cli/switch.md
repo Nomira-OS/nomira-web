@@ -21,8 +21,10 @@ untested: true
    [see where](../commands/#where-the-result-goes). That directory only
    ever holds an image that passed its checks.
 
-`build` never touches the running system. It passes the files named in
-`settings.secrets` to the steps that mount them as secrets.
+`build` never touches the running system. It passes the files that
+`--secret` or `nomira.conf` names to the steps that mount them as
+secrets; a secret the recipe requires but nobody gives stops the build
+before it starts.
 
 ## Deploying is bootc's
 

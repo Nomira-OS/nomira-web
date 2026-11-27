@@ -12,8 +12,11 @@ weight: 10
 | `<version>-<snapshot date>` | The same release with the date of its package set, for example `0.2.0-2026.11.13` |
 | `sha-<commit>` | A development build of one commit on `main` |
 
-There is deliberately no `latest` tag. No release has been published
-yet; until the first one only `sha-<commit>` tags exist, see
+| `latest` | The newest build of `main`, for trying things out |
+
+A recipe that should build the same tomorrow names a release or a
+`sha-…` tag, not `latest`. No release has been published yet; until the
+first one only `sha-<commit>` and `latest` exist, see
 [Packages at Nomira-OS](https://github.com/orgs/Nomira-OS/packages).
 
 ## Where the packages come from
