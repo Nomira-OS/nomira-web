@@ -53,7 +53,7 @@ nothing about package managers; a collector is any command. See
 
 Besides unit tests, every change builds a set of small recipes with a
 real BuildKit and checks the results: conflicts between writes and
-deletions, collectors, includes, that a group without `run` comes from
+deletions, collectors, imports, that a group without `run` comes from
 the cache after the base image changed, and that symbolic links and
 directory modes survive. No image of the frontend is published unless
 these pass.

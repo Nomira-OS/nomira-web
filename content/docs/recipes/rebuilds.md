@@ -15,7 +15,6 @@ weight: 14
 | A group | That group, and every later phase that uses `run` |
 | The items of a collector | The collector, and every later phase that uses `run` |
 | The base image | Collectors and groups that use `run` |
-| Anything in the recipe | The [record](../../frontend/schema/#settings), and every phase after it |
 | Nothing | Nothing |
 
 Sibling groups of a changed group always stay in the cache.
@@ -37,12 +36,12 @@ When that matters, split the collector: what rarely changes goes to a
 collector of its own before the others, with the same command.
 
 ```yaml
-phases:
-  - name: firmware        # changes with new hardware, rarely
+build:
+  firmware:        # changes with new hardware, rarely
     collect: run … pacman -S --needed --noconfirm ${items}
-  - name: packages        # changes often
+  packages:        # changes often
     collect: run … pacman -S --needed --noconfirm ${items}
-  - name: features
+  features:
     groups:
       hardware:
         firmware: [linux-firmware-intel, intel-ucode]
@@ -57,14 +56,12 @@ changes what ends up in the image.
 ## An example
 
 ```yaml
-phases:
-  - name: packages
+imports: [features/terminal.yml, features/network.yml]   # two groups that only copy
+build:
+  packages:
     collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
-  - name: features
-    groups:
-      terminal: {include: features/terminal.yml}   # copies only
-      network: {include: features/network.yml}     # copies only
-  - name: services
+  features: {}            # its groups come from the imports
+  services:
     collect: run systemctl enable ${items}
 ```
 
@@ -138,12 +135,12 @@ path. The group itself is not rebuilt for the check.
 ## Generated files
 
 A script that produces a file needs `run`, but not in a group. Give it a
-`prepare` stage with its own image. The stage does not depend on the
+stage with its own image. The stage does not depend on the
 base image either, and the group only copies:
 
 ```yaml
 terminal:
-  prepare:
+  stages:
     theme:
       from: docker.io/library/alpine:3.22
       commands:

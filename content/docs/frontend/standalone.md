@@ -10,8 +10,8 @@ One line at the top of the file selects the frontend:
 # syntax=ghcr.io/nomira-os/nomira:1-alpha
 settings:
   base: docker.io/library/alpine:3.22
-phases:
-  - name: app
+build:
+  app:
     groups:
       config:
         - copy files/app.conf /etc/app.conf
@@ -42,7 +42,10 @@ podman run --rm -i ghcr.io/nomira-os/nomira:1-alpha lint - < recipe.yml
 ```
 
 `lint` checks the structure, `graph` prints the pipeline as a Mermaid
-flowchart, and `inspect` prints name, base, phases and groups as JSON.
+flowchart, `inspect` prints name, base, phases and groups as JSON, and
+`resolve` prints the recipe with all imports merged, as the image
+records it. Recipes with imports need a file path instead of `-`, and the
+recipe directory mounted.
 
 ## Tags of the frontend image
 

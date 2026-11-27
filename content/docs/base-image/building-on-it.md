@@ -31,8 +31,9 @@ weight: 40
   and conflict.
 
 ```yaml
-- name: packages
-  collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+build:
+  packages:
+    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 ```
 
 ## Kernel, modules, firmware

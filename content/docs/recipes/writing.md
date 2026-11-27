@@ -17,11 +17,11 @@ settings:
   description: My system
   base: ghcr.io/nomira-os/arch-base:TAG
 
-phases:
-  - name: packages
+build:
+  packages:
     collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 
-  - name: features
+  features:
     groups:
       terminal:
         packages: [kmscon]
@@ -34,7 +34,7 @@ phases:
         commands:
           - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 
-  - name: services
+  services:
     collect: run systemctl enable ${items}
 ```
 
@@ -71,9 +71,8 @@ The long one is a mapping. Four keys have a fixed meaning:
 | Key | Meaning |
 |---|---|
 | `commands` | The list of commands |
-| `prepare` | Build stages that only this group uses |
+| `stages` | Build stages that only this group uses |
 | `expects` | Paths that must exist before the group is applied |
-| `include` | Read the group from a file |
 
 Every other key, such as `packages` above, is a contribution to the
 collector of that name. A group may consist of contributions alone:
@@ -87,14 +86,14 @@ editor:
 
 | Command | Purpose |
 |---|---|
-| `copy` | Copies files from the recipe directory, or from a `prepare` stage, into the image |
+| `copy` | Copies files from the recipe directory, or from a stage, into the image |
 | `run` | Runs a shell command |
 | `env` | Sets a variable for the following commands of the group |
 
 Useful additions:
 
 - `copy --chmod=0644` and `copy --chown=0:0` set mode and owner.
-- `copy --from=<stage>` copies from a `prepare` stage.
+- `copy --from=<stage>` copies from a stage.
 - `run --mount=type=cache,target=/path` keeps a directory between
   builds, the package cache for instance.
 - `run --no-cache` always runs a step.
@@ -106,14 +105,14 @@ so nothing that happens before it can make it stale. A group that uses
 `run` is executed on the system as it is at that point, and has to run
 again whenever that changes, for instance with every new base image.
 
-So the aim is: **`run` belongs in collectors and `prepare` stages,
+So the aim is: **`run` belongs in collectors and stages,
 groups copy.** What that means for common tasks:
 
 | Task | Instead of `run` in a group |
 |---|---|
 | Install a package | Contribute it to a `packages` collector |
 | Enable a service | Contribute it to a `services` collector |
-| Generate a file with a script | Run the script in a `prepare` stage, copy the result |
+| Generate a file with a script | Run the script in a stage, copy the result |
 | Write a one-line file | Keep the file in the recipe and copy it |
 
 ## Where files belong
@@ -125,8 +124,8 @@ and `/var` is not part of the image. Put the content of the system into
 The initramfs is rebuilt by the base image whenever a package needs it,
 see [Kernel, modules, firmware](../../base-image/building-on-it/#kernel-modules-firmware).
 
-Every image carries its recipe in `/usr/share/nomira/recipe`, and the
-first boot copies it to `/etc/nomira`; see `record` in the
+Every image carries its recipe, resolved, in its label
+`org.nomira.recipe`; `nomira recipe export` prints it. See `record` in the
 [schema](../../frontend/schema/#settings).
 
 ## Build and check

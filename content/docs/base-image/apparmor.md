@@ -18,8 +18,8 @@ the state.
 Put them into `/etc/apparmor.d` in your recipe:
 
 ```yaml
-phases:
-  - name: configuration
+build:
+  configuration:
     groups:
       apparmor:
         - copy files/apparmor.d/ /etc/apparmor.d/

@@ -13,26 +13,26 @@ In a new directory, create `recipe.yml`, the
 [minimal example](https://github.com/Nomira-OS/arch-base/blob/main/examples/minimal/recipe.yml):
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:sha-051c82c
+# syntax=ghcr.io/nomira-os/nomira:sha-367f87a
 settings:
   name: mysystem
   base: ghcr.io/nomira-os/arch-base:sha-e9d5101
 
-phases:
-  - name: packages
+build:
+  packages:
     collect: >-
       run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
       --mount=type=cache,target=/var/cache/pacman/pkg
       pacman-key --init && pacman-key --populate &&
       pacman -S --needed --noconfirm ${items}
 
-  - name: features
+  features:
     groups:
       network:
         packages: [networkmanager]
         services: [NetworkManager.service]
 
-  - name: services
+  services:
     collect: run systemctl enable ${items}
 ```
 

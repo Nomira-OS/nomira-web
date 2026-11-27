@@ -40,7 +40,9 @@ method=auto
 ## The group
 
 ```yaml
-  - name: features
+# features/wifi.yml, imported by the recipe (imports: [features/wifi.yml])
+build:
+  features:
     groups:
       wifi:
         packages: [networkmanager]

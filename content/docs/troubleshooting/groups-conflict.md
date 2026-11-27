@@ -21,8 +21,8 @@ this message.
 ## Seeing it for yourself
 
 ```yaml
-phases:
-  - name: content
+build:
+  content:
     groups:
       a: ["run echo a > /etc/a"]
       b: ["run echo b > /etc/a"]
@@ -40,7 +40,8 @@ The later phase sees the result of the earlier one.
 file with identical content are harmless. Allow that for the phase:
 
 ```yaml
-  - name: configuration
+build:
+  configuration:
     validation: allow-identical
 ```
 
@@ -48,7 +49,8 @@ file with identical content are harmless. Allow that for the phase:
 `/` exempts everything below it:
 
 ```yaml
-  - name: configuration
+build:
+  configuration:
     shared: [/usr/lib/tmpfiles.d/]
 ```
 

@@ -36,11 +36,19 @@ user without it, log in as `root` and run
 ## From now on
 
 The system changes through its recipe in `/etc/nomira`. Every image
-carries the recipe it was built from in `/usr/share/nomira/recipe`, and
-the first boot copies it to `/etc/nomira`. Edit it and update:
+carries the recipe it was built from in its label `org.nomira.recipe`;
+make it the machine's recipe once (and bring the files it copies, from
+your recipe directory or its repository):
+
+```sh
+sudo nomira recipe export -o /etc/nomira/recipe.yml
+```
+
+Then edit it, see what would change, and update:
 
 ```sh
 sudo nano /etc/nomira/recipe.yml
+nomira recipe diff
 sudo nomira build
 sudo bootc upgrade
 sudo reboot

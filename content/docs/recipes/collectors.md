@@ -22,11 +22,11 @@ command. `${items}` in that command is replaced by everything the groups
 of the recipe contributed under the name of the phase.
 
 ```yaml
-phases:
-  - name: packages
+build:
+  packages:
     collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 
-  - name: features
+  features:
     groups:
       terminal:
         packages: [kmscon]
@@ -56,14 +56,15 @@ a contribution from changing the meaning of the command.
 ## Useful collectors
 
 ```yaml
-- name: packages
-  collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+build:
+  packages:
+    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
 
-- name: services
-  collect: run systemctl enable ${items}
+  services:
+    collect: run systemctl enable ${items}
 
-- name: locales
-  collect: run for l in ${items}; do echo "$l UTF-8" >> /etc/locale.gen; done && locale-gen
+  locales:
+    collect: run for l in ${items}; do echo "$l UTF-8" >> /etc/locale.gen; done && locale-gen
 ```
 
 ## When not to use one

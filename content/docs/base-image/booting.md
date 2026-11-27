@@ -34,8 +34,6 @@ does all of it:
 - `--erofs-version v1-only` makes bootc compute the digest once instead of
   twice; the second is a fallback for older bootc versions, which the
   image's own bootc does not need.
-- The [recipe record](../../frontend/schema/#settings) comes right before
-  `uki`, so the digest covers it.
 
 ## The initramfs follows the packages
 
