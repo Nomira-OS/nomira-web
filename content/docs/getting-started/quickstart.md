@@ -16,7 +16,7 @@ In a new directory, create `recipe.yml`, the
 # syntax=ghcr.io/nomira-os/nomira:sha-367f87a
 settings:
   name: mysystem
-  base: ghcr.io/nomira-os/arch-base:sha-e9d5101
+  base: ghcr.io/nomira-os/arch-base:sha-492224c
 
 build:
   packages:
