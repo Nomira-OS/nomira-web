@@ -53,7 +53,7 @@ do not touch the same files. It is made for Arch Linux.
 | Build tools | Works with the usual container tools | Needs BuildKit |
 | Signing your image | Built in | Not built in |
 | Multi-architecture builds | Yes, through `platforms` | Can be declared in the recipe; the CLI does not act on it yet |
-| Switching the local system | Yes | Yes: `nomira switch`, with checks before the switch |
+| Switching the local system | Yes | Through bootc: `nomira build` publishes an image only when its build, checks included, succeeded |
 | Maturity | Established, with a community and templates | Alpha, very small project |
 
 The statements about BlueBuild reflect what we know and may be out of

@@ -5,8 +5,7 @@ weight: 20
 ---
 
 The schema is still in alpha and may change. Decoding is strict: an
-unknown key is an error, a key that moved gets a note where it went, and
-every error names the file and line. For editors there is a
+unknown key is an error, and every error names the file and line. For editors there is a
 [JSON Schema](https://github.com/Nomira-OS/nomira/blob/main/schema/recipe.schema.json);
 recipes stay YAML.
 
@@ -44,7 +43,6 @@ build:
     terminal:
       packages: [kmscon]
       services: [kmsconvt@tty1.service]
-      expects: [/usr/lib/systemd/system/kmsconvt@.service]
       commands:
         - env THEME=dark
         - copy --chmod=0644 files/kmscon/ /etc/kmscon/
@@ -73,20 +71,6 @@ image names, layer compression, `rewrite-timestamp`, the files behind
 secrets, the pull policy. They are flags of the client, for the nomira
 CLI also lines in [nomira.conf](../../architecture/client/#nomiraconf).
 See [Who decides what](../../architecture/client/#who-decides-what).
-
-**Keys that moved:**
-
-| Key | Now |
-|---|---|
-| `settings.name` | `--name` or `name =` in `nomira.conf` |
-| `settings.description` | the label `org.opencontainers.image.description` |
-| `settings.compression`, `secrets`, `tags`, `platforms` | flags of the client |
-| `settings.validation`, a phase's `validation` and `shared` | gone: identical writes are always allowed, see [The conflict check](../../architecture/conflict-check/) |
-| `settings.volatile` | `settings.mounts`, `type=tmpfs` |
-| `settings.args` | `settings.env`, or the `env` command |
-| `settings.toolbox` | the build option `toolbox` |
-| `groups:` under a phase | the groups stand directly under the phase |
-| `stages` in a group, a stage `from` a phase | stages at the top, from an image |
 
 **The record.** Every image carries the recipe it was built from in its
 label `org.nomira.recipe`: resolved, with all [imports](../../recipes/imports/)
@@ -150,7 +134,6 @@ The short form is a list of commands. The long form is a mapping:
 | Key | Meaning |
 |---|---|
 | `commands` | The list of commands |
-| `expects` | Clean absolute paths that must exist in the state the phase starts from |
 | `collect` | Makes the group a collector named after the group; then it has no other key |
 | any other key | A contribution, a list of items, to the collector of that name |
 

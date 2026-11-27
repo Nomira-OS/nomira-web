@@ -27,7 +27,7 @@ userspace on the new system, the kernel keeps running.
 sudo bootc upgrade --apply --soft-reboot=auto
 ```
 
-With a [unified kernel image](../../base-image/booting/#unified-kernel-image)
+With a [unified kernel image](../../recipes/base-images/boot/#unified-kernel-image)
 that is the case whenever no package changed what goes into the
 initramfs: it is then either not rebuilt at all or rebuilt to the same
 bytes. If a soft reboot is not

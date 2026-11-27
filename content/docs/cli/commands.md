@@ -14,8 +14,7 @@ nomira version                   print the version
 
 `nomira <command> -h` shows the flags of a command. `build`, `lint` and
 resolving a recipe file for `recipe` all go through BuildKit. Checks of
-the image are steps of the recipe, such as `run bootc container lint`;
-`validate` and `graph` are gone.
+the image are steps of the recipe, such as `run bootc container lint`.
 
 ## Flags
 

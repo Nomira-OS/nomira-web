@@ -52,8 +52,9 @@ as with any other image source.
 
 On a nomira system, run `nomira build` with `sudo`. It then uses the
 system-wide buildkitd, which the base image starts on demand. Without
-root, it falls back to the podman container; this is meant for
-developing recipes on another machine.
+root, nomira falls back to a buildkitd in a podman container, on a
+machine that has podman; this is meant for developing recipes on another
+machine. The base image has no container runtime.
 
 ## Checks
 

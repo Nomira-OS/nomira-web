@@ -1,7 +1,8 @@
 ---
 title: AppArmor
 lead: AppArmor is active in the base image and enforces the profiles it finds.
-weight: 30
+weight: 40
+aliases: [/docs/base-image/apparmor/]
 ---
 
 ## How it is switched on

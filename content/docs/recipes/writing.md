@@ -85,12 +85,11 @@ network:
   - copy files/nm/ /etc/NetworkManager/system-connections/
 ```
 
-The long one is a mapping. Three keys have a fixed meaning:
+The long one is a mapping. Two keys have a fixed meaning:
 
 | Key | Meaning |
 |---|---|
 | `commands` | The list of commands |
-| `expects` | Paths that must exist before the group is applied |
 | `collect` | Makes the group a collector; then it has no other key |
 
 Every other key, such as `packages` above, is a contribution to the
@@ -142,7 +141,7 @@ and `/var` is not part of the image. Put the content of the system into
 `/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
 
 The initramfs is rebuilt by the base image whenever a package needs it,
-see [Kernel, modules, firmware](../../base-image/building-on-it/#kernel-modules-firmware).
+see [The initramfs](../base-images/boot/#the-initramfs).
 
 Every image carries its recipe, resolved, in its label
 `org.nomira.recipe`; `nomira recipe export` prints it. See `record` in the

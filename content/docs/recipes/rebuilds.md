@@ -116,19 +116,25 @@ What you can do about it:
 
 A drop-in that comes from the cache is applied even if the thing it
 overrides is gone, for example because a unit was renamed in a new
-version. `expects` guards against that:
+version. A check as a step of the recipe guards against that: a group
+in a late phase, `lint` for instance, which the feature file adds next
+to its own group.
 
 ```yaml
-terminal:
-  packages: [kmscon]
-  expects: [/usr/lib/systemd/system/kmsconvt@.service]
-  commands:
-    - copy files/kmscon-override.conf /etc/systemd/system/kmsconvt@.service.d/override.conf
+# features/terminal.yml
+build:
+  features:
+    terminal:
+      packages: [kmscon]
+      commands:
+        - copy files/kmscon-override.conf /etc/systemd/system/kmsconvt@.service.d/override.conf
+  lint:
+    terminal: ["run test -e /usr/lib/systemd/system/kmsconvt@.service"]
 ```
 
-The paths are checked on every build against the state the phase starts
-from. If one is missing, the build stops and names the group and the
-path. The group itself is not rebuilt for the check.
+The check uses `run`, so it runs again whenever anything before it
+changed, a new base image included, and takes a fraction of a second.
+The group with the drop-in stays independent and comes from the cache.
 
 ## Generated files
 

@@ -8,7 +8,7 @@ untested: true
 Make a backup first. There is no way back to the old system except
 restoring it.
 
-The image's [unified kernel image](../../../base-image/booting/#unified-kernel-image)
+The image's [unified kernel image](../../../recipes/base-images/boot/#unified-kernel-image)
 needs a root partition of GPT type *Linux root (x86-64)* and a
 filesystem with fs-verity. If yours has neither, leave the phases
 `kernel` and `uki` out of the recipe.

@@ -24,7 +24,7 @@ bootc keeps the booted, the rollback and a staged deployment.
 ## Boot
 
 The base image boots with systemd-boot; bootc installs it on the ESP.
-With a [unified kernel image](../../base-image/booting/#unified-kernel-image)
+With a [unified kernel image](../../recipes/base-images/boot/#unified-kernel-image)
 the kernel command line carries the composefs digest, so the UKI only
 boots the tree it was built for; bootc's
 [sealed images](https://bootc.dev/bootc/building/bootc-sealed-images.7.html)

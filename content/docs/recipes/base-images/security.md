@@ -1,7 +1,8 @@
 ---
 title: Security
 lead: From the firmware to the home directory, each step checks the next. What nomira does today, and where the chain is still open.
-weight: 35
+weight: 20
+aliases: [/docs/base-image/security/]
 untested: true
 ---
 
@@ -10,11 +11,11 @@ untested: true
 | Step | What it checks | nomira today |
 |---|---|---|
 | [Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot) | The firmware starts only a signed boot loader and kernel. | **Not yet.** The boot loader and the boot entries are not signed. |
-| Sealed [UKI](https://wiki.archlinux.org/title/Unified_kernel_image) | Kernel, initramfs and kernel command line are one signed file. The command line carries the digest of the system image. | **Half.** nomira builds a UKI with the digest, but does not sign it yet; without a signature the command line can still be replaced. |
+| Sealed [UKI](https://wiki.archlinux.org/title/Unified_kernel_image) | Kernel, initramfs and kernel command line are one signed file. The command line carries the digest of the system image. | **Half.** A recipe with the UKI phases builds one with the digest, but does not sign it yet; without a signature the command line can still be replaced. Without a UKI the digest is on the command line of the boot entry, see [Two ways to boot](../boot/#two-ways-to-boot). |
 | composefs with [fs-verity](https://docs.kernel.org/filesystems/fsverity.html) | The initramfs mounts the system only if its digest matches the command line. The kernel then checks every file of `/usr` when it is read. | **Active** on ext4 and btrfs. |
-| [AppArmor](../apparmor/) | Confines programs while they run. | **Active.** |
+| [AppArmor](../arch-base/apparmor/) | Confines programs while they run. | **Active** in arch-base. |
 | Disk encryption | Protects `/etc` and `/var`, which are writable and not checked. | **Optional** at installation, bound to a TPM. See below. |
-| [systemd-homed](https://wiki.archlinux.org/title/Systemd-homed) | Encrypts each home directory, unlocked with the user's password. | **Active.** The first boot asks for the first user. |
+| [systemd-homed](https://wiki.archlinux.org/title/Systemd-homed) | Encrypts each home directory, unlocked with the user's password. | **Active** in arch-base. The first boot asks for the first user. |
 
 ## What holds and what does not
 

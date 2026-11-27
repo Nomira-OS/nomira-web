@@ -2,6 +2,7 @@
 title: Tags and package set
 lead: The tag of the base image is the package set.
 weight: 10
+aliases: [/docs/base-image/versions/]
 ---
 
 ## Tags
@@ -11,7 +12,6 @@ weight: 10
 | `<version>` | A release, for example `0.2.0` |
 | `<version>-<snapshot date>` | The same release with the date of its package set, for example `0.2.0-2026.11.13` |
 | `sha-<commit>` | A development build of one commit on `main` |
-
 | `latest` | The newest build of `main`, for trying things out |
 
 A recipe that should build the same tomorrow names a release or a
