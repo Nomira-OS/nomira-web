@@ -4,10 +4,6 @@ lead: Groups say what they need; one command does it for all of them.
 weight: 12
 ---
 
-> The mechanism is checked by end-to-end tests with a real BuildKit. The
-> collectors shown here for pacman and systemd have not been run on the
-> nomira base image yet.
-
 ## The problem they solve
 
 Some things have to happen in one step. Two groups that both install a
@@ -17,23 +13,24 @@ package in one phase, its files in another, its service in a third.
 
 ## How they work
 
-A phase with `collect` instead of `groups` is a collector. It runs one
-command. `${items}` in that command is replaced by everything the groups
-of the recipe contributed under the name of the phase.
+A group with `collect` is a collector. It runs one command. `${items}`
+in that command is replaced by everything the groups of the recipe
+contributed under the collector's name. A phase that is one collector
+can say so in short: `collect` directly under the phase, and the
+collector is named after the phase.
 
 ```yaml
 build:
   packages:
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: run pacman -S --needed --noconfirm ${items}
 
   features:
-    groups:
-      terminal:
-        packages: [kmscon]
-        commands:
-          - copy files/kmscon/ /etc/kmscon/
-      editor:
-        packages: [vim]
+    terminal:
+      packages: [kmscon]
+      commands:
+        - copy files/kmscon/ /etc/kmscon/
+    editor:
+      packages: [vim]
 ```
 
 This runs `pacman -S --needed --noconfirm kmscon vim` once.
@@ -46,6 +43,10 @@ This runs `pacman -S --needed --noconfirm kmscon vim` once.
 - **The order of items is fixed.** They are sorted and duplicates are
   removed, so moving a group to another file changes nothing.
 - **A collector without items is skipped.**
+- **Names are unique.** Contributions name the collector, so two
+  collectors cannot share a name, wherever they stand.
+- **Several in one phase** run side by side, as groups do, and are
+  checked like them: they must not change the same files differently.
 
 ## What an item may be
 
@@ -58,14 +59,21 @@ a contribution from changing the meaning of the command.
 ```yaml
 build:
   packages:
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: >-
+      run --mount=type=cache,target=/etc/pacman.d/gnupg,id=pacman-keyring,sharing=locked
+      { [ -s /etc/pacman.d/gnupg/trustdb.gpg ] || pacman-key --init; } &&
+      pacman-key --populate && pacman -S --needed --noconfirm ${items}
 
-  services:
-    collect: run systemctl enable ${items}
-
-  locales:
-    collect: run for l in ${items}; do echo "$l UTF-8" >> /etc/locale.gen; done && locale-gen
+  setup:
+    services:
+      collect: run systemctl enable ${items}
+    locales:
+      collect: run for l in ${items}; do echo "$l UTF-8" >> /etc/locale.gen; done && locale-gen
 ```
+
+`packages` and `services` are also
+[recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+of the base image, to import by URL.
 
 ## When not to use one
 
@@ -79,5 +87,5 @@ the others in the cache.
 ## One thing to keep in mind
 
 A contribution acts backwards: the group stands in the phase `features`,
-but its package is installed earlier, in `packages`. `nomira graph`
-draws these connections as dotted lines.
+but its package is installed earlier, in `packages`. The resolved recipe
+(`nomira recipe export`) lists every contribution next to its group.

@@ -23,8 +23,10 @@ settings:
 
 ## What is deliberately missing
 
-Network management, firmware, SSH, a desktop, and the boot test with
-bcvk (it would need QEMU). Your recipe chooses those; for the network,
+Network management, firmware, SSH, a desktop, and any part of a
+recipe: parts to import by URL are in
+[`recipes/`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+of the repository. Your recipe chooses those; for the network,
 the Arch Wiki compares the options in
 [Network configuration](https://wiki.archlinux.org/title/Network_configuration).
 

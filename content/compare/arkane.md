@@ -58,7 +58,7 @@ shape yourself.
 | Deployment | arkdep unpacks the image into a btrfs subvolume | bootc switches to the container image |
 | Requirements on the machine | btrfs and systemd-boot | What bootc supports; the boot loader for the Arch image is still an open point |
 | Way back | Earlier deployments stay selectable at boot | The previous image, through bootc |
-| Checks before switching | Not built in, as far as we know | Hooks and an optional boot test in a VM |
+| Checks before switching | Not built in, as far as we know | Checks as steps of the recipe, `bootc container lint` for one; an image that fails is not published |
 | Pinned package set | Not built in, as far as we know | The base image fixes a day of the Arch archive |
 | Maturity | A working distribution; arkdep describes itself as still in active development | Alpha, not installed on hardware yet |
 

@@ -16,11 +16,16 @@ layer.
 | `type=tmpfs` | empty memory | yes, gone after the step | no | scratch space |
 | `type=bind` | a stage or an earlier phase (`from`, `source`) | no | the definition of the source | building a UKI from the finished system |
 | `type=secret` | a file the client passes (`--secret`) | no | no | signing keys |
-| volatile paths | empty tmpfs, added by the frontend | yes, gone after the step | no | `/run`, `/tmp`, `/var/cache`, `/var/log`, `/var/tmp` by default |
+
+`settings.mounts` adds a cache or tmpfs mount to every `run` of the
+recipe, in stages too; a `--mount` of the run at the same target takes
+its place. Without the setting nothing is added. The base image's
+[`recipes/mounts.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+mounts a tmpfs at `/run`, `/tmp`, `/var/log` and `/var/tmp`, and a cache
+at `/var/cache/pacman/pkg`.
 
 - Mounts are applied parents first, so a cache at `/var/cache/pacman/pkg`
-  works inside the volatile tmpfs at `/var/cache`.
-- A `--mount` at the same path as a volatile one takes its place.
+  works inside a tmpfs at `/var/cache`.
 - BuildKit always adds `/proc`, `/sys`, `/dev`, and `/etc/resolv.conf`
   and `/etc/hosts`; none of them reaches a layer.
 - `copy` mounts nothing: what it copies always lands in the layer.

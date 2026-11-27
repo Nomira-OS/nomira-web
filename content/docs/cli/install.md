@@ -23,14 +23,14 @@ The CLI is a single file without dependencies of its own. It calls
 other tools, so install those too. On Arch Linux:
 
 ```sh
-sudo pacman -S --needed podman buildkit skopeo
+sudo pacman -S --needed buildkit podman skopeo
 ```
 
 | Tool | Needed for |
 |---|---|
-| `podman` | `lint`, `graph`, and the BuildKit service the CLI starts when none is running |
-| `buildctl` (package `buildkit`) | `build` |
-| `skopeo` | loading a built image into container storage |
+| `buildctl` (package `buildkit`) | `build`, `lint`, resolving a recipe |
+| `podman` | only the BuildKit service the CLI starts when none is running |
+| `skopeo` | only `recipe export`/`diff` of images in a registry or containers-storage |
 
 ## Run it from the base image
 

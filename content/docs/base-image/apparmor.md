@@ -20,9 +20,8 @@ Put them into `/etc/apparmor.d` in your recipe:
 ```yaml
 build:
   configuration:
-    groups:
-      apparmor:
-        - copy files/apparmor.d/ /etc/apparmor.d/
+    apparmor:
+      - copy files/apparmor.d/ /etc/apparmor.d/
 ```
 
 Because the image uses the usual paths of Arch Linux, profiles written

@@ -4,8 +4,11 @@ lead: Every field and every flag of a recipe.
 weight: 20
 ---
 
-The schema is still in alpha and may change. Decoding is strict: unknown
-keys are an error.
+The schema is still in alpha and may change. Decoding is strict: an
+unknown key is an error, a key that moved gets a note where it went, and
+every error names the file and line. For editors there is a
+[JSON Schema](https://github.com/Nomira-OS/nomira/blob/main/schema/recipe.schema.json);
+recipes stay YAML.
 
 ## The whole schema in one example
 
@@ -13,16 +16,16 @@ keys are an error.
 # syntax=ghcr.io/nomira-os/nomira:1-alpha
 imports: [features/editor.yml]
 settings:
-  name: mysystem
-  description: My system
   base: docker.io/library/archlinux:base
-  validation: strict
   labels:
-    org.example.owner: me
+    org.opencontainers.image.description: My system
   env:
     LANG: C.UTF-8
-  args:
-    VERSION: "1.0"
+  mounts:
+    /var/cache/pacman/pkg: type=cache,sharing=locked
+    /var/log: type=tmpfs
+  source_date_epoch: 1794268800
+  record: true
 
 stages:
   aurbuild:
@@ -32,28 +35,23 @@ stages:
 
 build:
   packages:
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: run pacman -S --needed --noconfirm ${items}
 
   features:
-    validation: allow-identical
-    shared: [/usr/lib/tmpfiles.d/]
     env: {MAKEFLAGS: -j4}
-    groups:
-      network:
-        - copy files/nm/ /etc/NetworkManager/
-      terminal:
-        packages: [kmscon]
-        services: [kmsconvt@tty1.service]
-        expects: [/usr/lib/systemd/system/kmsconvt@.service]
-        stages:
-          theme:
-            from: docker.io/library/alpine:3.22
-            commands: [run mkdir /out && echo dark > /out/theme.conf]
-        commands:
-          - copy --chmod=0644 files/kmscon/ /etc/kmscon/
-          - copy --from=theme /out/theme.conf /etc/kmscon/theme.conf
-      aur:
-        - copy --from=aurbuild /out/ /usr/lib/aur/
+    network:
+      - copy files/nm/ /etc/NetworkManager/
+    terminal:
+      packages: [kmscon]
+      services: [kmsconvt@tty1.service]
+      expects: [/usr/lib/systemd/system/kmsconvt@.service]
+      commands:
+        - env THEME=dark
+        - copy --chmod=0644 files/kmscon/ /etc/kmscon/
+    aur:
+      - copy --from=aurbuild /out/ /usr/lib/aur/
+    locales:
+      collect: run locale-gen ${items}
 
   services:
     collect: run systemctl enable ${items}
@@ -63,25 +61,32 @@ build:
 
 | Field | Meaning |
 |---|---|
-| `name` | Name of the image |
-| `description` | Becomes the label `org.opencontainers.image.description` |
 | `base` | The image the build starts from. Pin it by digest in real recipes |
-| `validation` | Default policy for all phases: `strict` or `allow-identical` |
-| `toolbox` | Image with busybox tools used by the check; has a default |
-| `labels` | Labels on the finished image |
-| `env` | Environment for all `run` commands, at build time only |
-| `args` | Declared build arguments with defaults, used as `${NAME}`. Callers of BuildKit may override them (`--opt build-arg:NAME=…`); the nomira CLI does not |
+| `labels` | Labels on the finished image, `org.opencontainers.image.description` for one |
+| `env` | Environment for every `run`, at build time only |
+| `mounts` | Mounts for every `run`, also in stages: target → what `--mount=` takes without the target. Only `type=tmpfs` and `type=cache`. A run's own mount at the same target wins. None by default |
 | `source_date_epoch` | Seconds since 1970. Every `run` sees it as `SOURCE_DATE_EPOCH`, the image takes it as its creation time, and the file times in the recipe's layers are clamped to it (the CLI asks BuildKit for that). Default (`true`): the creation time of the base image. `false` turns all of it off |
 | `record` | `true` (default) or `false`: whether the image carries the resolved recipe in its label `org.nomira.recipe`, see below |
-| `volatile` | Paths every `run` gets as an empty tmpfs, so that nothing written there ends up in the image. Default `[/run, /tmp, /var/cache, /var/log, /var/tmp]`; `[]` turns it off |
 
 **Not in a recipe:** what only the BuildKit client can set: platform,
 image names, layer compression, `rewrite-timestamp`, the files behind
 secrets, the pull policy. They are flags of the client, for the nomira
 CLI also lines in [nomira.conf](../../architecture/client/#nomiraconf).
-A recipe that still has `compression`, `secrets`, `tags` or `platforms`
-in its settings is rejected with a note where they went. See
-[Who decides what](../../architecture/client/#who-decides-what).
+See [Who decides what](../../architecture/client/#who-decides-what).
+
+**Keys that moved:**
+
+| Key | Now |
+|---|---|
+| `settings.name` | `--name` or `name =` in `nomira.conf` |
+| `settings.description` | the label `org.opencontainers.image.description` |
+| `settings.compression`, `secrets`, `tags`, `platforms` | flags of the client |
+| `settings.validation`, a phase's `validation` and `shared` | gone: identical writes are always allowed, see [The conflict check](../../architecture/conflict-check/) |
+| `settings.volatile` | `settings.mounts`, `type=tmpfs` |
+| `settings.args` | `settings.env`, or the `env` command |
+| `settings.toolbox` | the build option `toolbox` |
+| `groups:` under a phase | the groups stand directly under the phase |
+| `stages` in a group, a stage `from` a phase | stages at the top, from an image |
 
 **The record.** Every image carries the recipe it was built from in its
 label `org.nomira.recipe`: resolved, with all [imports](../../recipes/imports/)
@@ -91,17 +96,18 @@ belongs to the image's config and with it to the image digest and its
 signature; it is no layer, so a change to the recipe alone rebuilds no
 step. Files that `copy` takes from the recipe directory are not in it;
 they are in the image where they were copied to. `nomira recipe export`
-prints the label, `nomira recipe diff` compares two recipes.
+prints the label, `nomira recipe diff` compares two recipes. The label
+`org.nomira.frontend.version` names the frontend that built the image.
 
-**Volatile paths.** On a bootc system `/run` and `/tmp` are tmpfs, and
-bootc takes `/var` from an image only at the first install, never with an
-update. Logs, caches and temporary files written during the build are
-therefore build artifacts; `bootc container lint` warns about them. The
-frontend gives every `run` an empty tmpfs at the `volatile` paths, so
-they never reach a layer, and the image stays the same however often it
-is built. A `--mount` at the same path takes the place of the tmpfs, and
-mounts below it, a package cache in `/var/cache/pacman/pkg` for
-instance, work as usual.
+**Mounts for every run.** On a bootc system `/run` and `/tmp` are tmpfs,
+and bootc takes `/var` from an image only at the first install, never
+with an update. Logs, caches and temporary files written during the
+build are therefore build artifacts; `bootc container lint` warns about
+them. `settings.mounts` keeps them out: a tmpfs there, and a BuildKit
+cache where downloads should survive between builds. Mounts nest, so a
+cache below a tmpfs works. The base image's
+[`recipes/mounts.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+sets the usual ones. See [Mounts](../../architecture/mounts/).
 
 **What is loaded.** From the recipe directory the frontend reads only
 the entry file and the files it imports, and only what `copy` commands
@@ -110,34 +116,32 @@ output, is always left out.
 
 ## imports
 
-A list of further recipe files, relative to the file that names them,
-merged into the recipe: settings, stages, phases and groups are merged
-key by key, other values are replaced, `null` removes a key. See
-[Imports](../../recipes/imports/).
+A list of further recipe files, merged into the recipe: settings,
+stages, phases and groups key by key, other values replaced, `null`
+removes a key. An entry is a path relative to the importing file, or a
+URL, which BuildKit fetches; `#sha256=<hex>` at its end pins the content
+(required for `http`). See [Imports](../../recipes/imports/).
 
 ## stages
 
-Optional named stages, as in a multi-stage build. Each has `from` (an
-image, or a phase: the system after it) and `commands`. A group copies
-from a stage with `copy --from=<stage>` or mounts it with
-`--mount=type=bind,from=<stage>`. Stages at the top of the recipe are
-available to all groups; a group can also have stages of its own.
+Optional named stages, as in a multi-stage build. Each has `from`, an
+image, and `commands`. A group copies from a stage with
+`copy --from=<stage>` or mounts it with `--mount=type=bind,from=<stage>`.
 
 ## build
 
 The phases, as a mapping from phase name to phase; the order of the keys
-is the order of the phases. Each phase has either `groups` or `collect`.
+is the order of the phases. Under a phase stand its groups, by name;
+groups are independent of each other.
 
-| Field | Meaning |
+| Key under a phase | Meaning |
 |---|---|
-| `groups` | Mapping from group name to a group. Groups are independent |
-| `collect` | A `run` command containing `${items}`; makes the phase a collector |
-| `validation` | Overrides the default policy for this phase (groups only) |
-| `shared` | Paths exempt from the check. A trailing `/` makes it a prefix (groups only) |
 | `env` | Environment for the commands of this phase |
+| `collect` | The short form of a phase that is one collector, named after the phase; then `env` is the only other key |
+| any other key | A group |
 
-A phase with a single group that uses `run` is the serial case and skips
-the check.
+A phase with a single group that uses `run` is the serial case and has
+nothing to check.
 
 ## Groups
 
@@ -146,23 +150,26 @@ The short form is a list of commands. The long form is a mapping:
 | Key | Meaning |
 |---|---|
 | `commands` | The list of commands |
-| `stages` | Stages local to this group. They win over stages of the same name at the top |
 | `expects` | Clean absolute paths that must exist in the state the phase starts from |
-| any other key | A contribution, a list of items, to the collector phase of that name |
+| `collect` | Makes the group a collector named after the group; then it has no other key |
+| any other key | A contribution, a list of items, to the collector of that name |
 
-A group needs commands or at least one contribution.
+A group needs commands or at least one contribution. `env` is not a key
+of a group: use the phase's `env` or the `env` command.
 
 ## Collectors
 
 `${items}` is replaced by the contributions of all groups of the recipe,
 sorted and without duplicates, separated by spaces. Without
-contributions the phase is skipped.
+contributions the collector is skipped.
 
-- A collector cannot be named `commands`, `stages` or `expects`.
+- A collector is a group with `collect`, or a phase with `collect`
+  directly under it. Its name is unique in the recipe.
+- Several collectors in one phase run side by side, like other groups,
+  and are checked like them.
 - An item consists of letters, digits and `@%+=:,./_-` and does not
   start with `-`.
 - A contribution to a name that is not a collector is an error.
-- `items` cannot be used as the name of an arg.
 
 ## Commands
 
@@ -175,12 +182,13 @@ several lines.
 | `copy <src>… <dst>` | `--from=<stage or phase>`, `--chmod=0644`, `--chown=UID:GID` |
 | `env NAME=VALUE` | none; everything after the first `=` is the value |
 
-- **Args:** `${NAME}` is replaced only for args declared in
-  `settings.args`; `$repo` and the like are left alone. A changed arg
-  invalidates exactly the commands that use it.
 - **Environment:** `settings.env` applies everywhere, `env` on a phase
-  to its groups, the `env` command to the rest of its group. The more
-  specific one wins. Nothing of it ends up in the image configuration.
+  to its groups, the `env` command to the commands after it in its group
+  or stage. The more specific one wins. Nothing of it ends up in the
+  image configuration. A changed value reruns what it reaches:
+  `settings.env` every run, the `env` command only the commands after
+  it.
+- **`${…}`** is left to the shell; the frontend replaces nothing.
 - **`run --no-cache`:** the step always runs, and so does everything
   that builds on it: the rest of its group and all following phases. Put
   such steps in a group of their own, as late as possible, or in a
@@ -188,22 +196,11 @@ several lines.
 
 ## The check
 
-For every phase with more than one group, the build records what each
-group wrote or deleted and compares the groups pairwise.
-
-| Policy | Behaviour |
-|---|---|
-| `strict` | Two groups touching the same file is an error |
-| `allow-identical` | The same path is allowed if content and metadata are identical |
-
-Rules that hold under both policies:
-
-- Directories that several groups create are never a conflict.
-- A file in one group and a directory of the same name in another is a
-  conflict.
-- Deleting a directory conflicts with anything another group does below
-  it.
-- Changing only mode or owner counts as writing the path.
+For every phase with more than one group, the build compares what the
+groups wrote and deleted. Allowed is what is the same in every order:
+the same file with the same content, mode and owner; the same deletion.
+Everything else two groups both touch is a conflict. How it works:
+[The conflict check](../../architecture/conflict-check/).
 
 ## Groups without run
 
@@ -220,6 +217,17 @@ built on that state instead if
 The steps of such a group carry the note `WARNING: not independent of
 earlier state` with the first path in the way.
 
+## Build options
+
+What a BuildKit client passes with `--opt`; the nomira CLI sets them.
+
+| Option | Meaning |
+|---|---|
+| `filename` | The recipe in the `dockerfile` local; default `recipe.yml` |
+| `mode` | `build` (default), `lint` (only parse the recipe and its imports) or `resolve` (output the merged recipe as `recipe.yml`); lint and resolve also output `version` |
+| `image-resolve-mode` | `default`, `pull` or `local`, for the base image and stages |
+| `toolbox` | The busybox image the checks run in; has a default |
+
 ## Known limits
 
 - `copy` does not support paths with spaces; `--chown` is numeric only.
@@ -229,4 +237,4 @@ earlier state` with the first path in the way.
 - The platform follows the build host; multi-architecture builds are
   open.
 - Checked by end-to-end tests with a real BuildKit: everything on this
-  page except args, `run --no-cache`, `labels` and `--chown`.
+  page except `run --no-cache`, `labels` and `--chown`.

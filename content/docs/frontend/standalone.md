@@ -12,11 +12,10 @@ settings:
   base: docker.io/library/alpine:3.22
 build:
   app:
-    groups:
-      config:
-        - copy files/app.conf /etc/app.conf
-      assets:
-        - run mkdir -p /srv/www && echo hello > /srv/www/index.html
+    config:
+      - copy files/app.conf /etc/app.conf
+    assets:
+      - run mkdir -p /srv/www && echo hello > /srv/www/index.html
 ```
 
 BuildKit itself does the build:
@@ -35,17 +34,20 @@ well; we have not tried that yet.
 
 ## Checking a recipe without building
 
-The frontend image has helper modes that only read the recipe:
+The build option `mode` makes the frontend stop after reading the recipe
+and its imports, local and by URL, the same way as for a build:
 
 ```sh
-podman run --rm -i ghcr.io/nomira-os/nomira:1-alpha lint - < recipe.yml
+buildctl build --frontend gateway.v0 \
+  --opt source=ghcr.io/nomira-os/nomira:1-alpha \
+  --local context=. --local dockerfile=. --opt filename=recipe.yml \
+  --opt mode=resolve --output type=local,dest=out
 ```
 
-`lint` checks the structure, `graph` prints the pipeline as a Mermaid
-flowchart, `inspect` prints name, base, phases and groups as JSON, and
-`resolve` prints the recipe with all imports merged, as the image
-records it. Recipes with imports need a file path instead of `-`, and the
-recipe directory mounted.
+`mode=lint` only checks the recipe; `mode=resolve` also writes
+`out/recipe.yml`, the recipe with all imports merged, as the image
+records it. Both write `out/version`, the frontend's version. All
+options: [Build options](../schema/#build-options).
 
 ## Tags of the frontend image
 

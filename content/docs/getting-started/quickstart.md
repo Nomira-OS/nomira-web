@@ -9,37 +9,34 @@ You need the [nomira CLI](../../cli/install/).
 
 ## 1. Write the recipe
 
-In a new directory, create `recipe.yml`, the
+In a new directory `mysystem`, create `recipe.yml`, the
 [minimal example](https://github.com/Nomira-OS/arch-base/blob/main/examples/minimal/recipe.yml):
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:sha-434c4f5
+# syntax=ghcr.io/nomira-os/nomira:sha-64866c7
+imports:
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/1411e93895fd5905ded7ab547e4cbfd82ffa6fa0/recipes/services.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/1411e93895fd5905ded7ab547e4cbfd82ffa6fa0/recipes/lint.yml
+
 settings:
-  name: mysystem
-  base: ghcr.io/nomira-os/arch-base:sha-33740cd
+  base: ghcr.io/nomira-os/arch-base:sha-1411e93
 
 build:
-  packages:
-    collect: >-
-      run --mount=type=tmpfs,target=/etc/pacman.d/gnupg
-      --mount=type=cache,target=/var/cache/pacman/pkg
-      pacman-key --init && pacman-key --populate &&
-      pacman -S --needed --noconfirm ${items}
-
+  packages: {}            # features comes after packages (and before services)
   features:
-    groups:
-      network:
-        packages: [networkmanager]
-        services: [NetworkManager.service]
-
-  services:
-    collect: run systemctl enable ${items}
+    network:
+      packages: [networkmanager]
+      services: [NetworkManager.service]
 ```
 
-The group `network` names what it needs; the phase `packages` installs
-the packages of all groups in one step, and `services` enables the
-services. The pacman keyring lives in a tmpfs for that step only, so no
-private key ends up in the image.
+The group `network` names what it needs. The rest comes from the
+[recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+of the base image, imported by URL and pinned to a commit: the phase
+`packages` installs the packages of all groups in one step, `services`
+enables the services, and `lint` runs `bootc container lint` on the
+result. The pacman keyring lives in a build cache on your machine, so no
+private key ends up in the image. `nomira recipe export recipe.yml`
+shows the recipe with everything imported.
 
 A system for a real machine needs more, firmware above all; the
 [installation guide](../installation/prepare/) starts from a complete
@@ -56,7 +53,8 @@ nomira build
 Without `-f`, nomira uses `$NOMIRA_RECIPE`, otherwise the machine's own
 recipe in `/etc/nomira`.
 
-The result is the directory `.nomira/mysystem.oci`.
+The result is the directory `.nomira/mysystem.oci`, named after the
+directory the recipe is in (`--name` sets another).
 
 ## 3. Look inside
 
@@ -70,8 +68,8 @@ podman run --rm localhost/mysystem:latest pacman -Q networkmanager
 Add a group to `features` and build again:
 
 ```yaml
-      motd:
-        - copy files/motd /etc/motd
+    motd:
+      - copy files/motd /etc/motd
 ```
 
 ```sh

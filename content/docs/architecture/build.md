@@ -13,13 +13,14 @@ frontend reads the recipe through the gateway, builds an
 [LLB](https://github.com/moby/buildkit#exploring-llb) graph and asks
 BuildKit to solve it.
 
-1. **Load.** The entry file, then every file it imports, one by one.
-   From the build context only the paths `copy` names. Nothing else
-   leaves the client.
+1. **Load.** The entry file, then every file it imports, one by one; an
+   import by URL BuildKit fetches itself. From the build context only
+   the paths `copy` names. Nothing else leaves the client.
 2. **Merge.** [Imports](../../recipes/imports/) are merged as JSON Merge
    Patch into one document, the resolved recipe.
-3. **Parse.** Strict: unknown keys are errors. Args are expanded,
-   collectors get their items.
+3. **Parse.** Strict: unknown keys are errors, with file and line.
+   Collectors get their items. With the build option `mode=lint` or
+   `mode=resolve` the frontend stops here and answers.
 4. **Compile.** Phase by phase, with real results in between (see below).
 5. **Export.** BuildKit's exporter writes the image. Its options come
    from the client; the frontend contributes the image config, the epoch
@@ -33,18 +34,19 @@ BuildKit to solve it.
 | Group with `run` | `Exec` on `S`, then `Diff(S, result)` | `S` and the group's commands |
 | Group without `run` | built on `scratch`, merged as is | only the group's commands and copied files |
 | Merge of a phase | `Merge(S, Δ₁ … Δₙ)` ([MergeOp](https://github.com/moby/buildkit/blob/master/docs/dev/merge-diff.md)) | the layers merged |
-| Collector | one `Exec` on `S` with `${items}` | `S` and the sorted items |
-| Stage | its own `Image` or the state after a phase | its base and commands |
+| Collector | a group with one `Exec` on `S` with `${items}` | `S` and the sorted items |
+| Stage | its own `Image` | its base and commands |
 
 A phase with a single group that runs is serial: no diff, no merge, no
 check.
 
 ## Checks during the build
 
-- **Write sets.** For a phase with several groups, a small exec per group
-  lists what it wrote and deleted; the frontend compares the lists
-  pairwise under the phase's policy. A conflict stops the build before
-  anything is merged on top of it.
+- **Conflicts.** For a phase with several groups, small execs list what
+  each group wrote and deleted and hash what several groups wrote; the
+  frontend compares the groups. A conflict stops the build before
+  anything is merged on top of it. See
+  [The conflict check](../conflict-check/).
 - **Guard.** A group without `run` is only built on `scratch` when merging
   provably gives the same tree as building it on `S` (no symbolic links,
   modes or types in the way). Otherwise it falls back, with a warning in
@@ -72,7 +74,7 @@ key.
 | File times in layers | client: `rewrite-timestamp=true` clamps them to the epoch |
 | Image creation time | frontend: config `created` is the epoch |
 | Tools reading the time (dracut, …) | frontend: `SOURCE_DATE_EPOCH` in every `run` |
-| Logs, caches, temp files | frontend: tmpfs at the volatile paths |
+| Logs, caches, temp files | recipe: `settings.mounts`, a tmpfs there |
 | pacman install dates | base image: a pacman hook sets them to the epoch |
 | Package versions | base image: the mirrorlist points to a dated archive snapshot |
 

@@ -18,14 +18,14 @@ weight: 40
 - The package database is in `/usr/lib/sysimage`, not in `/var`, so that
   it is part of the image.
 - Cache and log are where Arch has them, in `/var/cache/pacman/pkg` and
-  `/var/log/pacman.log`. The frontend gives every step a tmpfs over
-  `/var/cache` and `/var/log` ([`volatile`](../../frontend/schema/#settings)),
-  so neither ends up in the image; a cache mount at
-  `/var/cache/pacman/pkg` keeps the downloads across builds.
+  `/var/log/pacman.log`. A recipe keeps both out of the image with
+  [`settings.mounts`](../../frontend/schema/#settings): a tmpfs at
+  `/var/log`, and a cache at `/var/cache/pacman/pkg` that keeps the
+  downloads across builds. `recipes/mounts.yml` does that.
 - The image ships no pacman keyring, because a keyring holds a private
   key that would then be the same on every machine. A step that runs
-  pacman sets one up in a tmpfs (`--mount=type=tmpfs`), so it never
-  ends up in the image.
+  pacman sets one up in a cache or tmpfs mount, so it never ends up in
+  the image.
 - Install packages with a [collector](../../recipes/collectors/). Two
   groups that each call pacman would both write the package database
   and conflict.
@@ -33,8 +33,16 @@ weight: 40
 ```yaml
 build:
   packages:
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg --mount=type=cache,target=/var/cache/pacman/pkg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: >-
+      run --mount=type=cache,target=/etc/pacman.d/gnupg,id=pacman-keyring,sharing=locked
+      { [ -s /etc/pacman.d/gnupg/trustdb.gpg ] || pacman-key --init; } &&
+      pacman-key --populate && pacman -S --needed --noconfirm ${items}
 ```
+
+The base image carries no part of a recipe. This collector, `services`,
+the mounts, a unified kernel image and `bootc container lint` are
+[recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+in its repository instead, to import by URL.
 
 ## Kernel, modules, firmware
 

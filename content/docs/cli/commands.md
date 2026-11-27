@@ -5,16 +5,17 @@ weight: 10
 ---
 
 ```text
-nomira build    [flags]          build the recipe, check and publish the image
-nomira validate [flags] [image]  run validation.d hooks and the boot test
-nomira lint     [flags]          check the recipe
-nomira graph    [flags]          print the pipeline as a Mermaid flowchart
+nomira build    [flags]          build the recipe and publish the image
+nomira lint     [flags]          check the recipe and its imports
 nomira recipe export [-o FILE] [SOURCE]   the recipe an image was built from
 nomira recipe diff [--origin] [A [B]]     compare two recipes
 nomira version                   print the version
 ```
 
-`nomira <command> -h` shows the flags of a command.
+`nomira <command> -h` shows the flags of a command. `build`, `lint` and
+resolving a recipe file for `recipe` all go through BuildKit. Checks of
+the image are steps of the recipe, such as `run bootc container lint`;
+`validate` and `graph` are gone.
 
 ## Flags
 
@@ -24,11 +25,10 @@ nomira version                   print the version
 | `-o DIR` | Output directory, see below for the default |
 | `--dry-run` | Only print the commands, run nothing |
 | `--progress plain` | buildctl's own progress display (`plain`, `tty`, `auto`) instead of nomira's (`nomira`, the default) |
-| `--no-boot-test` | Skip the bcvk boot test |
 | `--log-format json` | Output for log collectors, see [Output](#output); default `text` |
 | `--color never` | Colour in text output: `auto` (on a terminal, unless `NO_COLOR` is set), `always` or `never` |
 | `--origin` | `recipe diff`: also compare where each part came from |
-| `--name NAME` | Image name, for the output directory and local copies; default `settings.name` |
+| `--name NAME` | Image name, for the output directory; default `system` for the recipe in `/etc`, else the recipe directory's name |
 | `--compression gzip` | Layer compression: `zstd` (default), `gzip`, `uncompressed` |
 | `--secret id=ID,src=FILE` | A secret the recipe mounts; may be repeated |
 | `--pull always` | `always` pull images again (a moved `latest`), pull `missing` ones (default), `never` |
@@ -60,8 +60,9 @@ error. `f`, `config` and `dry-run` cannot be set there.
 
 ## Versions
 
-`nomira version` prints the CLI's version; before a build nomira compares
-it with the frontend's. The same `major.minor` works together; patches do
+`nomira version` prints the CLI's version; after a build, and after
+lint, nomira compares it with the frontend's, which the frontend writes
+into the image as the label `org.nomira.frontend.version`. The same `major.minor` works together; patches do
 not matter. Another `major.minor`, or a build that is not a release
 (`sha-…`), gives a warning and builds anyway.
 
@@ -80,10 +81,10 @@ not matter. Another `major.minor`, or a build that is not a release
 ## Where the result goes
 
 `nomira build` writes an OCI image layout directory: for the machine's
-recipe in `/etc/nomira` to `/var/lib/nomira/<name>.oci`, for a recipe
-anywhere else to `.nomira/<name>.oci` next to it. It is built and
-checked in `.build/<name>.oci` next to that and published only when the
-checks pass. A rebuild adds only the layers that changed and removes
+recipe in `/etc/nomira` to `/var/lib/nomira/system.oci`, for a recipe
+anywhere else to `.nomira/<name>.oci` next to it. It is built in
+`.build/<name>.oci` next to that and published only when the build
+succeeded, with every check the recipe runs. A rebuild adds only the layers that changed and removes
 those no longer used.
 
 ## The recipe of an image
@@ -96,9 +97,9 @@ two recipes. A source is one of:
 | Source | Meaning |
 |---|---|
 | `booted` | The image the running system booted, as `bootc status` names it; the default. nomira checks that the image it finds there is still that one |
-| `recipe.yml` | A recipe file, resolved by its frontend as a build would |
-| a directory | An OCI layout directory, such as the output of `nomira build` |
-| `docker://…`, `oci:…`, `containers-storage:…` | Any image skopeo reads |
+| `recipe.yml` | A recipe file, resolved by its frontend through BuildKit as a build would, imports by URL included |
+| a directory | An OCI layout directory, such as the output of `nomira build`; nomira reads it itself |
+| `docker://…`, `containers-storage:…` | Any other image, read with skopeo |
 
 Without arguments, `nomira recipe diff` compares the booted image with
 the recipe `-f` names: what the next build would change. Both sides are
@@ -149,4 +150,4 @@ path of the published image stays on stdout as in text mode.
 Step names say where in the recipe a step belongs: `[2/5 features/ssh]`
 is the group `ssh` of the second of five phases, `[stage aur]` a stage,
 `[check 2/5 features/ssh]` the frontend's check of that group, `[load]`
-what is read from the recipe directory.
+what is read from the recipe directory or fetched by URL.

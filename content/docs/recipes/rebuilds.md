@@ -4,10 +4,6 @@ lead: Which parts of a recipe run again after a change, and how to keep that sma
 weight: 14
 ---
 
-> These rules are checked by end-to-end tests with a real BuildKit on
-> small test images. A whole system on the nomira base image has not
-> been built this way yet.
-
 ## The rules
 
 | What changed | What runs again |
@@ -15,6 +11,8 @@ weight: 14
 | A group | That group, and every later phase that uses `run` |
 | The items of a collector | The collector, and every later phase that uses `run` |
 | The base image | Collectors and groups that use `run` |
+| `settings.env` | Every `run` of the recipe |
+| An `env` command | The commands after it in its group, and every later phase that uses `run` |
 | Nothing | Nothing |
 
 Sibling groups of a changed group always stay in the cache.
@@ -33,7 +31,8 @@ hook and, when firmware or a kernel is among them, builds the initramfs
 again. The result is the same; only the time grows with the collector.
 
 When that matters, split the collector: what rarely changes goes to a
-collector of its own before the others, with the same command.
+collector of its own in a phase before the others, with the same
+command.
 
 ```yaml
 build:
@@ -42,11 +41,10 @@ build:
   packages:        # changes often
     collect: run … pacman -S --needed --noconfirm ${items}
   features:
-    groups:
-      hardware:
-        firmware: [linux-firmware-intel, intel-ucode]
-      editor:
-        packages: [nano]
+    hardware:
+      firmware: [linux-firmware-intel, intel-ucode]
+    editor:
+      packages: [nano]
 ```
 
 Adding an editor then reruns only `packages` and what follows; the
@@ -59,7 +57,7 @@ changes what ends up in the image.
 imports: [features/terminal.yml, features/network.yml]   # two groups that only copy
 build:
   packages:
-    collect: run --mount=type=tmpfs,target=/etc/pacman.d/gnupg pacman-key --init && pacman-key --populate && pacman -S --needed --noconfirm ${items}
+    collect: run pacman -S --needed --noconfirm ${items}
   features: {}            # its groups come from the imports
   services:
     collect: run systemctl enable ${items}
@@ -139,16 +137,21 @@ stage with its own image. The stage does not depend on the
 base image either, and the group only copies:
 
 ```yaml
-terminal:
-  stages:
-    theme:
-      from: docker.io/library/alpine:3.22
+stages:
+  theme:
+    from: docker.io/library/alpine:3.22
+    commands:
+      - copy tools/gen-theme.sh /gen-theme.sh
+      - run mkdir /out && sh /gen-theme.sh > /out/theme.conf
+build:
+  features:
+    terminal:
       commands:
-        - copy tools/gen-theme.sh /gen-theme.sh
-        - run mkdir /out && sh /gen-theme.sh > /out/theme.conf
-  commands:
-    - copy --from=theme /out/theme.conf /etc/kmscon/theme.conf
+        - copy --from=theme /out/theme.conf /etc/kmscon/theme.conf
 ```
+
+A feature file that needs a stage brings it along: `stages` at the top
+of the file is merged like everything else.
 
 ## When run in a group is fine
 

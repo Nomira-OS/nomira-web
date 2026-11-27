@@ -14,7 +14,7 @@ Its [README](https://github.com/Nomira-OS/arch-base/blob/main/examples/README.md
 a machine without its network firmware cannot go online to fix that.
 
 ```sh
-mkdir ~/recipe && cd ~/recipe
+mkdir ~/mysystem && cd ~/mysystem
 curl -fLO https://raw.githubusercontent.com/Nomira-OS/arch-base/main/examples/uki/recipe.yml
 export NOMIRA_RECIPE="$PWD/recipe.yml"
 nomira build
@@ -22,7 +22,8 @@ nomira build
 
 ## Load
 
-Copy the directory `.nomira/mysystem.oci` to the machine you install from, then:
+Copy the directory `.nomira/mysystem.oci`, named after the recipe's
+directory, to the machine you install from, then:
 
 ```sh
 sudo skopeo copy oci:mysystem.oci containers-storage:localhost/mysystem:latest

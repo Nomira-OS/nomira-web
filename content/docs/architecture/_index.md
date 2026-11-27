@@ -44,19 +44,22 @@ an OCI image for bootc.
   the BuildKit client (platform, exporter, compression, image names,
   sources of secrets, pull policy) is a flag or a line in
   [nomira.conf](client/#nomiraconf), never a recipe setting.
-- **Loose coupling.** The CLI knows the frontend only as an image with
-  helper modes (`inspect`, `resolve`); the frontend never reads anything
-  of the CLI. Versions are compared, never required: see
+- **Loose coupling.** The CLI knows the frontend only as an image that
+  BuildKit runs, and reads the labels it writes; the frontend never reads
+  anything of the CLI. Versions are compared, never required: see
   [Versions](client/#versions).
 - **Builds are reproducible.** The same recipe on the same base image
   gives the same layers: see [Reproducibility](build/#reproducibility).
-- **The image holds no machine state.** Nothing written to `/run`, `/tmp`,
-  `/var/log`, `/var/cache` or `/var/tmp` during a build ends up in a layer:
-  see [Mounts](mounts/).
+- **The image holds no machine state.** A recipe mounts a tmpfs or a
+  cache where builds write logs, caches and temporary files, so they end
+  up in no layer: see [Mounts](mounts/).
+- **The base image carries no recipe.** Parts for recipes are imported
+  by URL; the image never assumes them.
 
 ## Pages
 
 - [The build](build/): from the recipe to layers.
+- [The conflict check](conflict-check/): how the independence of groups is verified.
 - [Mounts](mounts/): what is mounted where, at build time and at runtime.
 - [Client](client/): CLI, buildctl and nomira.conf.
 - [Deployment](deployment/): from an OCI image to a booted system.

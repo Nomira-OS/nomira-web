@@ -43,16 +43,17 @@ method=auto
 # features/wifi.yml, imported by the recipe (imports: [features/wifi.yml])
 build:
   features:
-    groups:
-      wifi:
-        packages: [networkmanager]
-        services: [NetworkManager.service]
-        commands:
-          - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
+    wifi:
+      packages: [networkmanager]
+      services: [NetworkManager.service]
+      commands:
+        - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 ```
 
-This assumes the collectors `packages` and `services` that the
-[example recipes](https://github.com/Nomira-OS/arch-base/tree/main/examples) have. If another group
+This assumes the collectors `packages` and `services`, which the
+[example recipes](https://github.com/Nomira-OS/arch-base/tree/main/examples)
+import from the base image's
+[recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes). If another group
 already asks for NetworkManager, naming it again does no harm.
 
 NetworkManager ignores connection files that others can read, hence

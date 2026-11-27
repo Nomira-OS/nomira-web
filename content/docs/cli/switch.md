@@ -1,6 +1,6 @@
 ---
 title: Build and deploy
-lead: nomira build builds, checks and publishes an image; bootc takes it from there.
+lead: nomira build builds and publishes an image; bootc takes it from there.
 weight: 20
 untested: true
 ---
@@ -12,19 +12,20 @@ untested: true
    `$XDG_RUNTIME_DIR/buildkit/buildkitd.sock`, then the system-wide one
    at `/run/buildkit/buildkitd.sock`); otherwise a podman container
    `nomira-buildkitd`, which the CLI creates when needed.
-2. **Build** the recipe with `buildctl` into a work directory. The check
-   of the groups runs in the frontend. BuildKit only writes layers that
+2. **Build** the recipe with `buildctl` into a work directory. The
+   conflict check of the groups and every check the recipe runs itself
+   happen during the build, see below. BuildKit only writes layers that
    are not there yet.
-3. **Check** the image, see below. The checks run it from
-   containers-storage, so only for them is it copied there.
+3. **Compare versions**: the frontend's, from the label it wrote into
+   the image, with the CLI's.
 4. **Publish** it to the output directory,
    [see where](../commands/#where-the-result-goes). That directory only
-   ever holds an image that passed its checks.
+   ever holds an image of a build that succeeded.
 
 `build` never touches the running system. It passes the files that
 `--secret` or `nomira.conf` names to the steps that mount them as
-secrets; a secret the recipe requires but nobody gives stops the build
-before it starts.
+secrets; a step that requires a secret nobody gives fails, and BuildKit
+says which.
 
 ## Deploying is bootc's
 
@@ -32,7 +33,7 @@ nomira has no command that changes the running system. The output
 directory is an image source, like a registry, and bootc follows it:
 
 ```sh
-sudo nomira build      # build, check, publish
+sudo nomira build      # build and publish
 sudo bootc upgrade     # take the new image; --apply reboots right away
 ```
 
@@ -54,24 +55,20 @@ system-wide buildkitd, which the base image starts on demand. Without
 root, it falls back to the podman container; this is meant for
 developing recipes on another machine.
 
-## The checks
+## Checks
 
-**Your own hooks.** Every `validation.d/*.sh` next to the recipe runs in
-sorted order, with the image name in `$IMG`. A hook that fails fails the
-build. Example, `validation.d/10-lint.sh`:
+Checks of the image are steps of the recipe, so they run on every build,
+are cached like any other step, and a failing one stops the build before
+anything is published. The base image's
+[recipe part `lint.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
+adds `bootc container lint` as the last phase:
 
-```sh
-podman run --rm "$IMG" bootc container lint --fatal-warnings
+```yaml
+build:
+  # … the other phases …
+  lint:
+    bootc: ["run bootc container lint --fatal-warnings"]
 ```
 
-**The boot test.** If `bcvk` is installed, `bcvk ephemeral test-basic`
-boots the image in a throwaway VM. The VM starts with
-`systemd.firstboot=off` so that it does not wait for the first-boot
-prompts. Without `bcvk` the test is skipped with a note;
-`--no-boot-test` skips it on purpose.
-
-The boot test connects over SSH. It therefore needs a network service
-and `sshd` to be active in the tested image; otherwise it runs into a
-timeout. The bare base image has neither.
-
-`nomira validate` runs the same checks without building.
+To boot an image before switching to it, see
+[Try it in a VM](../../getting-started/vm/).
