@@ -71,7 +71,9 @@ phases:
 | `toolbox` | Image with busybox tools used by the check; has a default |
 | `labels` | Labels on the finished image |
 | `env` | Environment for all `run` commands, at build time only |
-| `args` | Declared build arguments with defaults; `--build-arg` overrides them |
+| `args` | Declared build arguments with defaults, used as `${NAME}`. Callers of BuildKit may override them (`--opt build-arg:NAME=…`); the nomira CLI does not |
+| `compression` | `zstd` (default), `gzip` or `uncompressed`: compression of the exported layers. The CLI acts on it |
+| `secrets` | For each secret id that a step mounts, the file on the build machine that provides it, relative to the recipe or absolute. The CLI passes them to BuildKit |
 | `platforms`, `tags` | Checked and reported, but not acted on by the frontend. The caller decides |
 
 ## prepare

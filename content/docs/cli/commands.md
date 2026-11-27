@@ -19,14 +19,15 @@ nomira version                   print the version
 | Flag | Meaning |
 |---|---|
 | `-f recipe.yml` | Entry file of the recipe; default `$NOMIRA_RECIPE`, otherwise `/etc/nomira/recipe.yml` |
+| `-o DIR` | Output directory, see below for the default |
 | `--dry-run` | Only print the commands, run nothing |
-| `--build-arg NAME=VALUE` | Override an arg declared in `settings.args` |
-| `--secret id=ID,src=PATH` | Pass a secret to the build |
-| `--frontend IMAGE` | Frontend image; otherwise the `# syntax=` line of the recipe, otherwise `ghcr.io/nomira-os/nomira:1-alpha` |
-| `--name NAME` | Image name; otherwise `settings.name`, otherwise the directory name |
+| `--progress plain` | A log with every step and its time |
 | `--no-boot-test` | Skip the bcvk boot test |
 
-Not every flag applies to every command.
+Not every flag applies to every command. No flag changes the image:
+the frontend (the recipe's first line, `# syntax=…`), base image, args,
+compression and secrets all come from the recipe, so the same recipe
+builds the same image whoever runs it.
 
 ## Environment variables
 

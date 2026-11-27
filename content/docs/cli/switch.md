@@ -21,8 +21,8 @@ untested: true
    [see where](../commands/#where-the-result-goes). That directory only
    ever holds an image that passed its checks.
 
-`build` never touches the running system. `--secret id=ID,src=PATH`
-passes a file to steps that mount it as a secret.
+`build` never touches the running system. It passes the files named in
+`settings.secrets` to the steps that mount them as secrets.
 
 ## Deploying is bootc's
 
