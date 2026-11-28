@@ -31,6 +31,7 @@ the image are steps of the recipe, such as `run bootc container lint`.
 | `--compression gzip` | Layer compression: `zstd` (default), `gzip`, `uncompressed` |
 | `--secret id=ID,src=FILE` | A secret the recipe mounts; may be repeated |
 | `--pull always` | `always` pull images again (a moved tag), pull `missing` ones (default), `never` |
+| `--cache-from REF` | An image in a registry whose steps may be taken over, such as the one CI built from the same recipe; may be repeated, see [Reusing what was built](../../recipes/rebuilds/#reusing-what-was-built) |
 | `--no-check` | Skip the conflict checks between groups and between buckets: faster, but overlaps are merged without a word, see [The conflict check](../../architecture/conflict-check/#buckets-and-turning-it-off) |
 | `--config FILE` | The `nomira.conf` to read |
 

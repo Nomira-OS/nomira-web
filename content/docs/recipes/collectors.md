@@ -89,7 +89,7 @@ build:
     collect:
       resolve: run …   # gets ${items}, prints per file: name URL sha256:<hex> [key]
       each: run …      # once per bucket: its files in /nomira/in, writes /nomira/out
-      then: run …      # once: all files in /nomira/in, on the merged result
+      then: run …      # once: all files in /nomira/in, on the merged result; may use ${items}
 ```
 
 ```mermaid
@@ -117,7 +117,10 @@ flowchart TD
   unchanged package is neither unpacked nor exported nor downloaded by
   bootc again. The buckets run side by side.
 - **then** finishes on the whole: package database, install scripts,
-  hooks. Optional. It runs again whenever any bucket changed.
+  hooks. Optional. It runs again whenever any bucket changed, and may
+  use `${items}`, to tell what was asked for from what came along;
+  `each` may not, or every bucket would run again when one item
+  changed.
 - **A file in two buckets is a conflict** and stops the build, even with
   the same content. `--no-check` skips this check.
 

@@ -38,8 +38,8 @@ each call pacman would both write the package database and conflict.
 | Step | What pacman does there |
 |---|---|
 | resolve | `pacman -Sp --needed --print-format '%n %l sha256:%h %e'`: the packages to install with their dependencies, URL, sha256 and pkgbase as the key, so that split packages share a bucket |
-| each | `pacman --root /nomira/out -U --nodeps --noscriptlet`: the files of one bucket's packages, with `NoExtract` and file capabilities, and no hook |
-| then | `pacman -U --overwrite '*'` over all packages, with `NoExtract = *` and a `!` where a hook needs a path: database, install scripts and hooks as in a normal install |
+| each | `pacman --root /nomira/out -U --nodeps --noscriptlet`: the files of one bucket's packages, with `NoExtract` and file capabilities, and no hook; then a check against the system |
+| then | `pacman -U` over all new packages, with `NoExtract = *` and a `!` where a hook needs a path: database, install scripts and hooks as in a normal install; upgrades first, on their own; then the install reasons |
 
 - **No hooks in `each`.** libalpm looks for hooks below `--root`, so the
   hooks of a bucket's own packages would run in a system that holds
@@ -54,6 +54,21 @@ each call pacman would both write the package database and conflict.
   no font is written twice. A hook with `NeedsTargets` gets its targets
   as they are, for `texinfo` the info pages. depmod and the initramfs run
   as their own hooks, as on Arch.
+- **Conflicts as pacman finds them.** pacman compares the packages of
+  a bucket with each other in `each`; after that, `each` checks the
+  bucket against the system it runs on: a file that is there already
+  must belong to the package being upgraded, or the bucket stops with
+  the file and its owner. The frontend compares the buckets. `then`
+  needs `--overwrite '*'` only because the buckets have put the files in
+  place before pacman knows them; without it, pacman refuses every one
+  of them.
+- **Upgrades whole.** An upgrade removes the files of the old version,
+  and under `NoExtract` pacman would not unpack the new ones again.
+  Packages the system has in another version are therefore upgraded
+  first, in a transaction of their own without `NoExtract`.
+- **Install reasons as `pacman -S` gives them.** `pacman -U` marks
+  every new package as explicitly installed; afterwards, `then` marks
+  those no item named as dependencies (`then` gets the items as well).
 - **Compared with a normal install** (pacman 6.0.2, packages made for
   the test, a shell in one bucket): the same hooks with the same
   targets, the same files and database; written twice were only the
@@ -62,7 +77,10 @@ each call pacman would both write the package database and conflict.
 - **Downloads** are BuildKit's: kept below `/var/lib/buildkit` by their
   sha256, across reboots and base images, until BuildKit's garbage
   collection removes them. `resolve` uses an empty pacman cache only so
-  that pacman prints URLs.
+  that pacman prints URLs. Without that cache, `nomira build` takes the
+  unchanged buckets from the last image or from `--cache-from`, see
+  [Reusing what was built](../../../rebuilds/#reusing-what-was-built);
+  `then` needs every package and downloads them again.
 - **A package that conflicts with an installed one**, such as
   `iptables-nft` with `iptables` in the base image, stops the build in
   `resolve`: `--noconfirm` answers pacman's question with no. Remove the

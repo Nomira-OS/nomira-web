@@ -38,6 +38,24 @@ Every bucket starts from the state before the collector. Keep
 `packages` the first phase: a phase before it would run all buckets
 again whenever it changes.
 
+## Reusing what was built
+
+BuildKit's cache lives on the machine that built, below
+`/var/lib/buildkit`. Every image also carries the cache keys of its
+layers in its config (an inline cache), and `nomira build` imports them
+from the last image it published and from every `--cache-from` image.
+A BuildKit without cache, after a prune or on another machine, then
+takes every unchanged step from there: the buckets whose packages are
+the same come as layers, and only what changed runs, `then` included.
+
+```sh
+# on a new machine, with the image CI built from the same recipe
+sudo nomira build --cache-from ghcr.io/me/laptop:sha-…
+```
+
+A step is taken over only when everything it depends on is the same:
+the base image, the phases before it, its own commands and files.
+
 ## An example
 
 ```yaml

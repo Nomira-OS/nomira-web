@@ -103,7 +103,10 @@ the frontend turns that off for bind mounts and checks, since the
 definition of the mounted phase identifies it as well and a whole system
 takes seconds to checksum. Cache mounts, tmpfs and secrets never enter a
 key. A file a collector fetches is keyed by its sha256, so the same
-package is downloaded once, whatever its URL.
+package is downloaded once, whatever its URL. Caches that the client
+imports (`--import-cache`) the frontend passes on to every solve, so a
+step can also come from the inline cache of an earlier image or from a
+registry; see [Reusing what was built](../../recipes/rebuilds/#reusing-what-was-built).
 
 ## Reproducibility
 
