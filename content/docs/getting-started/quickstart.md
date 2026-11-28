@@ -15,11 +15,11 @@ In a new directory `mysystem`, create `recipe.yml`, the
 ```yaml
 # syntax=ghcr.io/nomira-os/nomira:sha-e1146b9
 imports:
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/8d6d40c9a63f3eb8cc4f6d3fbbea3f3b71ae01f9/recipes/services.yml
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/8d6d40c9a63f3eb8cc4f6d3fbbea3f3b71ae01f9/recipes/lint.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/50c6493a4e8520456e409f767b052ac2e3977861/recipes/services.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/50c6493a4e8520456e409f767b052ac2e3977861/recipes/lint.yml
 
 settings:
-  base: ghcr.io/nomira-os/arch-base:sha-e6e58a9
+  base: ghcr.io/nomira-os/arch-base:sha-50c6493
 
 build:
   packages: {}            # features comes after packages (and before services)
