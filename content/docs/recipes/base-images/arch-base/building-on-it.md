@@ -16,31 +16,57 @@ The layout every base image shares, `/usr`, `/etc` and `/var`, is on
   `/var/log/pacman.log`. A recipe keeps both out of the image with
   [`settings.mounts`](../../../../frontend/schema/#settings): a tmpfs at
   `/var/log`, and a cache at `/var/cache/pacman/pkg` that keeps the
-  downloads across builds. `mounts.yml` does that.
+  downloads of a `pacman -S` across builds. `mounts.yml` does that.
+- `pacman.conf` has no `NoExtract` lines: packages are installed whole,
+  documentation, man pages and translations included, as on Arch itself.
+  A recipe that wants less adds `NoExtract` lines in a phase before
+  `packages`.
 - The image ships no pacman keyring, because a keyring holds a private
   key that would then be the same on every machine. It needs none for
   `packages.yml`: the sync database was checked when the image was
   built, and BuildKit checks every package against its sha256 from it.
-- Install packages with a [collector](../../../collectors/). Two groups
-  that each call pacman would both write the package database and
-  conflict. `packages.yml` is that collector, one that fans out:
-
-| Step | What pacman does there |
-|---|---|
-| resolve | `pacman -Sp --needed --print-format '%n %l sha256:%h %e'`: the packages to install with their dependencies, URL, sha256 and pkgbase as the key |
-| each | `pacman --root /nomira/out -U --nodeps --noscriptlet` with every hook removed: only the files of one bucket's packages, with the image's `NoExtract` lines and file capabilities |
-| then | `pacman -U --overwrite '*'` with `NoExtract = *` and a `!` for every path a hook triggers on: database, install scripts and hooks as in a normal install, no file written again except those; then `depmod` and the initramfs script |
-
-  libalpm ignores files under `NoExtract` for path triggers, hence the
-  negations. Modules and firmware stay excluded, so that they are not
-  written twice; that is why `then` runs `depmod` and the initramfs
-  script itself, the latter taking an unchanged initramfs from its cache.
-  Tried by hand against a normal install of cups: the same hooks, no
-  file missing. Not yet in a real build.
-
 - The mirrorlist points to the day of the Arch Linux Archive the image
   was built from, so `pacman -S` installs from the same package set; see
   [Tags and package set](../versions/).
+
+### Installing packages
+
+Install packages with a [collector](../../../collectors/): two groups that
+each call pacman would both write the package database and conflict.
+`packages.yml` is that collector, one that fans out:
+
+| Step | What pacman does there |
+|---|---|
+| resolve | `pacman -Sp --needed --print-format '%n %l sha256:%h %e'`: the packages to install with their dependencies, URL, sha256 and pkgbase as the key, so that split packages share a bucket |
+| each | `pacman --root /nomira/out -U --nodeps --noscriptlet`: the files of one bucket's packages, with `NoExtract` and file capabilities, and no hook |
+| then | `pacman -U --overwrite '*'` over all packages, with `NoExtract = *` and a `!` where a hook needs a path: database, install scripts and hooks as in a normal install |
+
+- **No hooks in `each`.** libalpm looks for hooks below `--root`, so the
+  hooks of a bucket's own packages would run in a system that holds
+  nothing but that bucket. Their hook files stay under `NoExtract`
+  while pacman runs and are unpacked afterwards, with bsdtar; a tmpfs
+  hides `/etc/pacman.d/hooks`.
+- **Files again only where a hook needs them.** libalpm ignores files
+  under `NoExtract` for path triggers, so `then` negates what the hooks
+  in effect trigger on. A hook without `NeedsTargets` needs a single
+  matching path: for a target like `usr/share/fonts/*` that is the
+  directory `usr/share/fonts/`, which every package with fonts lists, so
+  no font is written twice. A hook with `NeedsTargets` gets its targets
+  as they are, for `texinfo` the info pages. depmod and the initramfs run
+  as their own hooks, as on Arch.
+- **Compared with a normal install** (pacman 6.0.2, packages made for
+  the test, a shell in one bucket): the same hooks with the same
+  targets, the same files and database; written twice were only the
+  files of a `NeedsTargets` hook and a kernel image a hook names by file.
+  Not yet measured in a real build.
+- **Downloads** are BuildKit's: kept below `/var/lib/buildkit` by their
+  sha256, across reboots and base images, until BuildKit's garbage
+  collection removes them. `resolve` uses an empty pacman cache only so
+  that pacman prints URLs.
+- **A package that conflicts with an installed one**, such as
+  `iptables-nft` with `iptables` in the base image, stops the build in
+  `resolve`: `--noconfirm` answers pacman's question with no. Remove the
+  installed one first, with `pacman -Rdd` in a phase before `packages`.
 
 ## The initramfs
 
@@ -67,8 +93,8 @@ give the same bytes.
 ### Without running dracut again
 
 `then` runs over all packages of the collector whenever one of them
-changes, and the initramfs script runs every time. dracut does not have
-to: with a cache mount at `/var/cache/nomira/initramfs`
+changes; with the kernel, firmware or dracut among them, the hook runs
+every time. dracut does not have to: with a cache mount at `/var/cache/nomira/initramfs`
 ([`mounts.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
 sets it), the script keeps every initramfs it built and takes one again
 when nothing it would contain has changed:

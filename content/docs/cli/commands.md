@@ -118,15 +118,16 @@ Text output, the default, puts the time since the start in front of
 every line and shows the commands nomira runs in bold. The build itself
 appears one line per event: a finished step with its time, a step still
 running after three seconds, the output of steps indented below them.
-Steps from the cache are only counted; bookkeeping such as resolving
-images or the frontend's checks shows only when it fails or is slow.
+Steps from the cache are only counted, and so are the downloads of a
+collector that fans out, one step per file; bookkeeping such as
+resolving images or the frontend's checks shows only when it fails or is
+slow.
 `--progress plain` or `tty` shows buildctl's own display instead.
 Colour on a terminal, unless `NO_COLOR` is set.
 
 ```text
  0:00  + buildctl … build …
  0:02  ✓ [1/6 packages/packages] resolve mkdir -p /tmp/nocache && pacman -Sp --needed …  1.1s
- 0:04  ✓ [1/6 packages/packages] fetch nano-8.4-1-x86_64.pkg.tar.zst  0.3s
  0:05  ✓ [1/6 packages/packages] each bucket 07: nano  0.6s
  0:08  ▸ [1/6 packages/packages] then neg="$(sed -n …
         │ [1/6 packages/packages] (1/1) installing nano
@@ -134,6 +135,7 @@ Colour on a terminal, unless `NO_COLOR` is set.
  0:20  ✓ [2/6 features/ssh] copy files/sshd/ /etc/ssh/sshd_config.d/  0.0s
  0:37  ✓ [6/6 uki/uki] run mkdir -p /boot/EFI/Linux && …  0:17
  0:43  ✓ exporting to oci image format  6.1s
+ 0:43  • files fetched: 1 downloaded, 1233 from the cache
  0:43  • 112 steps from the cache
 ```
 

@@ -100,7 +100,10 @@ The buckets of a [collector that fans out](../../recipes/collectors/#collectors-
 are checked strictly, with pass 1 alone: a file in two buckets is a
 conflict even with the same content, since two packages that ship the
 same file are an error of their own. On arch-base, pacman compares the
-packages within a bucket in `each`; between buckets, this check does.
+packages within a bucket in `each`; between buckets only this check
+does, since `then` runs with `--overwrite '*'`, and pacman then installs
+two packages with the same file without a word (tried with pacman
+6.0.2).
 
 `nomira build --no-check` (build option `check=off`) skips both, the
 check between groups and the one between buckets. The build gets faster
