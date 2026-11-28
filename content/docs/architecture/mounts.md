@@ -12,7 +12,7 @@ layer.
 
 | Mount | Source | Writable | In the cache key | Typical use |
 |---|---|---|---|---|
-| `type=cache` | a BuildKit cache directory (`id`, `sharing`) | yes, kept across builds | no | package cache, pacman keyring |
+| `type=cache` | a BuildKit cache directory (`id`, `sharing`) | yes, kept across builds | no | downloads, the initramfs cache of arch-base |
 | `type=tmpfs` | empty memory | yes, gone after the step | no | scratch space |
 | `type=bind` | a stage or an earlier phase (`from`, `source`) | no | the definition of the source | building a UKI from the finished system |
 | `type=secret` | a file the client passes (`--secret`) | no | no | signing keys |
@@ -21,8 +21,8 @@ layer.
 recipe, in stages too; a `--mount` of the run at the same target takes
 its place. Without the setting nothing is added. The base image's
 [`recipes/mounts.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
-mounts a tmpfs at `/run`, `/tmp`, `/var/log` and `/var/tmp`, and a cache
-at `/var/cache/pacman/pkg`.
+mounts a tmpfs at `/run`, `/tmp`, `/var/log` and `/var/tmp`, and caches
+at `/var/cache/pacman/pkg` and `/var/cache/nomira/initramfs`.
 
 - Mounts are applied parents first, so a cache at `/var/cache/pacman/pkg`
   works inside a tmpfs at `/var/cache`.

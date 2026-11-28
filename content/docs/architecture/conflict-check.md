@@ -55,6 +55,21 @@ database. That is what [collectors](../../recipes/collectors/) are for.
 
 ## How it runs
 
+```mermaid
+flowchart TD
+  accTitle: The two passes of the conflict check
+  accDescr: Pass 1 lists, for every group, the paths it wrote and deleted, without reading a file. If a write of one group meets a deletion of another, that is a conflict. If no path is written by more than one group, the groups are independent. Otherwise pass 2 hashes only those paths, in only those groups: the same content, mode and owner everywhere means independent, anything else is a conflict.
+  p1["pass 1, every group:<br/>list writes and deletions"] --> del{"a write meets a deletion<br/>of another group?"}
+  del -->|yes| stop["conflict: the build stops"]
+  del -->|no| multi{"a path written by<br/>several groups?"}
+  multi -->|no| ok["independent: merge"]
+  multi -->|yes| p2["pass 2, only those paths:<br/>sha256, mode, owner"]
+  p2 --> same{"the same<br/>in every group?"}
+  same -->|yes| ok
+  same -->|no| stop
+  class ok accent
+```
+
 Two passes, each a small step per group in a busybox image
 ([`toolbox`](../../frontend/schema/#build-options)) that mounts the trees
 read-only, named `[check …]` in the build output:
@@ -78,6 +93,19 @@ cache key, so BuildKit does not checksum the trees
 
 A phase with a single group that uses `run` has nothing to compare: it
 skips the check, the diff and the merge.
+
+## Buckets, and turning it off
+
+The buckets of a [collector that fans out](../../recipes/collectors/#collectors-that-fan-out)
+are checked strictly, with pass 1 alone: a file in two buckets is a
+conflict even with the same content, since two packages that ship the
+same file are an error of their own. On arch-base, pacman compares the
+packages within a bucket in `each`; between buckets, this check does.
+
+`nomira build --no-check` (build option `check=off`) skips both, the
+check between groups and the one between buckets. The build gets faster
+by these steps; overlapping groups and buckets are then merged in a
+fixed order without a word.
 
 ## Limits
 

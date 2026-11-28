@@ -36,9 +36,9 @@ sudo pacman -S --needed buildkit podman skopeo
 
 > **Not tried yet.** This should work, but nobody has run it so far.
 
-The base image contains the CLI together with
-Podman, BuildKit and skopeo. You download that image anyway, because
-recipes build on it. So the machine needs nothing but Podman:
+The base image contains the CLI together with BuildKit and skopeo. You
+download that image anyway, because recipes build on it. So the machine
+needs nothing but Podman:
 
 ```sh
 nomira() {
@@ -46,7 +46,7 @@ nomira() {
     -v "$PWD":/work -w /work \
     -v nomira-buildkit:/var/lib/buildkit \
     -v nomira-containers:/var/lib/containers \
-    ghcr.io/nomira-os/arch-base:TAG \
+    ghcr.io/nomira-os/arch-base:sha-… \
     sh -c 'buildkitd >/var/log/buildkitd.log 2>&1 & sleep 2; exec nomira "$@"' nomira "$@"
 }
 
@@ -58,7 +58,7 @@ do:
 
 | Option | Meaning |
 |---|---|
-| `--privileged` | BuildKit and the Podman inside the container need it to run builds and containers |
+| `--privileged` | BuildKit inside the container needs it to run builds |
 | `-v "$PWD":/work -w /work` | The recipe directory; results land in `.nomira/` there |
 | `-v nomira-buildkit:…` | Keeps the build cache between runs |
 | `-v nomira-containers:…` | Keeps pulled images between runs |

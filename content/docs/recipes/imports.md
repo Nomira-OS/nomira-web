@@ -10,10 +10,10 @@ by URL. Each is a recipe or a part of one, and may import further files
 itself. The files are merged into one recipe.
 
 ```yaml
+# syntax=ghcr.io/nomira-os/nomira:sha-…
 # recipe.yml
-# syntax=ghcr.io/nomira-os/nomira:1-alpha
 imports:
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/COMMIT/recipes/services.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/<commit>/recipes/services.yml
   - base.yml               # what all my machines share
   - features/terminal.yml
 build:
@@ -68,15 +68,15 @@ file come after it. Groups and stages have no order, so that is all.
 
 Phases do, and there a new phase goes where its own file puts it: after
 the phase that comes before it there, or, if it is the first there,
-before the next phase it names. An import can thus put `firmware` in
-front of `packages`:
+before the next phase it names. An import can thus put `keys` in front
+of `uki`:
 
 ```yaml
-# machine/laptop.yml
+# features/secure-boot.yml
 build:
-  firmware:
-    collect: run … pacman -S --needed --noconfirm ${items}
-  packages: {}             # only to say where firmware goes
+  keys:
+    db: ["copy files/db.crt /etc/kernel/secureboot/db.crt"]
+  uki: {}                  # only to say where keys goes
 ```
 
 The importing file comes last, so a phase of its own that it names first

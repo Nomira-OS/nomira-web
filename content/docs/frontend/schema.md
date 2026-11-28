@@ -12,7 +12,7 @@ recipes stay YAML.
 ## The whole schema in one example
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:1-alpha
+# syntax=ghcr.io/nomira-os/nomira:sha-…
 imports: [features/editor.yml]
 settings:
   base: docker.io/library/archlinux:base
@@ -69,7 +69,7 @@ build:
 **Not in a recipe:** what only the BuildKit client can set: platform,
 image names, layer compression, `rewrite-timestamp`, the files behind
 secrets, the pull policy. They are flags of the client, for the nomira
-CLI also lines in [nomira.conf](../../architecture/client/#nomiraconf).
+CLI also lines in [nomira.conf](../../cli/commands/#nomiraconf).
 See [Who decides what](../../architecture/client/#who-decides-what).
 
 **The record.** Every image carries the recipe it was built from in its

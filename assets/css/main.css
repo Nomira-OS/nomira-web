@@ -309,3 +309,10 @@ tbody tr:last-child > * { border-bottom: 0; }
 .code .copy { position: absolute; top: 0.45rem; right: 0.45rem; min-height: 32px; padding: 0 0.7rem; font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; opacity: 0.85; }
 .code .copy:hover, .code .copy:focus-visible { opacity: 1; border-color: var(--accent); }
 .code:hover .copy { opacity: 1; }
+
+/* Diagrams: SVGs rendered from ```mermaid blocks (hack/diagrams), coloured
+   by the custom properties above, so they follow the theme. */
+.prose .diagram { margin: 1.6rem 0; padding: 1.25rem 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
+.prose .diagram svg { display: block; margin-inline: auto; height: auto; }
+.prose .diagram figcaption { margin-top: 0.9rem; color: var(--muted); font-size: 0.92rem; text-align: center; }
+.prose .diagram figcaption p { margin: 0; }

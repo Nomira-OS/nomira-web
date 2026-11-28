@@ -10,7 +10,8 @@ weight: 14
 |---|---|
 | A group | That group, and every later phase that uses `run` |
 | The items of a collector | The collector, and every later phase that uses `run` |
-| The base image | Collectors and groups that use `run` |
+| The packages of a collector that fans out | `resolve`, the buckets whose files changed, `then`, and every later phase that uses `run` |
+| The base image, or a phase before a collector | Collectors, all their buckets, and groups that use `run` |
 | `settings.env` | Every `run` of the recipe |
 | An `env` command | The commands after it in its group, and every later phase that uses `run` |
 | Nothing | Nothing |
@@ -22,53 +23,41 @@ copies files does not look at what came before it. nomira builds it on
 its own and lays the result on top, so its cache depends only on the
 files it copies. A new base image leaves it alone.
 
-## Large collectors
+## Packages
 
-A collector runs once with all its items. When one item changes, it runs
-again with all of them: pacman takes the packages from the cache mount
-instead of downloading them, but still unpacks every one, runs every
-hook and, when firmware or a kernel is among them, builds the initramfs
-again. The result is the same; only the time grows with the collector.
+A plain collector runs once with all its items: when one item changes,
+it runs again with all of them. That is fine for `services`. For
+packages, the base image's `packages.yml` fans out: a new or updated
+package unpacks only its own bucket, about one in 64, and every other
+bucket comes from the cache, as a layer that bootc does not download
+again. `then` runs over all packages each time (database, install
+scripts, hooks); the initramfs comes from a cache when nothing in it
+changed.
 
-When that matters, split the collector: what rarely changes goes to a
-collector of its own in a phase before the others, with the same
-command.
-
-```yaml
-build:
-  firmware:        # changes with new hardware, rarely
-    collect: run … pacman -S --needed --noconfirm ${items}
-  packages:        # changes often
-    collect: run … pacman -S --needed --noconfirm ${items}
-  features:
-    hardware:
-      firmware: [linux-firmware-intel, intel-ucode]
-    editor:
-      packages: [nano]
-```
-
-Adding an editor then reruns only `packages` and what follows; the
-firmware stays in the cache. Which collector a package goes to never
-changes what ends up in the image.
+Every bucket starts from the state before the collector. Keep
+`packages` the first phase: a phase before it would run all buckets
+again whenever it changes.
 
 ## An example
 
 ```yaml
-imports: [features/terminal.yml, features/network.yml]   # two groups that only copy
+imports:
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/<commit>/recipes/services.yml
 build:
-  packages:
-    collect: run pacman -S --needed --noconfirm ${items}
-  features: {}            # its groups come from the imports
-  services:
-    collect: run systemctl enable ${items}
+  packages: {}            # features comes right after packages
+  features:
+    terminal: …            # groups that only copy, and name packages and services
+    network: …
 ```
 
-After a new base image: `packages` runs again, which is right, because
-the packages are different ones. `services` runs again and takes a
-moment. `terminal` and `network` come from the cache.
+After a new base image: the buckets of `packages` and `then` run again,
+which is right, because the packages are different ones. `services`
+runs again and takes a moment. `terminal` and `network` come from the
+cache.
 
-After a change to `terminal`: only `terminal` is rebuilt, then
-`services` runs again.
+After a change to the files of `terminal`: only `terminal` is rebuilt,
+then `services` runs again. After adding a package to `terminal`:
+`resolve`, the bucket of the new package and `then`, then `services`.
 
 ## Checked, not assumed
 

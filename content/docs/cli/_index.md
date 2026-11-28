@@ -6,8 +6,9 @@ weight: 30
 
 The CLI is a thin layer around `buildctl`. It knows the frontend only as
 a container image that BuildKit runs, and reads the labels the frontend
-writes into images. Deploying is bootc's. The frontend stays usable
-without the CLI.
+writes into images. Deploying is bootc's, see
+[Build and deploy](../operating/build-and-deploy/). The frontend stays
+usable without the CLI.
 
 ## What has been tried
 

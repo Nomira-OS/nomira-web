@@ -30,6 +30,18 @@ hugo server
   top of `assets/css/main.css`.
 - `static/fonts/`: Inter and IBM Plex Mono, served by the site itself.
   The site loads nothing from other servers.
+- `assets/diagrams/`: the diagrams, as SVG. Write a diagram as a
+  ` ```mermaid ` block in the Markdown, with `accTitle` and `accDescr`
+  as its text equivalent, then render it (Node and Chrome needed, Inter
+  installed for the same text widths):
+
+  ```sh
+  cd hack/diagrams && npm ci && node render.mjs
+  ```
+
+  The SVGs use the colours of the theme, so one file serves dark and
+  light, and no JavaScript is needed. A block without its SVG stops the
+  Hugo build.
 
 ## Publishing
 

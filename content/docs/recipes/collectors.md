@@ -21,23 +21,23 @@ collector is named after the phase.
 
 ```yaml
 build:
-  packages:
-    collect: run pacman -S --needed --noconfirm ${items}
-
   features:
     terminal:
-      packages: [kmscon]
+      services: [kmsconvt@tty1.service]
       commands:
         - copy files/kmscon/ /etc/kmscon/
-    editor:
-      packages: [vim]
+    ssh:
+      services: [sshd.service]
+  services:
+    collect: run systemctl enable ${items}
 ```
 
-This runs `pacman -S --needed --noconfirm kmscon vim` once.
+This runs `systemctl enable kmsconvt@tty1.service sshd.service` once,
+after the phase `features`.
 
-- **nomira knows nothing about pacman.** A collector is whatever command
-  you write. The same mechanism enables services, generates locales or
-  adds users.
+- **nomira knows nothing about the command.** A collector is whatever
+  command you write: install packages, enable services, generate
+  locales, add users.
 - **Where the collector stands decides when it runs.** Contributions
   come from groups of any phase, also from later ones.
 - **The order of items is fixed.** They are sorted and duplicates are
@@ -58,12 +58,6 @@ a contribution from changing the meaning of the command.
 
 ```yaml
 build:
-  packages:
-    collect: >-
-      run --mount=type=cache,target=/etc/pacman.d/gnupg,id=pacman-keyring,sharing=locked
-      { [ -s /etc/pacman.d/gnupg/trustdb.gpg ] || pacman-key --init; } &&
-      pacman-key --populate && pacman -S --needed --noconfirm ${items}
-
   setup:
     services:
       collect: run systemctl enable ${items}
@@ -71,18 +65,17 @@ build:
       collect: run for l in ${items}; do echo "$l UTF-8" >> /etc/locale.gen; done && locale-gen
 ```
 
-`packages` and `services` are also
-[recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
-of the base image, to import by URL.
+For packages, take the base image's part: on arch-base
+[`packages.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes),
+a collector that fans out (below). `services.yml` is the collector
+`services` above.
 
 ## When not to use one
 
 A collector is one step. If one item changes, the whole command runs
-again. That is harmless for anything quick such as enabling services;
-for packages, use a collector that fans out.
-
+again. That is harmless for anything quick, such as enabling services.
 For slow, unrelated steps use groups instead: there, changing one leaves
-the others in the cache.
+the others in the cache. For packages, use a collector that fans out.
 
 ## Collectors that fan out
 
@@ -99,23 +92,44 @@ build:
       then: run …      # once: all files in /nomira/in, on the merged result
 ```
 
+```mermaid
+flowchart TD
+  accTitle: A collector that fans out
+  accDescr: resolve runs once on S with all items and prints the files to fetch. BuildKit fetches every file and checks it against its sha256. The files go into up to 64 buckets by their key. each runs once per bucket, on S, the buckets side by side, and the output of each is a layer of its own. The buckets are checked against each other: a file in two of them stops the build. Otherwise they are merged onto S. then runs once on the result, with all files, and finishes the collector.
+  S["S: the state where the collector stands"] --> resolve["resolve, once, with the items:<br/>name, URL, sha256, key per file"]
+  resolve --> fetch["BuildKit fetches the files,<br/>checked against their sha256"]
+  fetch --> b1["each: bucket 03"] & b2["each: bucket 17"] & bn["each: … up to 64 buckets"]
+  b1 & b2 & bn --> check{"no file in two buckets?"}
+  check -->|yes| merge["Merge(S, bucket layers)"]
+  check -->|no| stop["stop: the files<br/>and their buckets"]
+  merge --> then["then, once, with all files"]
+  then --> result["the collector's result"]
+  class b1,b2,bn accent
+```
+
 - **resolve** turns the items into files to fetch, dependencies
   included. The key in the fourth column decides the bucket; files with
   the same key share one. Without it, the name is the key.
 - **BuildKit downloads** every file itself, checked against its sha256
   and cached by it.
-- **each** unpacks one bucket. Its result is a layer of its own, which
-  only changes when one of the bucket's files changes: an unchanged
-  package is neither unpacked nor exported nor downloaded by bootc again.
+- **each** unpacks one bucket, on `S`. Its result is a layer of its own,
+  which only changes when one of the bucket's files changes: an
+  unchanged package is neither unpacked nor exported nor downloaded by
+  bootc again. The buckets run side by side.
 - **then** finishes on the whole: package database, install scripts,
-  hooks. Optional.
-- A file in two buckets is a conflict and stops the build.
+  hooks. Optional. It runs again whenever any bucket changed.
+- **A file in two buckets is a conflict** and stops the build, even with
+  the same content. `--no-check` skips this check.
 
-The frontend knows no package manager; the base image offers the
-commands as a part, for arch-base
-[`packages.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes).
-The order of the steps and what runs in parallel:
-[A collector that fans out](../../architecture/build/#a-collector-that-fans-out).
+A file's bucket depends on its key alone, so adding or removing a
+package moves no other one. Every bucket starts from `S`, though: a
+change before the collector, in the base image or an earlier phase, runs
+all of them again. Keep such a collector early, `packages` as the first
+phase.
+
+The frontend knows no package manager; the base image offers the three
+commands as a part. What pacman does in each of them on arch-base:
+[Building on arch-base](../base-images/arch-base/building-on-it/#pacman).
 
 ## One thing to keep in mind
 

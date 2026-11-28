@@ -12,14 +12,13 @@
   </div>
   <div class="window">
     <div class="window-bar"><i><b></b></i><span id="win-title">recipe.yml</span></div>
-    <pre tabindex="0" aria-labelledby="win-title"><code><span class="k"># syntax=ghcr.io/nomira-os/nomira:1-alpha</span>
+    <pre tabindex="0" aria-labelledby="win-title"><code><span class="k"># syntax=ghcr.io/nomira-os/nomira:sha-e1146b9</span>
 settings:
   base: docker.io/library/alpine:3.22
-phases:
-  - name: content
-    groups:
-      <span class="g">a</span>: ["run echo a > /etc/a"]
-      <span class="g">b</span>: ["run echo b > /etc/b"]</code></pre>
+build:
+  content:
+    <span class="g">a</span>: ["run echo a > /etc/a"]
+    <span class="g">b</span>: ["run echo b > /etc/b"]</code></pre>
   </div>
 </section>
 
@@ -40,7 +39,7 @@ phases:
       <li>
         <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.500-3.400 8-8 9-4.600-1-8-4.500-8-9V6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/></svg></span>
         <h3>Check</h3>
-        <p>If two groups touch the same file, the build stops before the merge.</p>
+        <p>If two groups change the same file differently, the build stops before the merge.</p>
       </li>
       <li>
         <span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/></svg></span>
@@ -91,13 +90,15 @@ phases:
   <div class="wrap hero-split" style="padding-block: 0">
     <div>
       <h2 id="example-title">When groups collide</h2>
-      <p class="section-lead">Let both groups of the recipe above write <code>/etc/a</code>. The build stops and names the groups and the file.</p>
+      <p class="section-lead">Let both groups of the recipe above write <code>/etc/a</code>, each with its own content. The build stops and names the groups and the file.</p>
     </div>
     <div class="window">
       <div class="window-bar"><i><b></b></i><span id="win-err">build output</span></div>
-      <pre tabindex="0" aria-labelledby="win-err"><code>phase "content": declared-independent
-groups are not disjoint (policy: strict):
-  groups "a" and "b": /etc/a (both write)</code></pre>
+      <pre tabindex="0" aria-labelledby="win-err"><code>phase "content": its groups are not independent:
+  groups "a" and "b": /etc/a (both write, with
+    different content, mode or owner)
+  fix: make it one group, or move one of them
+    into a phase of its own</code></pre>
     </div>
   </div>
 </section>

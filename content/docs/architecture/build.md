@@ -28,6 +28,21 @@ BuildKit to solve it.
 
 ## Phases, groups, collectors
 
+```mermaid
+flowchart TD
+  accTitle: How one phase is built
+  accDescr: Every group of a phase starts from the state S that the earlier phases left. A group that runs commands is an exec on S; its layer is what it changed. A group that only copies is built on an empty state. The conflict check compares the layers. If the groups are independent, their layers are merged onto S, and the next phase starts from the result. Otherwise the build stops and names the groups and paths.
+  S["S: the state the earlier phases left"]
+  S --> a["group a: run on S"] --> da["layer Δa"]
+  S --> b["group b: run on S"] --> db["layer Δb"]
+  c["group c: only copies,<br/>built on scratch"] --> dc["layer Δc"]
+  da & db & dc --> check{"independent?"}
+  check -->|yes| m["S′ = Merge(S, Δa, Δb, Δc)"]
+  check -->|no| stop["stop: groups and paths<br/>in the message"]
+  m --> next["the next phase starts from S′"]
+  class check accent
+```
+
 | Element | LLB | Cache key depends on |
 |---|---|---|
 | Phase | the state `S` all its groups start from | everything before it |
@@ -35,63 +50,49 @@ BuildKit to solve it.
 | Group without `run` | built on `scratch`, merged as is | only the group's commands and copied files |
 | Merge of a phase | `Merge(S, Δ₁ … Δₙ)` ([MergeOp](https://github.com/moby/buildkit/blob/master/docs/dev/merge-diff.md)) | the layers merged |
 | Collector | a group with one `Exec` on `S` with `${items}` | `S` and the sorted items |
-| Collector that fans out | see below | per bucket: `S` and the bucket's files |
+| Collector that fans out | `resolve`, one `Exec` per bucket on `S`, `then` | per bucket: `S` and the bucket's files |
 | Stage | its own `Image` | its base and commands |
 
 A phase with a single group that runs is serial: no diff, no merge, no
-check.
+check. Every layer of a merge stays a layer of the image, so an
+unchanged group is neither exported nor downloaded again.
 
 ## Checks during the build
 
-- **Conflicts.** For a phase with several groups, small execs list what
+These steps mount whole systems read-only and are named `[check …]` in
+the output.
+
+- **Conflicts.** For a phase with several groups, small steps list what
   each group wrote and deleted and hash what several groups wrote; the
   frontend compares the groups. A conflict stops the build before
   anything is merged on top of it. See
   [The conflict check](../conflict-check/).
-- **Guard.** A group without `run` is only built on `scratch` when merging
-  provably gives the same tree as building it on `S` (no symbolic links,
-  modes or types in the way). Otherwise it falls back, with a warning in
-  the step names.
-These execs mount whole systems read-only and are named `[check …]` in
-the output.
+- **Buckets.** Between the buckets of a collector that fans out, the
+  first pass of the same check runs strictly: a file in two buckets is a
+  conflict, even with the same content.
+- **Guard.** A group without `run` is only built on `scratch` when
+  merging provably gives the same tree as building it on `S` (no
+  symbolic links, modes or types in the way). Otherwise it falls back,
+  with a warning in the step names; see
+  [Checked, not assumed](../../recipes/rebuilds/#checked-not-assumed).
 
-- **Buckets.** For a collector that fans out, pass 1 of the conflict
-  check runs between its buckets, strictly: a file in two buckets is a
-  conflict.
-
-The build option `check=off` (`nomira build --no-check`) skips the
-conflict checks between groups and between buckets; the guard stays.
+The build option `check=off` (`nomira build --no-check`) skips the checks
+between groups and between buckets; the guard stays.
 
 ## A collector that fans out
 
-What runs in which order, and what runs side by side. Every box on one
-level runs in parallel; a level starts when what it needs is done.
-
-```text
-S  (the state the phase starts from)
-│
-├─ resolve ──────────────────────────────── 1 exec on S, solved at once:
-│    prints: name  URL  sha256:<hex>  [key]   the frontend reads the list
-│                                             before it builds the rest
-├─ fetch file 1 │ fetch file 2 │ … │ file n   BuildKit, by checksum, parallel,
-│                                             cached across all builds
-├─ each bucket 03 │ each bucket 17 │ …        1 exec per bucket on S, parallel;
-│    /nomira/in: the bucket's files            an unchanged bucket is cached
-│    /nomira/out → the bucket's layer          and its layer exported as before
-│
-├─ check: no file in two buckets ─────────── pass 1 per bucket, parallel
-│                                             (skipped with check=off)
-├─ Merge(S, bucket layers…) ──────────────── order fixed, decides nothing
-│
-└─ then ─────────────────────────────────── 1 exec on the merged result,
-     /nomira/in: all files                    reruns when any bucket changed
-     → the collector's result, merged with the other groups of the phase
-```
+`resolve` runs first and is solved at once: the frontend needs its list
+to build the rest of the graph. Then everything that does not wait for
+something else runs side by side: BuildKit fetches the files, and every
+bucket whose files are there runs `each` on `S`. No bucket waits for
+another, and an unchanged bucket comes from the cache. `then` waits for
+all of them, and the later phases wait for `then`.
 
 A file's bucket depends on its key alone, by rendezvous hashing over 64
-buckets: adding or removing a file changes only its own bucket, and
-every bucket is built on `S` on its own, so no bucket waits for another.
-The later phases wait for `then`, as they wait for any phase.
+buckets: adding or removing a file changes only its own bucket. Every
+bucket starts from `S`, so a change before the collector (a new base
+image, an earlier phase) runs all buckets again. The steps in order:
+[Collectors that fan out](../../recipes/collectors/#collectors-that-fan-out).
 
 ## Cache keys
 
@@ -101,7 +102,8 @@ bind mounts it would by default checksum every file of the mounted tree
 the frontend turns that off for bind mounts and checks, since the
 definition of the mounted phase identifies it as well and a whole system
 takes seconds to checksum. Cache mounts, tmpfs and secrets never enter a
-key.
+key. A file a collector fetches is keyed by its sha256, so the same
+package is downloaded once, whatever its URL.
 
 ## Reproducibility
 

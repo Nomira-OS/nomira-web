@@ -66,24 +66,37 @@ give the same bytes.
 
 ### Without running dracut again
 
-A collector installs all its packages again whenever one of them
-changes, firmware included, and the hook fires every time. dracut does
-not have to: with a cache mount at `/var/cache/nomira/initramfs`
+`then` runs over all packages of the collector whenever one of them
+changes, and the initramfs script runs every time. dracut does not have
+to: with a cache mount at `/var/cache/nomira/initramfs`
 ([`mounts.yml`](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
 sets it), the script keeps every initramfs it built and takes one again
 when nothing it would contain has changed:
 
-1. **Find a candidate** by a fingerprint of what decides which files
-   dracut takes: kernel version, `SOURCE_DATE_EPOCH`, dracut's
-   configuration by content, and path, size, mtime, mode and owner of
-   every file below `/usr/lib/modules/<kver>`, `/usr/lib/firmware`,
-   `/usr/lib/dracut` and of the configuration in `/etc` that dracut
-   takes (`vconsole.conf`, `locale.conf`, `modprobe.d`, `sysctl.d`,
-   `systemd/*.conf`, `udev/rules.d`, …).
-2. **Check it**: every file the cached initramfs contains, binaries and
-   libraries included, must still have the same path, size, mtime, mode
-   and owner on the system.
-3. **Use it, or run dracut** and store the result.
+```mermaid
+flowchart TD
+  accTitle: How the initramfs script decides whether to run dracut
+  accDescr: For every kernel the script computes a fingerprint of what decides which files dracut takes. Without a cache entry for that fingerprint it runs dracut and stores the result. With one, it checks every file the cached initramfs contains against the system; if one of them changed, it runs dracut too. Otherwise it takes the cached initramfs. It writes the initramfs only when it differs from the one in place.
+  k["for every kernel"] --> fp["fingerprint of what dracut<br/>would take"]
+  fp --> hit{"a cache entry<br/>for it?"}
+  hit -->|no| dracut["run dracut,<br/>store the result"]
+  hit -->|yes| same{"every file in it<br/>unchanged?"}
+  same -->|no| dracut
+  same -->|yes| take["take the cached initramfs"]
+  dracut & take --> diff{"different from<br/>the one in place?"}
+  diff -->|yes| write["write initramfs.img"]
+  diff -->|no| leave["leave it as it is"]
+  class take accent
+```
+
+The **fingerprint** covers the kernel version, `SOURCE_DATE_EPOCH`,
+dracut's configuration by content, and path, size, mtime, mode and
+owner of every file below `/usr/lib/modules/<kver>`, `/usr/lib/firmware`
+and `/usr/lib/dracut`, and of the configuration in `/etc` that dracut
+takes (`vconsole.conf`, `locale.conf`, `modprobe.d`, `sysctl.d`,
+`systemd/*.conf`, `udev/rules.d`, …). The **check** compares path,
+size, mtime, mode and owner of every file the cached initramfs contains,
+binaries and libraries included.
 
 The result is the same initramfs that dracut would build, byte for
 byte. Checking costs a `stat` over some thousand files, well under a

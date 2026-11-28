@@ -1,7 +1,7 @@
 ---
 weight: 50
 title: Frontend
-lead: "How the BuildKit frontend works: phases, groups and the check that groups are independent."
+lead: The BuildKit frontend that turns a recipe into an image. What it does, how it is tested, and what it is not.
 ---
 
 ## What it does
@@ -11,52 +11,30 @@ again. The nomira frontend describes a build in **phases** and
 **groups** instead.
 
 - **Phases** run one after another.
-- **Groups** of a phase are independent of each other. They all start
-  from the same state, run at the same time and are cached one by one.
-- At the end of the phase their results are merged.
+- **Groups** of a phase start from the same state, run at the same time
+  and are cached one by one; at the end of the phase their layers are
+  merged. A changed group is rebuilt alone, not its siblings.
+- **A group that only copies** is built apart from the state before it,
+  the way `COPY --link` works in a Dockerfile, so neither a new base
+  image nor a change in an earlier phase rebuilds it.
+- **Collectors** run one command for what all groups contribute: the
+  packages of every feature in one transaction, each feature still
+  naming its own. A collector can fan out, so that a changed package
+  unpacks only its own share.
 
-When a group changes, only that group is rebuilt, not its siblings.
-
-## Independence is verified
-
-The recipe only claims that groups are independent. The frontend checks
-it on every build: it determines which files each group has written or
-deleted. If two groups overlap, the build aborts and names the groups
-and the path.
-
-```text
-phase "configs": declared-independent groups are not disjoint (policy: strict):
-  groups "a" and "b": /etc/a (both write)
-```
-
-## Groups that do not depend on what came before
-
-A group without `run` only copies files. It never sees the state before
-it, so the frontend builds it apart from that state and merges the
-result, the way `COPY --link` works in a Dockerfile. Neither a new base
-image nor a change in an earlier phase rebuilds such a group.
-
-This is done only where it provably gives the same tree. A check on
-every build compares the group with the state before it and falls back
-to building on that state otherwise, with a warning in the build output. See
-[What gets rebuilt](../recipes/rebuilds/).
-
-## Collectors
-
-A phase can also be a single command that receives a list: every group
-may contribute words to it. That is how packages are installed in one
-transaction while each feature still names its own. The frontend knows
-nothing about package managers; a collector is any command. See
-[Collectors](../recipes/collectors/).
+The recipe only claims that groups are independent; every build checks
+it and stops with the groups and paths if they are not. How all of this
+maps to BuildKit: [The build](../architecture/build/) and
+[The conflict check](../architecture/conflict-check/).
 
 ## How it is tested
 
 Besides unit tests, every change builds a set of small recipes with a
 real BuildKit and checks the results: conflicts between writes and
-deletions, collectors, imports, that a group without `run` comes from
-the cache after the base image changed, and that symbolic links and
-directory modes survive. No image of the frontend is published unless
-these pass.
+deletions, collectors and collectors that fan out, imports, that a group
+without `run` comes from the cache after the base image changed, and
+that symbolic links and directory modes survive. No image of the
+frontend is published unless these pass.
 
 ## What it deliberately is not
 
@@ -68,6 +46,8 @@ these pass.
   proof that they are.
 - **Not a replacement for a Containerfile in every case.** It pays off
   where a build has many independent parts.
-- **Not stable yet.** The schema may change, hence the tag `1-alpha`.
+- **Not stable yet.** The schema may change; until the first release
+  there are only `sha-<commit>` tags, see
+  [Tags](standalone/#tags-of-the-frontend-image).
 
 Source: [github.com/Nomira-OS/nomira](https://github.com/Nomira-OS/nomira)

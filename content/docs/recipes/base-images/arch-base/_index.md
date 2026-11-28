@@ -6,7 +6,7 @@ weight: 30
 
 ```yaml
 settings:
-  base: ghcr.io/nomira-os/arch-base:TAG
+  base: ghcr.io/nomira-os/arch-base:sha-…   # see Tags and package set
 ```
 
 ## What is in it
@@ -36,15 +36,16 @@ the repository:
 | Part | What it adds |
 |---|---|
 | `mounts.yml` | A tmpfs over `/run`, `/tmp`, `/var/log`, `/var/tmp`; pacman's downloads and the initramfs cache in BuildKit caches |
-| `packages.yml` | The collector `packages`, one `pacman -S` for all groups; the keyring in a BuildKit cache |
-| `services.yml` | The collector `services`, one `systemctl enable` |
+| `packages.yml` | The collector `packages`, fanning out: resolved by pacman, downloaded by BuildKit, unpacked in up to 64 layers that only change with their own packages, finished by one pacman transaction; see [pacman](building-on-it/#pacman) |
+| `services.yml` | The collector `services`, one `systemctl enable`; brings `packages.yml` and `mounts.yml` along |
 | `initramfs.yml` | The initramfs once more, late, for configuration copied after the packages |
 | `lint.yml` | `bootc container lint` on the finished system |
 | `uki.yml` | A [unified kernel image](../boot/#unified-kernel-image); import it last |
 
 The [examples](https://github.com/Nomira-OS/arch-base/tree/main/examples)
 are built from them: `minimal` boots with kernel and initramfs, `uki`
-with a unified kernel image.
+with a unified kernel image. The order of the imports is the order of
+the phases: `services.yml`, `initramfs.yml`, `lint.yml`, `uki.yml` last.
 
 ## What has been tried
 

@@ -1,8 +1,9 @@
 ---
 title: Build and deploy
 lead: nomira build builds and publishes an image; bootc takes it from there.
-weight: 20
+weight: 5
 untested: true
+aliases: [/docs/cli/switch/]
 ---
 
 ## nomira build
@@ -12,14 +13,15 @@ untested: true
    `$XDG_RUNTIME_DIR/buildkit/buildkitd.sock`, then the system-wide one
    at `/run/buildkit/buildkitd.sock`); otherwise a podman container
    `nomira-buildkitd`, which the CLI creates when needed.
-2. **Build** the recipe with `buildctl` into a work directory. The
-   conflict check of the groups and every check the recipe runs itself
-   happen during the build, see below. BuildKit only writes layers that
-   are not there yet.
+2. **Build** the recipe with `buildctl` into a work directory,
+   `.build/<name>.oci` next to the output directory. The conflict check
+   of the groups and every check the recipe runs itself happen during
+   the build, see below. BuildKit only writes layers that are not there
+   yet.
 3. **Compare versions**: the frontend's, from the label it wrote into
    the image, with the CLI's.
 4. **Publish** it to the output directory,
-   [see where](../commands/#where-the-result-goes). That directory only
+   [see where](../../cli/commands/#where-the-result-goes). That directory only
    ever holds an image of a build that succeeded.
 
 `build` never touches the running system. It passes the files that
@@ -68,7 +70,7 @@ adds `bootc container lint` as the last phase:
 build:
   # … the other phases …
   lint:
-    bootc: ["run bootc container lint --fatal-warnings"]
+    bootc: ["run bootc container lint"]
 ```
 
 To boot an image before switching to it, see

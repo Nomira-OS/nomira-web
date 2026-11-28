@@ -7,12 +7,12 @@ weight: 10
 ## A small example
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:1-alpha
+# syntax=ghcr.io/nomira-os/nomira:sha-…
 imports:
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/COMMIT/recipes/services.yml
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/COMMIT/recipes/lint.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/<commit>/recipes/services.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/<commit>/recipes/lint.yml
 settings:
-  base: ghcr.io/nomira-os/arch-base:TAG
+  base: ghcr.io/nomira-os/arch-base:sha-…
   labels:
     org.opencontainers.image.description: My system
 
@@ -31,39 +31,39 @@ build:
         - copy --chmod=0600 files/nm/ /etc/NetworkManager/system-connections/
 ```
 
-NetworkManager stands for any network manager here; the Arch Wiki lists
-the choices in [Network configuration](https://wiki.archlinux.org/title/Network_configuration).
-
 Read it like this: there are two features, `terminal` and `network`.
 Each says which packages and services it needs and which files it
 brings. The [recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
 of the base image, imported by URL and pinned to a commit, bring the
-rest: two phases, `packages` and `services`, collect those wishes and
-carry them out in one step each; mounts keep logs and downloads out of
-the image; the last phase, `lint`, runs `bootc container lint`. Written
-out, without imports, the same recipe is:
+rest. A part imports what it builds on, so the two imports bring four:
 
-```yaml
-settings:
-  base: ghcr.io/nomira-os/arch-base:TAG
-  mounts:
-    /var/cache/pacman/pkg: type=cache,id=pacman-pkg,sharing=locked
-    /var/log: type=tmpfs
-    /tmp: type=tmpfs
-build:
-  packages:
-    collect: >-
-      run --mount=type=cache,target=/etc/pacman.d/gnupg,id=pacman-keyring,sharing=locked
-      { [ -s /etc/pacman.d/gnupg/trustdb.gpg ] || pacman-key --init; } &&
-      pacman-key --populate && pacman -S --needed --noconfirm ${items}
-  features:
-    terminal: …
-    network: …
-  services:
-    collect: run systemctl enable ${items}
-  lint:
-    bootc: ["run bootc container lint"]
+| Part | Brings |
+|---|---|
+| `mounts.yml` | `settings.mounts`: a tmpfs for logs and temporary files, caches for downloads and the initramfs |
+| `packages.yml` | the phase `packages`: every package of every group, as a [collector that fans out](../collectors/#collectors-that-fan-out) |
+| `services.yml` | the phase `services`: `systemctl enable` for every unit of every group |
+| `lint.yml` | the phase `lint`: `bootc container lint` on the finished system |
+
+The phases then run in this order:
+
+```mermaid
+flowchart LR
+  accTitle: The phases of the example, in order
+  accDescr: packages from packages.yml, then features from the recipe itself, then services from services.yml, then lint from lint.yml.
+  p["packages<br/>packages.yml"] --> f["features<br/>the recipe"] --> s["services<br/>services.yml"] --> l["lint<br/>lint.yml"]
+  class f accent
 ```
+
+`packages: {}` says where `features` goes: right after `packages`.
+Without it, the recipe's own phase would come after all imported ones;
+see [Order](../imports/#order). `nomira recipe export` shows the recipe
+with everything imported. Which tags to pin: for the
+[base image](../base-images/arch-base/versions/#tags) and for the
+[frontend](../../frontend/standalone/#tags-of-the-frontend-image); the
+parts are pinned to a commit of arch-base.
+
+NetworkManager stands for any network manager here; the Arch Wiki lists
+the choices in [Network configuration](https://wiki.archlinux.org/title/Network_configuration).
 
 ## Phases
 
@@ -114,7 +114,7 @@ Useful additions:
 - `copy --from=<stage>` copies from a stage, `copy --from=<phase>` from
   the system after an earlier phase.
 - `run --mount=type=cache,target=/path` keeps a directory between
-  builds, the package cache for instance.
+  builds.
 - `run --no-cache` always runs a step.
 
 ## Prefer copy to run
@@ -129,8 +129,8 @@ groups copy.** What that means for common tasks:
 
 | Task | Instead of `run` in a group |
 |---|---|
-| Install a package | Contribute it to a `packages` collector |
-| Enable a service | Contribute it to a `services` collector |
+| Install a package | Contribute it to the `packages` collector |
+| Enable a service | Contribute it to the `services` collector |
 | Generate a file with a script | Run the script in a stage, copy the result |
 | Write a one-line file | Keep the file in the recipe and copy it |
 
@@ -138,10 +138,9 @@ groups copy.** What that means for common tasks:
 
 In the finished system `/usr` is read-only, `/etc` is merged on updates,
 and `/var` is not part of the image. Put the content of the system into
-`/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`.
-
-The initramfs is rebuilt by the base image whenever a package needs it,
-see [The initramfs](../base-images/boot/#the-initramfs).
+`/usr` and `/etc`, not into `/var`, `/opt` or `/usr/local`. The
+initramfs follows the packages by itself, see
+[The initramfs](../base-images/boot/#the-initramfs).
 
 Every image carries its recipe, resolved, in its label
 `org.nomira.recipe`; `nomira recipe export` prints it. See `record` in the

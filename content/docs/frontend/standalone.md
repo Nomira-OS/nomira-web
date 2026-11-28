@@ -7,7 +7,7 @@ weight: 10
 One line at the top of the file selects the frontend:
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:1-alpha
+# syntax=ghcr.io/nomira-os/nomira:sha-…
 settings:
   base: docker.io/library/alpine:3.22
 build:
@@ -22,7 +22,7 @@ BuildKit itself does the build:
 
 ```sh
 buildctl build --frontend gateway.v0 \
-  --opt source=ghcr.io/nomira-os/nomira:1-alpha \
+  --opt source=ghcr.io/nomira-os/nomira:sha-… \
   --local context=. --local dockerfile=. --opt filename=recipe.yml \
   --output type=oci,dest=image.tar
 ```
@@ -39,7 +39,7 @@ and its imports, local and by URL, the same way as for a build:
 
 ```sh
 buildctl build --frontend gateway.v0 \
-  --opt source=ghcr.io/nomira-os/nomira:1-alpha \
+  --opt source=ghcr.io/nomira-os/nomira:sha-… \
   --local context=. --local dockerfile=. --opt filename=recipe.yml \
   --opt mode=resolve --output type=local,dest=out
 ```
@@ -53,8 +53,9 @@ options: [Build options](../schema/#build-options).
 
 | Tag | Meaning |
 |---|---|
-| `1-alpha` | Moves with every release while the schema is unstable |
-| `sha-<commit>` | One immutable build per commit on `main` |
+| `sha-<commit>` | One immutable build per commit on `main`. Pin this |
+| `1-alpha` | Will move with every release while the schema is unstable |
+| `latest` | Moves with every commit on `main`; not for recipes, which should build the same tomorrow |
 
 No release has been published yet; until the first one, use a
 `sha-<commit>` tag from

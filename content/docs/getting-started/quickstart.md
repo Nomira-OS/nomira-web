@@ -13,13 +13,13 @@ In a new directory `mysystem`, create `recipe.yml`, the
 [minimal example](https://github.com/Nomira-OS/arch-base/blob/main/examples/minimal/recipe.yml):
 
 ```yaml
-# syntax=ghcr.io/nomira-os/nomira:sha-64866c7
+# syntax=ghcr.io/nomira-os/nomira:sha-e1146b9
 imports:
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/1411e93895fd5905ded7ab547e4cbfd82ffa6fa0/recipes/services.yml
-  - https://raw.githubusercontent.com/Nomira-OS/arch-base/1411e93895fd5905ded7ab547e4cbfd82ffa6fa0/recipes/lint.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/8d6d40c9a63f3eb8cc4f6d3fbbea3f3b71ae01f9/recipes/services.yml
+  - https://raw.githubusercontent.com/Nomira-OS/arch-base/8d6d40c9a63f3eb8cc4f6d3fbbea3f3b71ae01f9/recipes/lint.yml
 
 settings:
-  base: ghcr.io/nomira-os/arch-base:sha-1411e93
+  base: ghcr.io/nomira-os/arch-base:sha-e6e58a9
 
 build:
   packages: {}            # features comes after packages (and before services)
@@ -32,11 +32,11 @@ build:
 The group `network` names what it needs. The rest comes from the
 [recipe parts](https://github.com/Nomira-OS/arch-base/tree/main/recipes)
 of the base image, imported by URL and pinned to a commit: the phase
-`packages` installs the packages of all groups in one step, `services`
-enables the services, and `lint` runs `bootc container lint` on the
-result. The pacman keyring lives in a build cache on your machine, so no
-private key ends up in the image. `nomira recipe export recipe.yml`
-shows the recipe with everything imported.
+`packages` installs the packages of all groups, `services` enables the
+services, and `lint` runs `bootc container lint` on the result.
+`nomira recipe export recipe.yml` shows the recipe with everything
+imported. Newer tags than these: see
+[Tags](../../recipes/base-images/arch-base/versions/#tags).
 
 A system for a real machine needs more, firmware above all; the
 [installation guide](../installation/prepare/) starts from a complete
@@ -59,8 +59,8 @@ directory the recipe is in (`--name` sets another).
 ## 3. Look inside
 
 ```sh
-skopeo copy oci:.nomira/mysystem.oci containers-storage:localhost/mysystem:latest
-podman run --rm localhost/mysystem:latest pacman -Q networkmanager
+skopeo copy oci:.nomira/mysystem.oci containers-storage:localhost/mysystem:dev
+podman run --rm localhost/mysystem:dev pacman -Q networkmanager
 ```
 
 ## 4. Change something

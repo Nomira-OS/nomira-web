@@ -1,0 +1,13 @@
+{
+  "name": "nomira-web-diagrams",
+  "private": true,
+  "description": "Renders the mermaid diagrams of the site to SVG, see render.mjs.",
+  "type": "module",
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0",
+    "mermaid": "12.4.0"
+  },
+  "overrides": {
+    "mermaid": "12.4.0"
+  }
+}
