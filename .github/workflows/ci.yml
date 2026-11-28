@@ -10,4 +10,4 @@ permissions:
 
 jobs:
   checks:
-    uses: Nomira-OS/ci/.github/workflows/checks.yml@main
+    uses: Nomira-OS/ci/.github/workflows/checks.yml@6f634847008ee3b3d30fcb84095b79b9a3bb1da7 # main
