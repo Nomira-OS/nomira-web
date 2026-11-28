@@ -22,9 +22,9 @@ The layout every base image shares, `/usr`, `/etc` and `/var`, is on
   A recipe that wants less adds `NoExtract` lines in a phase before
   `packages`.
 - The image ships no pacman keyring, because a keyring holds a private
-  key that would then be the same on every machine. It needs none for
-  `packages.yml`: the sync database was checked when the image was
-  built, and BuildKit checks every package against its sha256 from it.
+  key that would then be the same on every machine. A step that checks
+  signatures sets one up in a tmpfs from `archlinux-keyring`, as
+  `packages.yml` does.
 - The mirrorlist points to the day of the Arch Linux Archive the image
   was built from, so `pacman -S` installs from the same package set; see
   [Tags and package set](../versions/).
@@ -40,10 +40,9 @@ Two flavours of the same collector:
 
 `packages-live.yml` imports `packages.yml` and replaces its `resolve`;
 import it after `services.yml`. It is the way to a security fix without
-waiting for a new base image. Its packages are checked against the
-sha256 in the sync databases, which come from the mirror over HTTPS:
-Arch does not sign its databases, and pacman does not check the
-signatures of packages it is handed as files.
+waiting for a new base image. Arch does not sign its sync databases, so
+a mirror could hold back updates; a package that Arch did not sign it
+cannot slip in, since `then` checks every signature.
 
 Install packages with a [collector](../../../collectors/): two groups that
 each call pacman would both write the package database and conflict.
@@ -53,7 +52,7 @@ each call pacman would both write the package database and conflict.
 |---|---|
 | resolve | `pacman -Sp --needed --print-format '%n %l sha256:%h %e'`: the packages to install with their dependencies, URL, sha256 and pkgbase as the key, so that split packages share a bucket |
 | each | `pacman --root /nomira/out -U --nodeps --noscriptlet`: the files of one bucket's packages, with `NoExtract` and file capabilities, and no hook; then a check against the system |
-| then | `pacman -U` over all new packages, with `NoExtract = *` and a `!` where a hook needs a path: database, install scripts and hooks as in a normal install; upgrades first, on their own; then the install reasons |
+| then | `pacman -Su --needed` with the items, the downloaded files as its cache and downloading forbidden, with `NoExtract = *` and a `!` where a hook needs a path: signatures, database, install scripts and hooks as in a normal install |
 
 - **No hooks in `each`.** libalpm looks for hooks below `--root`, so the
   hooks of a bucket's own packages would run in a system that holds
@@ -84,9 +83,16 @@ each call pacman would both write the package database and conflict.
   the old files it would not unpack again, and removes afterwards the
   files only the old version had. Install scripts and hooks see a real
   upgrade, and nothing is written twice.
-- **Install reasons as `pacman -S` gives them.** `pacman -U` marks
-  every new package as explicitly installed; afterwards, `then` marks
-  those no item named as dependencies (`then` gets the items as well).
+- **Signatures checked by pacman.** `then` installs with `pacman -S`
+  from the downloaded files, so pacman checks every package against its
+  signature, with a keyring set up in a tmpfs and no keyserver. pacman
+  wants a `.sig` file next to a cached package; `then` writes them from
+  the signatures in the sync database (`%PGPSIG%`), and
+  `XferCommand = /bin/false` keeps pacman from downloading anything. A
+  package signed by an unknown key, or missing from the downloads, stops
+  the build. Install reasons are those of `pacman -S` (`then` gets the
+  items for that). The frontend knows nothing of signatures: they are
+  part of the recipe part, like everything else about pacman.
 - **Compared with a normal install** (pacman 6.0.2, packages made for
   the test, a shell in one bucket): the same hooks with the same
   targets, the same files and database; written twice were only the
