@@ -37,6 +37,7 @@ the repository:
 |---|---|
 | `mounts.yml` | A tmpfs over `/run`, `/tmp`, `/var/log`, `/var/tmp`; pacman's downloads and the initramfs cache in BuildKit caches |
 | `packages.yml` | The collector `packages`, fanning out: resolved by pacman, downloaded by BuildKit, unpacked in up to 64 layers that only change with their own packages, finished by one pacman transaction; see [pacman](building-on-it/#pacman) |
+| `packages-live.yml` | The same collector against the live repositories: new packages and every update from the current state, resolved on every build; see [Installing packages](building-on-it/#installing-packages) |
 | `services.yml` | The collector `services`, one `systemctl enable`; brings `packages.yml` and `mounts.yml` along |
 | `initramfs.yml` | The initramfs once more, late, for configuration copied after the packages |
 | `lint.yml` | `bootc container lint` on the finished system |

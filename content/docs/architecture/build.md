@@ -117,7 +117,7 @@ registry; see [Reusing what was built](../../recipes/rebuilds/#reusing-what-was-
 | Tools reading the time (dracut, …) | frontend: `SOURCE_DATE_EPOCH` in every `run` |
 | Logs, caches, temp files | recipe: `settings.mounts`, a tmpfs there |
 | pacman install dates | base image: a pacman hook sets them to the epoch |
-| Package versions | base image: the mirrorlist points to a dated archive snapshot |
+| Package versions | base image: the mirrorlist points to a dated archive snapshot (not with `packages-live.yml`, which installs from the live repositories) |
 
 The epoch is `settings.source_date_epoch`, by default the creation time
 of the base image. The base image itself is checked by building it twice

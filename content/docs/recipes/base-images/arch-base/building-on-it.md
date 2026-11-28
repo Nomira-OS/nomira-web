@@ -31,6 +31,20 @@ The layout every base image shares, `/usr`, `/etc` and `/var`, is on
 
 ### Installing packages
 
+Two flavours of the same collector:
+
+| Part | Packages from | Same recipe, same packages |
+|---|---|---|
+| `packages.yml` | the archive snapshot of the image | yes, on every build |
+| `packages-live.yml` | the live repositories, resolved on every build: new packages and every update from one current state | only for the same state of the repositories, which the sync databases in the image record |
+
+`packages-live.yml` imports `packages.yml` and replaces its `resolve`;
+import it after `services.yml`. It is the way to a security fix without
+waiting for a new base image. Its packages are checked against the
+sha256 in the sync databases, which come from the mirror over HTTPS:
+Arch does not sign its databases, and pacman does not check the
+signatures of packages it is handed as files.
+
 Install packages with a [collector](../../../collectors/): two groups that
 each call pacman would both write the package database and conflict.
 `packages.yml` is that collector, one that fans out:
@@ -62,10 +76,14 @@ each call pacman would both write the package database and conflict.
   needs `--overwrite '*'` only because the buckets have put the files in
   place before pacman knows them; without it, pacman refuses every one
   of them.
-- **Upgrades whole.** An upgrade removes the files of the old version,
-  and under `NoExtract` pacman would not unpack the new ones again.
-  Packages the system has in another version are therefore upgraded
-  first, in a transaction of their own without `NoExtract`.
+- **Updates like new packages.** `resolve` lists what `pacman -Su
+  --needed` would download, so an installed package that the sync
+  database has in a newer version comes along. Its bucket lays it over
+  the old files; `then` upgrades it in the same transaction, with
+  `NoUpgrade = *` next to `NoExtract = *`, so that pacman does not remove
+  the old files it would not unpack again, and removes afterwards the
+  files only the old version had. Install scripts and hooks see a real
+  upgrade, and nothing is written twice.
 - **Install reasons as `pacman -S` gives them.** `pacman -U` marks
   every new package as explicitly installed; afterwards, `then` marks
   those no item named as dependencies (`then` gets the items as well).
